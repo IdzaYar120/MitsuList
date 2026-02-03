@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}MitsuList{% endblock %}
+
+{% block content %}
+<div id="homepage-div">
+    <!-- News Banner -->
+    {% if news_items %}
+    <div id="news-banner-container">
+        <div id="news-banner">
+            {% for news in news_items %}
+            <div class="news-item {% if forloop.first %}active{% endif %}">
+                {% if news.link %}<a href="{{ news.link }}">{% endif %}
+                    <img src="{{ news.image.url }}" alt="{{ news.title }}" class="news-image">
+                    <div class="news-content">
+                        <h2 class="news-title">{{ news.title }}</h2>
+                        {% if news.description %}
+                        <p class="news-description">{{ news.description|truncatechars:100 }}</p>
+                        {% endif %}
+                    </div>
+                    {% if news.link %}
+                </a>{% endif %}
+            </div>
+            {% endfor %}
+
+            <!-- Controls -->
+            <button class="banner-btn prev" id="banner-prev">&#10094;</button>
+            <button class="banner-btn next" id="banner-next">&#10095;</button>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="header-and-buttons">
+        <h1 id="currently-airing-header"><i class="fa-solid fa-bolt"></i>&nbsp;&nbsp;THIS SEASON</h1>
+        <div class="scroll-buttons">
+            <button class="scroll-buttons" id="previous-airing"><i class="fa-solid fa-arrow-left"></i></button>
+            <button class="scroll-buttons" id="next-airing"><i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+    </div>
+    <div id="airing-now-container">
+        {% for airing_now_anime in airing_now_data.data %}
+        <a href="anime/id={{airing_now_anime.mal_id}}" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="{{airing_now_anime.images.jpg.large_image_url}}" class="image" loading="lazy">
+                <p class="anime-title">{{airing_now_anime.title}}</p>
+                <table class="airing-now-details-table">
+                    <tr>
+                        <td><i class="fa-solid fa-star" style="color: gold"></i>&nbsp;{{airing_now_anime.score}}</td>
+                    </tr>
+                </table>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+
+    <div class="header-and-buttons">
+        <h1 id="popular-anime-header"><i class="fa-solid fa-fire"></i>&nbsp;&nbsp;POPULAR ANIME</h1>
+        <div class="scroll-buttons">
+            <button class="scroll-buttons" id="previous-popular-anime"><i class="fa-solid fa-arrow-left"></i></button>
+            <button class="scroll-buttons" id="next-popular-anime"><i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+    </div>
+    <div id="popular-anime-container">
+        {% for popular_anime in popular_anime_data.data %}
+        <a href="anime/id={{popular_anime.mal_id}}" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="{{popular_anime.images.jpg.large_image_url}}" class="image" loading="lazy">
+                <p class="anime-title">{{popular_anime.title}}</p>
+                <table class="airing-now-details-table">
+                    <tr>
+                        <td><i class="fa-solid fa-star" style="color: gold"></i>&nbsp;{{popular_anime.score}}</td>
+                    </tr>
+                </table>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+
+    <div class="header-and-buttons">
+        <h1 id="top-anime-header"><i class="fa-solid fa-crown"></i>&nbsp;&nbsp;TOP ANIME</h1>
+        <div class="scroll-buttons">
+            <button class="scroll-buttons" id="previous-top-anime"><i class="fa-solid fa-arrow-left"></i></button>
+            <button class="scroll-buttons" id="next-top-anime"><i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+    </div>
+    <div id="top-anime-container">
+        {% for top_anime in top_anime_data.data %}
+        <a href="anime/id={{top_anime.mal_id}}" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="{{top_anime.images.jpg.large_image_url}}" class="image" loading="lazy">
+                <p class="anime-title">{{top_anime.title}}</p>
+                <table class="airing-now-details-table">
+                    <tr>
+                        <td><i class="fa-solid fa-star" style="color: gold"></i>&nbsp;{{top_anime.score}}</td>
+                    </tr>
+                </table>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+
+    <div class="header-and-buttons">
+        <h1 id="anime-movie-header"><i class="fa-solid fa-ticket"></i>&nbsp;&nbsp;TOP MOVIES</h1>
+        <div class="scroll-buttons">
+            <button class="scroll-buttons" id="previous-anime-movie"><i class="fa-solid fa-arrow-left"></i></button>
+            <button class="scroll-buttons" id="next-anime-movie"><i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+    </div>
+    <div id="anime-movie-container">
+        {% for movie in anime_movie.data %}
+        <a href="anime/id={{movie.mal_id}}" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="{{movie.images.jpg.large_image_url}}" class="image" loading="lazy">
+                <p class="anime-title">{{movie.title}}</p>
+                <table class="airing-now-details-table">
+                    <tr>
+                        <td><i class="fa-solid fa-star" style="color: gold"></i>&nbsp;{{movie.score}}</td>
+                    </tr>
+                </table>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/index.js' %}"></script>
+{% endblock %}

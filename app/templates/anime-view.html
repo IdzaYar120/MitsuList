@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ anime_data.title }} - MitsuList{% endblock %}
+
+{% block content %}
+<div id="anime-view-header">
+    <div id="title-skew-container">
+        <div id="title-content">
+            <h1 id="anime-title-main">{{ anime_data.title }}</h1>
+            <h2 id="anime-title-sub">{{ anime_data.title_japanese }}</h2>
+            {% if anime_data.title_english and anime_data.title_english != anime_data.title %}
+            <h3 id="anime-title-eng-sub">{{ anime_data.title_english }}</h3>
+            {% endif %}
+        </div>
+    </div>
+    <div id="genre-tags">
+        {% for genre in anime_data.genres %}
+        <span class="p5-tag">{{ genre.name }}</span>
+        {% endfor %}
+    </div>
+</div>
+
+<div id="details-grid">
+    <!-- Left Column: Image and Synopsis -->
+    <div class="details-left">
+        <div id="main-poster-container">
+            <img src="{{ anime_data.images.jpg.large_image_url }}" id="main-poster" alt="{{ anime_data.title }}">
+            <div id="poster-decoration"></div>
+        </div>
+
+        <div id="synopsis-box">
+            <h2 class="p5-header-tag">SYNOPSIS</h2>
+            <div class="synopsis-text">
+                <p>{{ anime_data.synopsis }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Stats and Info -->
+    <div class="details-right">
+        <div class="p5-info-block" id="stats-block">
+            <h2 class="p5-header-tag">STATISTICS</h2>
+            <div class="info-content">
+                <div class="stat-item">
+                    <span class="stat-label"><i class="fa-solid fa-star"></i> SCORE</span>
+                    <span class="stat-value">{{ anime_data.score }} <small>({{ anime_data.scored_by }})</small></span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label"><i class="fa-solid fa-heart"></i> POPULARITY</span>
+                    <span class="stat-value">#{{ anime_data.popularity }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label"><i class="fa-solid fa-ranking-star"></i> RANKING</span>
+                    <span class="stat-value">#{{ anime_data.rank }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="p5-info-block" id="info-block">
+            <h2 class="p5-header-tag">INFORMATION</h2>
+            <div class="info-content">
+                <table class="p5-info-table">
+                    <tr>
+                        <td>TYPE</td>
+                        <td>{{ media_type }}</td>
+                    </tr>
+                    <tr>
+                        <td>RATING</td>
+                        <td>{{ rating }}</td>
+                    </tr>
+                    <tr>
+                        <td>EPISODES</td>
+                        <td>{{ episodes }}</td>
+                    </tr>
+                    <tr>
+                        <td>DURATION</td>
+                        <td>{{ episode_duration }}</td>
+                    </tr>
+                    <tr>
+                        <td>STATUS</td>
+                        <td>{{ status }}</td>
+                    </tr>
+                    <tr>
+                        <td>SOURCE</td>
+                        <td>{{ source }}</td>
+                    </tr>
+                    <tr>
+                        <td>SEASON</td>
+                        <td>{{ season }}</td>
+                    </tr>
+                    <tr>
+                        <td>STUDIOS</td>
+                        <td>
+                            {% for studio in anime_data.studios %}
+                            {{ studio.name }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="p5-info-block" id="relations-block">
+            <h2 class="p5-header-tag">RELATIONS</h2>
+            <div class="info-content">
+                {% if relation_length == 0 %}
+                <p>N/A</p>
+                {% else %}
+                <ul class="relations-list">
+                    {% for relation in anime_data.relations %}
+                    {% for entry in relation.entry %}
+                    <li>
+                        <span class="rel-type">{{ relation.relation }}</span>
+                        <a href="id={{ entry.mal_id }}" class="p5-link">{{ entry.name }}</a>
+                    </li>
+                    {% endfor %}
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/anime-view.js' %}"></script>
+{% endblock %}
