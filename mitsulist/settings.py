@@ -23,11 +23,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'csp',
     'app'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'csp.middleware.CSPMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -100,3 +102,78 @@ MEDIA_ROOT = BASE_DIR / 'media'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# =============================================================================
+# SECURITY SETTINGS
+# =============================================================================
+
+# HTTPS and SSL Settings (Production)
+SECURE_SSL_REDIRECT = not DEBUG  # Redirect HTTP to HTTPS in production
+SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0  # 1 year HSTS
+SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
+SECURE_HSTS_PRELOAD = not DEBUG
+
+# Secure Cookies (Production)
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = True
+
+# Security Headers
+X_FRAME_OPTIONS = 'DENY'
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
+
+# =============================================================================
+# CONTENT SECURITY POLICY (CSP)
+# =============================================================================
+
+# Django-CSP 4.0+ format
+CONTENT_SECURITY_POLICY = {
+    'DIRECTIVES': {
+        'default-src': ("'self'",),
+        'script-src': (
+            "'self'",
+            'https://cdnjs.cloudflare.com',  # Font Awesome
+        ),
+        'style-src': (
+            "'self'",
+            "'unsafe-inline'",  # Required for inline styles in some cases
+            'https://fonts.googleapis.com',
+            'https://cdnjs.cloudflare.com',
+        ),
+        'font-src': (
+            "'self'",
+            'https://fonts.gstatic.com',
+            'https://cdnjs.cloudflare.com',
+        ),
+        'img-src': (
+            "'self'",
+            'https:',  # Allow images from HTTPS sources (anime posters from API)
+            'data:',   # Allow data URIs
+        ),
+        'connect-src': (
+            "'self'",
+            'https://api.jikan.moe',  # Jikan API
+        ),
+        'frame-ancestors': ("'none'",),  # Same as X-Frame-Options: DENY
+        'base-uri': ("'self'",),
+        'object-src': ("'none'",),
+    }
+}
+
+# =============================================================================
+# RATE LIMITING
+# =============================================================================
+
+# Cache backend for rate limiting (uses default cache)
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
+
+# Rate limit settings
+RATELIMIT_ENABLE = True
+RATELIMIT_USE_CACHE = 'default'

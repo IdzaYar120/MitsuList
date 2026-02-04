@@ -4,6 +4,7 @@ from datetime import datetime
 import math
 import time
 from django.core.cache import cache
+from django_ratelimit.decorators import ratelimit
 
 from .models import News
 
@@ -31,6 +32,7 @@ def get_jikan_data(cache_key, url, timeout=300):
     
     return {'data': []}
 
+@ratelimit(key='ip', rate='20/m', method='GET', block=True)
 def index(request):
     # Fetch News (Database)
     news_items = News.objects.all().order_by('-created_at')
@@ -50,15 +52,16 @@ def index(request):
     }
     return render(request, 'index.html', context)
 
+@ratelimit(key='ip', rate='60/m', method='GET', block=True)
 def index_two(request, anime_id):
     # Caching details too (10 minutes)
     cache_key = f'anime_detail_{anime_id}'
     raw_data = get_jikan_data(cache_key, f'https://api.jikan.moe/v4/anime/{anime_id}/full', timeout=600)
     
-    anime_data = raw_data.get('data', {})
-    if not anime_data:
-        # If detail fetch fails, we don't have enough data to render correctly
-        return render(request, '404.html', status=404) # Assuming a 404 template exists or standard error
+    anime_data = raw_data.get('data')
+    if not anime_data or not isinstance(anime_data, dict):
+        # If detail fetch fails or returns unexpected data, we can't render correctly
+        return render(request, '404.html', status=404)
 
     # Data extraction with safe defaults
     media_type = anime_data.get('type', "N/A")
@@ -90,6 +93,7 @@ def index_two(request, anime_id):
     }
     return render(request, 'anime-view.html', context)
 
+@ratelimit(key='ip', rate='30/m', method='GET', block=True)
 def index_three(request, search_query):
     from django.http import JsonResponse
     # Direct search proxy (could also be cached briefly)

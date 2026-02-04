@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: mitsulist_db
+    environment:
+      POSTGRES_DB: mitsulist_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mitsulist_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+volumes:
+  postgres_data:
