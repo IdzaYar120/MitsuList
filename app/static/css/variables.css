@@ -1,22 +1,26 @@
 :root {
-    /* Colors */
-    --color-primary: #ff003c; /* Electric Red */
-    --color-secondary: #000000; /* Deep Black */
-    --color-bg: #1a1a1a; /* Dark Grey Background */
-    --color-text: #ffffff;
-    --color-accent: #ffe600; /* Cyber Yellow */
-    --color-shadow: rgba(0, 0, 0, 0.8);
+    /* Colors - Electric Midnight Palette */
+    --color-primary: #7b2ff7; /* Vibrant Purple */
+    --color-secondary: #0f172a; /* Slate Dark */
+    --color-bg: #020617; /* Deep Midnight */
+    --color-text: #f8fafc; /* Slate Light */
+    --color-accent: #38bdf8; /* Sky Blue */
+    --color-muted: #64748b; /* Slate Muted */
+    --color-shadow: rgba(0, 0, 0, 0.4);
+    --glass-bg: rgba(255, 255, 255, 0.05);
 
     /* Fonts */
-    --font-header: 'Anton', sans-serif;
-    --font-body: 'Oswald', sans-serif;
+    --font-header: 'Outfit', sans-serif;
+    --font-body: 'Inter', sans-serif;
 
     /* Spacing */
     --spacing-sm: 8px;
     --spacing-md: 16px;
     --spacing-lg: 32px;
 
-    /* Effects */
-    --skew-angle: -10deg;
-    --skew-angle-reverse: 10deg;
+    /* Shapes */
+    --skew-angle: 0deg; /* Removed Persona 5 Skew */
+    --skew-angle-reverse: 0deg;
+    --border-radius: 12px;
+    --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }

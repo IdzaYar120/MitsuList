@@ -5,18 +5,16 @@
 
 {% block content %}
 <div id="anime-view-header">
-    <div id="title-skew-container">
-        <div id="title-content">
-            <h1 id="anime-title-main">{{ anime_data.title }}</h1>
-            <h2 id="anime-title-sub">{{ anime_data.title_japanese }}</h2>
-            {% if anime_data.title_english and anime_data.title_english != anime_data.title %}
-            <h3 id="anime-title-eng-sub">{{ anime_data.title_english }}</h3>
-            {% endif %}
-        </div>
+    <div id="title-container">
+        <h1 id="anime-title-main">{{ anime_data.title }}</h1>
+        <h2 id="anime-title-sub">{{ anime_data.title_japanese }}</h2>
+        {% if anime_data.title_english and anime_data.title_english != anime_data.title %}
+        <h3 id="anime-title-eng-sub">{{ anime_data.title_english }}</h3>
+        {% endif %}
     </div>
     <div id="genre-tags">
         {% for genre in anime_data.genres %}
-        <span class="p5-tag">{{ genre.name }}</span>
+        <span class="mitsulist-tag">{{ genre.name }}</span>
         {% endfor %}
     </div>
 </div>
@@ -26,11 +24,10 @@
     <div class="details-left">
         <div id="main-poster-container">
             <img src="{{ anime_data.images.jpg.large_image_url }}" id="main-poster" alt="{{ anime_data.title }}">
-            <div id="poster-decoration"></div>
         </div>
 
         <div id="synopsis-box">
-            <h2 class="p5-header-tag">SYNOPSIS</h2>
+            <h2 class="mitsulist-header-tag">SYNOPSIS</h2>
             <div class="synopsis-text">
                 <p>{{ anime_data.synopsis }}</p>
             </div>
@@ -39,12 +36,14 @@
 
     <!-- Right Column: Stats and Info -->
     <div class="details-right">
-        <div class="p5-info-block" id="stats-block">
-            <h2 class="p5-header-tag">STATISTICS</h2>
+        <div class="mitsulist-info-block" id="stats-block">
+            <h2 class="mitsulist-header-tag">STATISTICS</h2>
             <div class="info-content">
                 <div class="stat-item">
                     <span class="stat-label"><i class="fa-solid fa-star"></i> SCORE</span>
-                    <span class="stat-value">{{ anime_data.score }} <small>({{ anime_data.scored_by }})</small></span>
+                    <span class="stat-value">{{ anime_data.score }} <small
+                            style="color: var(--color-muted); font-size: 0.8rem;">({{ anime_data.scored_by
+                            }})</small></span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-label"><i class="fa-solid fa-heart"></i> POPULARITY</span>
@@ -57,41 +56,41 @@
             </div>
         </div>
 
-        <div class="p5-info-block" id="info-block">
-            <h2 class="p5-header-tag">INFORMATION</h2>
+        <div class="mitsulist-info-block" id="info-block">
+            <h2 class="mitsulist-header-tag">INFORMATION</h2>
             <div class="info-content">
-                <table class="p5-info-table">
+                <table class="mitsulist-info-table">
                     <tr>
-                        <td>TYPE</td>
-                        <td>{{ media_type }}</td>
+                        <td class="stat-label">TYPE</td>
+                        <td class="stat-value" style="font-size: 1rem;">{{ media_type }}</td>
                     </tr>
                     <tr>
-                        <td>RATING</td>
-                        <td>{{ rating }}</td>
+                        <td class="stat-label">RATING</td>
+                        <td class="stat-value" style="font-size: 1rem;">{{ rating }}</td>
                     </tr>
                     <tr>
-                        <td>EPISODES</td>
-                        <td>{{ episodes }}</td>
+                        <td class="stat-label">EPISODES</td>
+                        <td class="stat-value" style="font-size: 1rem;">{{ episodes }}</td>
                     </tr>
                     <tr>
-                        <td>DURATION</td>
-                        <td>{{ episode_duration }}</td>
+                        <td class="stat-label">DURATION</td>
+                        <td class="stat-value" style="font-size: 1rem;">{{ episode_duration }}</td>
                     </tr>
                     <tr>
-                        <td>STATUS</td>
-                        <td>{{ status }}</td>
+                        <td class="stat-label">STATUS</td>
+                        <td class="stat-value" style="font-size: 1rem;">{{ status }}</td>
                     </tr>
                     <tr>
-                        <td>SOURCE</td>
-                        <td>{{ source }}</td>
+                        <td class="stat-label">SOURCE</td>
+                        <td class="stat-value" style="font-size: 1rem;">{{ source }}</td>
                     </tr>
                     <tr>
-                        <td>SEASON</td>
-                        <td>{{ season }}</td>
+                        <td class="stat-label">SEASON</td>
+                        <td class="stat-value" style="font-size: 1rem;">{{ season }}</td>
                     </tr>
                     <tr>
-                        <td>STUDIOS</td>
-                        <td>
+                        <td class="stat-label">STUDIOS</td>
+                        <td class="stat-value" style="font-size: 1rem;">
                             {% for studio in anime_data.studios %}
                             {{ studio.name }}{% if not forloop.last %}, {% endif %}
                             {% endfor %}
@@ -101,18 +100,22 @@
             </div>
         </div>
 
-        <div class="p5-info-block" id="relations-block">
-            <h2 class="p5-header-tag">RELATIONS</h2>
+        <div class="mitsulist-info-block" id="relations-block">
+            <h2 class="mitsulist-header-tag">RELATIONS</h2>
             <div class="info-content">
                 {% if relation_length == 0 %}
-                <p>N/A</p>
+                <p style="color: var(--color-muted);">N/A</p>
                 {% else %}
-                <ul class="relations-list">
+                <ul class="relations-list" style="list-style: none; padding: 0; margin: 0;">
                     {% for relation in anime_data.relations %}
                     {% for entry in relation.entry %}
-                    <li>
-                        <span class="rel-type">{{ relation.relation }}</span>
-                        <a href="id={{ entry.mal_id }}" class="p5-link">{{ entry.name }}</a>
+                    <li style="margin-bottom: 12px; display: flex; align-items: center; gap: 10px;">
+                        <span
+                            style="background: rgba(123, 47, 247, 0.2); color: var(--color-accent); font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; text-transform: uppercase;">{{
+                            relation.relation }}</span>
+                        <a href="id={{ entry.mal_id }}" class="mitsulist-link"
+                            style="color: var(--color-text); text-decoration: none; font-size: 0.95rem; transition: var(--transition);">{{
+                            entry.name }}</a>
                     </li>
                     {% endfor %}
                     {% endfor %}
