@@ -5,31 +5,73 @@
 
 {% block content %}
 <div id="homepage-div">
-    <!-- News Banner -->
-    {% if news_items %}
-    <div id="news-banner-container">
-        <div id="news-banner">
-            {% for news in news_items %}
-            <div class="news-item {% if forloop.first %}active{% endif %}">
-                {% if news.link %}<a href="{{ news.link }}">{% endif %}
-                    <img src="{{ news.image.url }}" alt="{{ news.title }}" class="news-image">
-                    <div class="news-content">
-                        <h2 class="news-title">{{ news.title }}</h2>
-                        {% if news.description %}
-                        <p class="news-description">{{ news.description|truncatechars:100 }}</p>
-                        {% endif %}
-                    </div>
-                    {% if news.link %}
-                </a>{% endif %}
+    <!-- Advanced Filters Panel -->
+    <div id="advanced-filters-panel" class="glass-panel"
+        style="display: none; margin: 20px auto; width: 90%; max-width: 1200px; padding: 30px; border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.05); background: var(--glass-bg); backdrop-filter: blur(10px);">
+        <div
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; align-items: end;">
+            <div>
+                <label for="filter-genre">GENRE</label>
+                <select id="filter-genre" class="mitsulist-input">
+                    <option value="">All Genres</option>
+                    <!-- Populated via JS -->
+                </select>
             </div>
-            {% endfor %}
+            <div>
+                <label for="filter-year">YEAR</label>
+                <input type="number" id="filter-year" class="mitsulist-input" placeholder="e.g. 2024" min="1950"
+                    max="2026">
+            </div>
+            <div>
+                <label for="filter-type">TYPE</label>
+                <select id="filter-type" class="mitsulist-input">
+                    <option value="">All Types</option>
+                    <option value="tv">TV Series</option>
+                    <option value="movie">Movie</option>
+                    <option value="ova">OVA</option>
+                    <option value="special">Special</option>
+                    <option value="ona">ONA</option>
+                    <option value="music">Music</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button id="apply-filters" class="mitsulist-btn-primary">Apply Filters</button>
+                <button id="clear-filters" class="mitsulist-btn-secondary">Clear</button>
+            </div>
+        </div>
 
-            <!-- Controls -->
-            <button class="banner-btn prev" id="banner-prev">&#10094;</button>
-            <button class="banner-btn next" id="banner-next">&#10095;</button>
+        {% if user.is_authenticated %}
+        <div
+            style="margin-top: 25px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center;">
+            <div id="saved-searches-quick"
+                style="display: flex; gap: 10px; align-items: center; overflow-x: auto; padding-bottom: 5px;">
+                <span style="color: var(--color-muted); font-size: 0.8rem; font-weight: 700;">SAVED:</span>
+                <div id="saved-searches-list" style="display: flex; gap: 10px;">
+                    <!-- Populated via JS -->
+                    <span style="color: var(--color-muted); font-size: 0.8rem;">No saved searches yet</span>
+                </div>
+            </div>
+            <button id="save-current-search" class="mitsulist-btn-accent"
+                style="font-size: 0.8rem; padding: 6px 12px;"><i class="fa-solid fa-bookmark"></i> Save Current</button>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Search Results Container -->
+    <div id="search-results-container" style="display: none; width: 90%; margin: 20px auto;">
+        <div class="header-and-buttons">
+            <h1 id="search-results-header"><i class="fa-solid fa-magnifying-glass"
+                    style="color: var(--color-accent);"></i>&nbsp;&nbsp;SEARCH RESULTS</h1>
+            <button id="close-search" class="scroll-buttons" style="margin-left: auto; margin-right: 5%;"><i
+                    class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div id="container"
+            style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 30px; padding: 40px; justify-content: center;">
+            <!-- Results go here -->
         </div>
     </div>
-    {% endif %}
+
+    <!-- News Banner -->
 
     <div class="header-and-buttons">
         <h1 id="currently-airing-header"><i class="fa-solid fa-bolt"

@@ -2,7 +2,31 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+import json
+from .models import SavedSearch
 from .forms import UserRegisterForm
+
+@login_required
+def save_search(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            name = data.get('name', 'Untitled Search')
+            params = data.get('params', {})
+            
+            SavedSearch.objects.create(user=request.user, name=name, params=params)
+            return JsonResponse({'status': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    return JsonResponse({'status': 'invalid method'}, status=405)
+
+@login_required
+def list_saved_searches(request):
+    searches = SavedSearch.objects.filter(user=request.user)
+    data = [{'id': s.id, 'name': s.name, 'params': s.params, 'created_at': s.created_at} for s in searches]
+    return JsonResponse({'data': data})
 
 def register(request):
     if request.method == 'POST':

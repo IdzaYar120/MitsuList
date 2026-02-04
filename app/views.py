@@ -96,9 +96,31 @@ def index_two(request, anime_id):
 @ratelimit(key='ip', rate='30/m', method='GET', block=True)
 def index_three(request, search_query):
     from django.http import JsonResponse
-    # Direct search proxy (could also be cached briefly)
-    cache_key = f'search_{search_query.lower()}'
-    data = get_jikan_data(cache_key, f'https://api.jikan.moe/v4/anime?q={search_query}&limit=10', timeout=60)
+    
+    # Extract optional filters from query parameters
+    genres = request.GET.get('genres')
+    year = request.GET.get('year')
+    anime_type = request.GET.get('type') # 'tv', 'movie', etc.
+    
+    # Build Jikan Search URL
+    base_url = f'https://api.jikan.moe/v4/anime?q={search_query}&limit=20'
+    
+    if genres:
+        base_url += f'&genres={genres}'
+    if year:
+        base_url += f'&start_date={year}-01-01' # Jikan v4 filter for year usually uses start_date or specific year param
+    if anime_type:
+        base_url += f'&type={anime_type}'
+    
+    cache_key = f'search_advanced_{search_query.lower()}_{genres}_{year}_{anime_type}'
+    data = get_jikan_data(cache_key, base_url, timeout=60)
+    return JsonResponse(data)
+
+def get_genres(request):
+    from django.http import JsonResponse
+    cache_key = 'anime_genres_list'
+    # Fetch all genres from Jikan
+    data = get_jikan_data(cache_key, 'https://api.jikan.moe/v4/genres/anime', timeout=86400) # Cache for 24h
     return JsonResponse(data)
 
         
