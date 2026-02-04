@@ -498,7 +498,14 @@ select.mitsulist-input {
     background-size: 16px;
     padding-right: 40px;
     color-scheme: dark;
-    /* Helps style the popup on modern browsers */
+}
+
+/* Fix visibility for dropdown options */
+select.mitsulist-input option {
+    background-color: var(--color-secondary);
+    /* Solid background for the popup */
+    color: var(--color-text);
+    /* White text */
 }
 
 /* Hide Number Arrows */
