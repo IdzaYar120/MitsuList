@@ -179,13 +179,22 @@ CONTENT_SECURITY_POLICY = {
 # RATE LIMITING
 # =============================================================================
 
-# Cache backend for rate limiting (uses default cache)
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',
+# Cache backend for rate limiting and API caching
+# Uses Redis in production, LocMemCache in development
+if DEBUG:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'unique-snowflake',
+        }
     }
-}
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+            'LOCATION': os.getenv('REDIS_URL', 'redis://127.0.0.1:6379'),
+        }
+    }
 
 # Rate limit settings
 RATELIMIT_ENABLE = True

@@ -99,10 +99,35 @@
             </div>
             {% else %}
             <div style="text-align: center; padding: 50px; color: var(--color-muted);">
-                <h2>Your list is empty</h2>
-                <p>Go start your journey!</p>
+                <h2>{% trans "Your list is empty" %}</h2>
+                <p>{% trans "Go start your journey!" %}</p>
                 <a href="{% url 'home' %}" class="mitsulist-btn-primary"
-                    style="text-decoration: none; display: inline-block; margin-top: 20px;">Explore Anime</a>
+                    style="text-decoration: none; display: inline-block; margin-top: 20px;">{% trans "Explore Anime" %}</a>
+            </div>
+            {% endif %}
+            
+            <!-- Pagination -->
+            {% if anime_entries.has_other_pages %}
+            <div style="display: flex; justify-content: center; gap: 10px; margin-top: 30px; padding: 20px 0;">
+                {% if anime_entries.has_previous %}
+                <a href="?page={{ anime_entries.previous_page_number }}" 
+                   style="padding: 10px 20px; background: var(--glass-bg); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; text-decoration: none; transition: 0.2s;"
+                   onmouseover="this.style.borderColor='var(--color-primary)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">
+                    <i class="fa-solid fa-chevron-left"></i> {% trans "Previous" %}
+                </a>
+                {% endif %}
+                
+                <span style="padding: 10px 20px; color: var(--color-muted);">
+                    {% trans "Page" %} {{ anime_entries.number }} {% trans "of" %} {{ anime_entries.paginator.num_pages }}
+                </span>
+                
+                {% if anime_entries.has_next %}
+                <a href="?page={{ anime_entries.next_page_number }}" 
+                   style="padding: 10px 20px; background: var(--glass-bg); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; text-decoration: none; transition: 0.2s;"
+                   onmouseover="this.style.borderColor='var(--color-primary)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">
+                    {% trans "Next" %} <i class="fa-solid fa-chevron-right"></i>
+                </a>
+                {% endif %}
             </div>
             {% endif %}
         </div>

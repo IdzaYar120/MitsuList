@@ -2,6 +2,10 @@ import httpx
 import asyncio
 from django.core.cache import cache
 import time
+import logging
+
+logger = logging.getLogger(__name__)
+
 # Global semaphore to limit concurrent requests to Jikan API
 # Jikan allows ~3 requests/second, so we allow 3 concurrent with small delays
 jikan_semaphore = asyncio.Semaphore(3)
@@ -40,21 +44,21 @@ async def fetch_jikan_data(cache_key, url, timeout=3600, retries=2):
                     elif response.status_code == 429:
                         # Exponential backoff
                         wait_time = 2 ** (attempt + 1)
-                        print(f"Rate limited on {url}. Retrying in {wait_time}s...")
+                        logger.warning(f"Rate limited on {url}. Retrying in {wait_time}s...")
                         await asyncio.sleep(wait_time)
                         continue
                     
                     elif 500 <= response.status_code < 600:
-                         print(f"Server error {response.status_code} for {url}. Retrying...")
+                         logger.warning(f"Server error {response.status_code} for {url}. Retrying...")
                          await asyncio.sleep(1)
                          continue
     
                     else:
-                        print(f"Error {response.status_code} for {url}")
+                        logger.error(f"Error {response.status_code} for {url}")
                         break
                 
                 except httpx.RequestError as exc:
-                    print(f"Connection error: {exc}")
+                    logger.error(f"Connection error: {exc}")
                     break
     
     return {'data': []}

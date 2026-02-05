@@ -11,7 +11,6 @@ from .services import fetch_jikan_data
 from .models import News, Review
 from users.models import UserAnimeEntry
 from .forms import ReviewForm
-from .forms import ReviewForm
 import random
 from django.utils.translation import get_language
 from .translation import translate_text
@@ -66,7 +65,6 @@ async def index(request):
         'airing_now_data': airing_now_data,
         'top_anime_data': top_anime_data,
         'popular_anime_data': popular_anime_data,
-        'popular_anime_data': popular_anime_data,
         'anime_movie': anime_movie,
         'recommendations_data': recommendations_data,
         'source_anime_title': source_anime_title,
@@ -108,7 +106,6 @@ async def index_two(request, anime_id):
         translate_sync = sync_to_async(translate_text)
         
         # Translate synopsis and metadata (but NOT title)
-        anime_data['synopsis'] = await translate_sync(anime_data.get('synopsis'), 'uk')
         anime_data['synopsis'] = await translate_sync(anime_data.get('synopsis'), 'uk')
         anime_data['status'] = await translate_sync(anime_data.get('status'), 'uk')
         anime_data['type'] = await translate_sync(anime_data.get('type'), 'uk')

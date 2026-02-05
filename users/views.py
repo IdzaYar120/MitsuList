@@ -4,7 +4,6 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
 import json
 from .models import SavedSearch, UserAnimeEntry
 from app.models import Review
@@ -33,7 +32,14 @@ def list_saved_searches(request):
 
 @login_required
 def profile(request):
-    anime_entries = UserAnimeEntry.objects.filter(user=request.user)
+    from django.core.paginator import Paginator
+    
+    anime_entries_list = UserAnimeEntry.objects.filter(user=request.user)
+    paginator = Paginator(anime_entries_list, 24)  # 24 items per page
+    
+    page_number = request.GET.get('page')
+    anime_entries = paginator.get_page(page_number)
+    
     return render(request, 'users/profile.html', {'anime_entries': anime_entries})
 
 @login_required
@@ -128,8 +134,6 @@ def login_view(request):
         else:
             messages.error(request, "Invalid username or password.")
     form = AuthenticationForm()
-    return render(request, "users/login.html", {"form": form})
-
     return render(request, "users/login.html", {"form": form})
 
 @login_required

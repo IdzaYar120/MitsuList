@@ -34,8 +34,12 @@ class Profile(models.Model):
                 output_size = (300, 300)
                 img.thumbnail(output_size)
                 img.save(self.image.path)
-        except:
-            pass # Handle cases where file might not exist or storage is remote
+        except FileNotFoundError:
+            pass  # Image file doesn't exist yet (e.g., during initial migration)
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Could not resize profile image: {e}")
 
 class SavedSearch(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='saved_searches')
