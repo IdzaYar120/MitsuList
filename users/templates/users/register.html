@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Register - MitsuList{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Register" %} - MitsuList{% endblock %}
 {% block content %}
 <div
     style="display: flex; justify-content: center; align-items: center; min-height: calc(100vh - 150px); padding: 20px;">
@@ -8,19 +9,18 @@
         <div>
             <h1
                 style="font-family: var(--font-header); color: var(--color-text); font-size: 2.5rem; margin-bottom: 30px; border-left: none; background: transparent; padding: 0; box-shadow: none; text-align: left;">
-                Register</h1>
+                {% trans "Register" %}</h1>
             <form method="POST" class="auth-form">
                 {% csrf_token %}
                 <div class="auth-form-fields">
-                    {{ form.as_p }}
+                    {{form.as_p}}
                 </div>
                 <button type="submit"
-                    style="background: var(--color-primary); color: white; border: none; padding: 14px 30px; font-family: var(--font-header); font-size: 1.2rem; font-weight: 600; border-radius: 10px; cursor: pointer; margin-top: 20px; width: 100%; transition: var(--transition); box-shadow: 0 4px 15px rgba(123, 47, 247, 0.4);">Create
-                    Account</button>
+                    style="background: var(--color-primary); color: white; border: none; padding: 14px 30px; font-family: var(--font-header); font-size: 1.2rem; font-weight: 600; border-radius: 10px; cursor: pointer; margin-top: 20px; width: 100%; transition: var(--transition); box-shadow: 0 4px 15px rgba(123, 47, 247, 0.4);">{% trans "Create Account" %}</button>
             </form>
             <div style="margin-top: 30px; font-family: var(--font-body); color: var(--color-muted);">
-                Already have an account? <a href="{% url 'login' %}"
-                    style="color: var(--color-accent); text-decoration: none; font-weight: 600;">Login</a>
+                {% trans "Already have an account?" %} <a href="{% url 'login' %}"
+                    style="color: var(--color-accent); text-decoration: none; font-weight: 600;">{% trans "Login" %}</a>
             </div>
         </div>
     </div>

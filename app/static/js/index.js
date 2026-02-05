@@ -54,6 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setupFluidScroll("popular-anime-container", "next-popular-anime", "previous-popular-anime");
     setupFluidScroll("top-anime-container", "next-top-anime", "previous-top-anime");
     setupFluidScroll("anime-movie-container", "next-anime-movie", "previous-anime-movie");
+    setupFluidScroll("recommendations-container", "next-recommendations", "previous-recommendations");
 });
 
 // Search & Filter Logic

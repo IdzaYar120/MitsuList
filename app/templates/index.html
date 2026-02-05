@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
 {% block title %}MitsuList{% endblock %}
 
@@ -11,32 +11,32 @@
         <div
             style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; align-items: end;">
             <div>
-                <label for="filter-genre">GENRE</label>
+                <label for="filter-genre">{% trans "GENRE" %}</label>
                 <select id="filter-genre" class="mitsulist-input">
-                    <option value="">All Genres</option>
+                    <option value="">{% trans "All Genres" %}</option>
                     <!-- Populated via JS -->
                 </select>
             </div>
             <div>
-                <label for="filter-year">YEAR</label>
+                <label for="filter-year">{% trans "YEAR" %}</label>
                 <input type="number" id="filter-year" class="mitsulist-input" placeholder="e.g. 2024" min="1950"
                     max="2026">
             </div>
             <div>
-                <label for="filter-type">TYPE</label>
+                <label for="filter-type">{% trans "TYPE" %}</label>
                 <select id="filter-type" class="mitsulist-input">
-                    <option value="">All Types</option>
-                    <option value="tv">TV Series</option>
-                    <option value="movie">Movie</option>
-                    <option value="ova">OVA</option>
-                    <option value="special">Special</option>
-                    <option value="ona">ONA</option>
-                    <option value="music">Music</option>
+                    <option value="">{% trans "All Types" %}</option>
+                    <option value="tv">{% trans "TV Series" %}</option>
+                    <option value="movie">{% trans "Movie" %}</option>
+                    <option value="ova">{% trans "OVA" %}</option>
+                    <option value="special">{% trans "Special" %}</option>
+                    <option value="ona">{% trans "ONA" %}</option>
+                    <option value="music">{% trans "Music" %}</option>
                 </select>
             </div>
             <div style="display: flex; gap: 10px;">
-                <button id="apply-filters" class="mitsulist-btn-primary">Apply Filters</button>
-                <button id="clear-filters" class="mitsulist-btn-secondary">Clear</button>
+                <button id="apply-filters" class="mitsulist-btn-primary">{% trans "Apply Filters" %}</button>
+                <button id="clear-filters" class="mitsulist-btn-secondary">{% trans "Clear" %}</button>
             </div>
         </div>
 
@@ -45,14 +45,14 @@
             style="margin-top: 25px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center;">
             <div id="saved-searches-quick"
                 style="display: flex; gap: 10px; align-items: center; overflow-x: auto; padding-bottom: 5px;">
-                <span style="color: var(--color-muted); font-size: 0.8rem; font-weight: 700;">SAVED:</span>
+                <span style="color: var(--color-muted); font-size: 0.8rem; font-weight: 700;">{% trans "SAVED" %}:</span>
                 <div id="saved-searches-list" style="display: flex; gap: 10px;">
                     <!-- Populated via JS -->
-                    <span style="color: var(--color-muted); font-size: 0.8rem;">No saved searches yet</span>
+                    <span style="color: var(--color-muted); font-size: 0.8rem;">{% trans "No saved searches yet" %}</span>
                 </div>
             </div>
             <button id="save-current-search" class="mitsulist-btn-accent"
-                style="font-size: 0.8rem; padding: 6px 12px;"><i class="fa-solid fa-bookmark"></i> Save Current</button>
+                style="font-size: 0.8rem; padding: 6px 12px;"><i class="fa-solid fa-bookmark"></i> {% trans "Save Current" %}</button>
         </div>
         {% endif %}
     </div>
@@ -75,7 +75,7 @@
 
     <div class="header-and-buttons">
         <h1 id="currently-airing-header"><i class="fa-solid fa-bolt"
-                style="color: var(--color-accent);"></i>&nbsp;&nbsp;THIS SEASON</h1>
+                style="color: var(--color-accent);"></i>&nbsp;&nbsp;{% trans "THIS SEASON" %}</h1>
         <div class="scroll-btns-group" style="display: flex; gap: 10px; margin-left: auto; margin-right: 5%;">
             <button class="scroll-buttons" id="previous-airing"><i class="fa-solid fa-chevron-left"></i></button>
             <button class="scroll-buttons" id="next-airing"><i class="fa-solid fa-chevron-right"></i></button>
@@ -97,7 +97,7 @@
 
     <div class="header-and-buttons">
         <h1 id="popular-anime-header"><i class="fa-solid fa-fire"
-                style="color: var(--color-accent);"></i>&nbsp;&nbsp;POPULAR</h1>
+                style="color: var(--color-accent);"></i>&nbsp;&nbsp;{% trans "POPULAR" %}</h1>
         <div class="scroll-btns-group" style="display: flex; gap: 10px; margin-left: auto; margin-right: 5%;">
             <button class="scroll-buttons" id="previous-popular-anime"><i class="fa-solid fa-chevron-left"></i></button>
             <button class="scroll-buttons" id="next-popular-anime"><i class="fa-solid fa-chevron-right"></i></button>
@@ -118,8 +118,7 @@
     </div>
 
     <div class="header-and-buttons">
-        <h1 id="top-anime-header"><i class="fa-solid fa-crown" style="color: var(--color-accent);"></i>&nbsp;&nbsp;TOP
-            ANIME</h1>
+        <h1 id="top-anime-header"><i class="fa-solid fa-crown" style="color: var(--color-accent);"></i>&nbsp;&nbsp;{% trans "TOP ANIME" %}</h1>
         <div class="scroll-btns-group" style="display: flex; gap: 10px; margin-left: auto; margin-right: 5%;">
             <button class="scroll-buttons" id="previous-top-anime"><i class="fa-solid fa-chevron-left"></i></button>
             <button class="scroll-buttons" id="next-top-anime"><i class="fa-solid fa-chevron-right"></i></button>
@@ -139,27 +138,60 @@
         {% endfor %}
     </div>
 
-    <div class="header-and-buttons">
-        <h1 id="anime-movie-header"><i class="fa-solid fa-ticket"
-                style="color: var(--color-accent);"></i>&nbsp;&nbsp;MOVIES</h1>
-        <div class="scroll-btns-group" style="display: flex; gap: 10px; margin-left: auto; margin-right: 5%;">
-            <button class="scroll-buttons" id="previous-anime-movie"><i class="fa-solid fa-chevron-left"></i></button>
-            <button class="scroll-buttons" id="next-anime-movie"><i class="fa-solid fa-chevron-right"></i></button>
-        </div>
+</div>
+
+{% if user.is_authenticated and recommendations_data and recommendations_data.data %}
+<div class="header-and-buttons">
+    <h1 id="recommendations-header"><i class="fa-solid fa-thumbs-up"
+            style="color: var(--color-accent);"></i>&nbsp;&nbsp;BECAUSE YOU WATCHED {{ source_anime_title|upper }}</h1>
+    <div class="scroll-btns-group" style="display: flex; gap: 10px; margin-left: auto; margin-right: 5%;">
+        <button class="scroll-buttons" id="previous-recommendations"><i class="fa-solid fa-chevron-left"></i></button>
+        <button class="scroll-buttons" id="next-recommendations"><i class="fa-solid fa-chevron-right"></i></button>
     </div>
-    <div id="anime-movie-container">
-        {% for movie in anime_movie.data %}
-        <a href="anime/id={{movie.mal_id}}" class="anime-card-links">
-            <div class="anime-cards">
-                <img src="{{movie.images.jpg.large_image_url}}" class="image" loading="lazy">
-                <p class="anime-title">{{movie.title}}</p>
-                <div class="airing-now-details-table">
-                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;{{movie.score}}
-                </div>
+</div>
+<div id="recommendations-container"
+    style="display: flex; overflow-x: auto; padding: 20px 5%; gap: 30px; scrollbar-width: none; -ms-overflow-style: none; scroll-behavior: smooth;">
+    {% for rec in recommendations_data.data %}
+    <a href="anime/id={{rec.entry.mal_id}}" class="anime-card-links">
+        <div class="anime-cards">
+            <img src="{{rec.entry.images.jpg.large_image_url}}" class="image" loading="lazy">
+            <p class="anime-title">{{rec.entry.title}}</p>
+            <div class="airing-now-details-table">
+                <i class="fa-solid fa-heart" style="color: #ff4757"></i>&nbsp;Rec
             </div>
-        </a>
-        {% endfor %}
+        </div>
+    </a>
+    {% endfor %}
+</div>
+
+<style>
+    #recommendations-container::-webkit-scrollbar {
+        display: none;
+    }
+</style>
+{% endif %}
+
+<div class="header-and-buttons">
+    <h1 id="anime-movie-header"><i class="fa-solid fa-ticket" style="color: var(--color-accent);"></i>&nbsp;&nbsp;MOVIES
+    </h1>
+    <div class="scroll-btns-group" style="display: flex; gap: 10px; margin-left: auto; margin-right: 5%;">
+        <button class="scroll-buttons" id="previous-anime-movie"><i class="fa-solid fa-chevron-left"></i></button>
+        <button class="scroll-buttons" id="next-anime-movie"><i class="fa-solid fa-chevron-right"></i></button>
     </div>
+</div>
+<div id="anime-movie-container">
+    {% for movie in anime_movie.data %}
+    <a href="anime/id={{movie.mal_id}}" class="anime-card-links">
+        <div class="anime-cards">
+            <img src="{{movie.images.jpg.large_image_url}}" class="image" loading="lazy">
+            <p class="anime-title">{{movie.title}}</p>
+            <div class="airing-now-details-table">
+                <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;{{movie.score}}
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+</div>
 </div>
 {% endblock %}
 

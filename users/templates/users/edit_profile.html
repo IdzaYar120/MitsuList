@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Profile - MitsuList{% endblock %}
+
+{% block content %}
+<div
+    style="max-width: 600px; margin: 40px auto; padding: 30px; background: var(--glass-bg); border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
+    <h2 style="margin-bottom: 20px; font-family: var(--font-header);">Edit Profile</h2>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 5px; color: var(--color-muted);">Username</label>
+            {{ u_form.username }}
+        </div>
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 5px; color: var(--color-muted);">Email</label>
+            {{ u_form.email }}
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0;">
+
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 5px; color: var(--color-muted);">Bio</label>
+            {{ p_form.bio }}
+        </div>
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 5px; color: var(--color-muted);">Profile Picture</label>
+            {{ p_form.image }}
+        </div>
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 5px; color: var(--color-muted);">Gender</label>
+            {{ p_form.gender }}
+        </div>
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 5px; color: var(--color-muted);">Birth Date</label>
+            {{ p_form.birth_date }}
+        </div>
+
+        <button type="submit" class="mitsulist-btn-primary" style="width: 100%;">Save Changes</button>
+    </form>
+</div>
+
+<style>
+    /* Enforce consistent sizing for all inputs */
+    .mitsulist-input {
+        height: 40px !important;
+        /* Fixed height */
+        max-width: 350px !important;
+        /* Fixed maximum width */
+        width: 100% !important;
+        padding: 5px 12px !important;
+        /* Consistent padding */
+        box-sizing: border-box !important;
+        /* Include padding/border in height/width */
+        display: block;
+        /* Standard display for inputs */
+        line-height: normal;
+        /* Reset line-height */
+        margin-top: 5px;
+    }
+
+    /* Exception for textarea: Allow height to grow and keep width consistent */
+    textarea.mitsulist-input {
+        height: auto !important;
+        min-height: 100px;
+        display: block;
+        padding: 10px !important;
+    }
+
+    /* Fix for file input to align its internal button */
+    input[type="file"].mitsulist-input {
+        padding: 4px !important;
+        /* Reduced padding for file input */
+        display: flex;
+        /* Flex is okay for file input container to align button */
+        align-items: center;
+    }
+
+    /* Specific tweaks for file input button */
+    input[type="file"]::file-selector-button {
+        background-color: var(--color-secondary);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 4px 10px;
+        border-radius: 4px;
+        margin-right: 15px;
+        cursor: pointer;
+        transition: 0.2s;
+        height: 28px;
+        /* Fits inside the 40px container */
+        box-sizing: border-box;
+    }
+
+    input[type="file"]::file-selector-button:hover {
+        background-color: var(--color-primary);
+    }
+</style>
+{% endblock %}

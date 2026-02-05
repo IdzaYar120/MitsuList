@@ -1,0 +1,318 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: MitsuList 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-06 00:00+0000\n"
+"PO-Revision-Date: 2026-02-06 00:00+0000\n"
+"Last-Translator: MitsuList Team\n"
+"Language-Team: Ukrainian\n"
+"Language: uk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#: Navigation
+msgid "Login"
+msgstr "Вхід"
+
+msgid "Logout"
+msgstr "Вихід"
+
+msgid "Join"
+msgstr "Приєднатися"
+
+msgid "Register"
+msgstr "Реєстрація"
+
+msgid "Profile"
+msgstr "Профіль"
+
+msgid "Search"
+msgstr "Пошук"
+
+#: Login Page
+msgid "Log In"
+msgstr "Увійти"
+
+msgid "Need an account?"
+msgstr "Немає акаунту?"
+
+#: Register Page
+msgid "Create Account"
+msgstr "Створити акаунт"
+
+msgid "Already have an account?"
+msgstr "Вже маєте акаунт?"
+
+#: Profile Page
+msgid "Edit"
+msgstr "Редагувати"
+
+msgid "Edit Profile"
+msgstr "Редагувати профіль"
+
+msgid "Write Review"
+msgstr "Написати відгук"
+
+msgid "Member since"
+msgstr "Учасник з"
+
+msgid "ALL"
+msgstr "ВСІ"
+
+msgid "WATCHING"
+msgstr "ДИВЛЮСЬ"
+
+msgid "COMPLETED"
+msgstr "ЗАВЕРШЕНО"
+
+msgid "PLAN TO WATCH"
+msgstr "ЗАПЛАНОВАНО"
+
+msgid "DROPPED"
+msgstr "КИНУТО"
+
+msgid "ON HOLD"
+msgstr "НА ПАУЗІ"
+
+msgid "No anime in your list yet."
+msgstr "У вашому списку ще немає аніме."
+
+#: Anime Detail Page
+msgid "Status"
+msgstr "Статус"
+
+msgid "Type"
+msgstr "Тип"
+
+msgid "Source"
+msgstr "Джерело"
+
+msgid "Episodes"
+msgstr "Епізоди"
+
+msgid "Duration"
+msgstr "Тривалість"
+
+msgid "Season"
+msgstr "Сезон"
+
+msgid "Rating"
+msgstr "Рейтинг"
+
+msgid "Synopsis"
+msgstr "Синопсис"
+
+msgid "Genres"
+msgstr "Жанри"
+
+msgid "Reviews"
+msgstr "Відгуки"
+
+msgid "Add to List"
+msgstr "Додати до списку"
+
+msgid "Remove from List"
+msgstr "Видалити зі списку"
+
+#: Common anime statuses (from Jikan API)
+msgid "Currently Airing"
+msgstr "Зараз виходить"
+
+msgid "Finished Airing"
+msgstr "Завершено"
+
+msgid "Not yet aired"
+msgstr "Ще не вийшло"
+
+#: Common anime types
+msgid "TV"
+msgstr "ТВ"
+
+msgid "Movie"
+msgstr "Фільм"
+
+msgid "OVA"
+msgstr "OVA"
+
+msgid "ONA"
+msgstr "ONA"
+
+msgid "Special"
+msgstr "Спешл"
+
+msgid "Music"
+msgstr "Музика"
+
+#: Common sources
+msgid "Manga"
+msgstr "Манга"
+
+msgid "Original"
+msgstr "Оригінал"
+
+msgid "Light novel"
+msgstr "Ранобе"
+
+msgid "Visual novel"
+msgstr "Візуальна новела"
+
+msgid "Game"
+msgstr "Гра"
+
+msgid "Web manga"
+msgstr "Веб-манга"
+
+#: Common genres
+msgid "Action"
+msgstr "Бойовик"
+
+msgid "Adventure"
+msgstr "Пригоди"
+
+msgid "Comedy"
+msgstr "Комедія"
+
+msgid "Drama"
+msgstr "Драма"
+
+msgid "Fantasy"
+msgstr "Фентезі"
+
+msgid "Horror"
+msgstr "Жахи"
+
+msgid "Mystery"
+msgstr "Містика"
+
+msgid "Romance"
+msgstr "Романтика"
+
+msgid "Sci-Fi"
+msgstr "Наукова фантастика"
+
+msgid "Slice of Life"
+msgstr "Повсякденність"
+
+msgid "Sports"
+msgstr "Спорт"
+
+msgid "Supernatural"
+msgstr "Надприродне"
+
+msgid "Thriller"
+msgstr "Трилер"
+
+#: Anime View Page - Uppercase Labels
+msgid "SYNOPSIS"
+msgstr "СИНОПСИС"
+
+msgid "MY PROGRESS"
+msgstr "МІЙ ПРОГРЕС"
+
+msgid "Watching"
+msgstr "Дивлюсь"
+
+msgid "Completed"
+msgstr "Завершено"
+
+msgid "Plan"
+msgstr "Заплановано"
+
+msgid "Dropped"
+msgstr "Кинуто"
+
+msgid "RATING"
+msgstr "РЕЙТИНГ"
+
+msgid "Update Status"
+msgstr "Оновити статус"
+
+msgid "STATISTICS"
+msgstr "СТАТИСТИКА"
+
+msgid "SCORE"
+msgstr "ОЦІНКА"
+
+msgid "POPULARITY"
+msgstr "ПОПУЛЯРНІСТЬ"
+
+msgid "RANKING"
+msgstr "РЕЙТИНГ"
+
+msgid "INFORMATION"
+msgstr "ІНФОРМАЦІЯ"
+
+msgid "TYPE"
+msgstr "ТИП"
+
+msgid "EPISODES"
+msgstr "ЕПІЗОДИ"
+
+msgid "DURATION"
+msgstr "ТРИВАЛІСТЬ"
+
+msgid "STATUS"
+msgstr "СТАТУС"
+
+msgid "SOURCE"
+msgstr "ДЖЕРЕЛО"
+
+msgid "SEASON"
+msgstr "СЕЗОН"
+
+msgid "STUDIOS"
+msgstr "СТУДІЇ"
+
+msgid "RELATIONS"
+msgstr "ЗВ'ЯЗКИ"
+
+#: Index Page - Filters
+msgid "GENRE"
+msgstr "ЖАНР"
+
+msgid "All Genres"
+msgstr "Всі жанри"
+
+msgid "YEAR"
+msgstr "РІК"
+
+msgid "All Types"
+msgstr "Всі типи"
+
+msgid "TV Series"
+msgstr "ТВ серіал"
+
+msgid "Apply Filters"
+msgstr "Застосувати фільтри"
+
+msgid "Clear"
+msgstr "Очистити"
+
+msgid "SAVED"
+msgstr "ЗБЕРЕЖЕНО"
+
+msgid "No saved searches yet"
+msgstr "Збережених пошуків ще немає"
+
+msgid "Save Current"
+msgstr "Зберегти поточний"
+
+msgid "SEARCH RESULTS"
+msgstr "РЕЗУЛЬТАТИ ПОШУКУ"
+
+#: Index Page - Section Headers
+msgid "THIS SEASON"
+msgstr "ЦЕЙ СЕЗОН"
+
+msgid "POPULAR"
+msgstr "ПОПУЛЯРНЕ"
+
+msgid "TOP ANIME"
+msgstr "ТОП АНІМЕ"
+
+msgid "BECAUSE YOU WATCHED"
+msgstr "ТОМУ ЩО ВИ ДИВИЛИСЬ"
+
+

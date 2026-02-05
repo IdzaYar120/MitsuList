@@ -1,4 +1,4 @@
-{% load static %}
+{% load static i18n %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -47,16 +47,33 @@
                     style="border-radius: 0 var(--border-radius) var(--border-radius) 0; background: var(--color-secondary); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--color-accent); padding: 10px 15px; cursor: pointer; transition: var(--transition);"><i
                         class="fa-solid fa-sliders"></i></button>
             </div>
-            <div id="auth-links" style="margin-left: 20px; font-family: var(--font-body); font-weight: 600;">
+            <div id="auth-links"
+                style="margin-left: 20px; font-family: var(--font-body); font-weight: 600; display: flex; align-items: center;">
+                <!-- Language Switcher -->
+                <form action="{% url 'set_language' %}" method="post" style="margin-right: 15px;">
+                    {% csrf_token %}
+                    <input name="next" type="hidden" value="{{ redirect_to }}">
+                    <select name="language" onchange="this.form.submit()"
+                        style="background: transparent; color: var(--color-muted); border: 1px solid rgba(255,255,255,0.1); padding: 5px; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">
+                        {% get_current_language as LANGUAGE_CODE %}
+                        {% get_available_languages as LANGUAGES %}
+                        {% get_language_info_list for LANGUAGES as languages %}
+                        {% for language in languages %}
+                        <option value="{{ language.code }}" {% if language.code == LANGUAGE_CODE %} selected{% endif %}
+                            style="background: #222; color: white;">
+                            {{ language.name_local }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </form>
+
                 {% if user.is_authenticated %}
-                <span style="color: var(--color-muted); margin-right: 15px;">{{ user.username }}</span>
-                <a href="{% url 'logout' %}"
-                    style="color: var(--color-primary); text-decoration: none; border-left: 1px solid var(--color-muted); padding-left: 15px; transition: var(--transition);">Logout</a>
+                <a href="{% url 'profile' %}"
+                    style="color: var(--color-muted); margin-right: 15px; text-decoration: none; transition: var(--transition);">{{user.username}}</a>
+                <a href="{% url 'logout' %}" style="color: var(--color-primary); text-decoration: none; border-left: 1px solid var(--color-muted); padding-left: 15px; transition: var(--transition);">{% trans "Logout" %}</a>
                 {% else %}
-                <a href="{% url 'login' %}"
-                    style="color: var(--color-text); text-decoration: none; margin-right: 20px; transition: var(--transition);">Login</a>
-                <a href="{% url 'register' %}"
-                    style="color: white; text-decoration: none; background: var(--color-primary); padding: 8px 20px; border-radius: var(--border-radius); transition: var(--transition); border: 1px solid var(--color-primary);">Join</a>
+                <a href="{% url 'login' %}" style="color: var(--color-text); text-decoration: none; margin-right: 20px; transition: var(--transition);">{% trans "Login" %}</a>
+                <a href="{% url 'register' %}" style="color: white; text-decoration: none; background: var(--color-primary); padding: 8px 20px; border-radius: var(--border-radius); transition: var(--transition); border: 1px solid var(--color-primary);">{% trans "Join" %}</a>
                 {% endif %}
             </div>
         </div>
@@ -65,9 +82,9 @@
         {% if messages %}
         <div id="messages-container" style="margin-top: 20px; width: 80%; max-width: 600px;">
             {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}"
+            <div class="alert alert-{{message.tags}}"
                 style="background: var(--glass-bg); backdrop-filter: blur(10px); color: white; padding: 15px 20px; margin-bottom: 10px; font-family: var(--font-body); border-radius: 10px; border: 1px solid rgba(123, 47, 247, 0.3); text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
-                {{ message }}
+                {{message}}
             </div>
             {% endfor %}
         </div>

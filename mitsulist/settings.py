@@ -33,6 +33,7 @@ MIDDLEWARE = [
     'csp.middleware.CSPMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -114,6 +115,16 @@ SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0  # 1 year HSTS
 SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
 SECURE_HSTS_PRELOAD = not DEBUG
 
+# Internationalization
+LANGUAGES = [
+    ('en', 'English'),
+    ('uk', 'Ukrainian'),
+]
+
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',
+]
+
 # Secure Cookies (Production)
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
@@ -135,6 +146,7 @@ CONTENT_SECURITY_POLICY = {
         'default-src': ("'self'",),
         'script-src': (
             "'self'",
+            "'unsafe-inline'", # Required for inline scripts
             'https://cdnjs.cloudflare.com',  # Font Awesome
         ),
         'style-src': (

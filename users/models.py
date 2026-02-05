@@ -6,9 +6,36 @@ from django.dispatch import receiver
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     favorites = models.JSONField(default=list, blank=True)
+    
+    # New Fields
+    image = models.ImageField(default='default.jpg', upload_to='profile_pics')
+    bio = models.TextField(blank=True, max_length=500)
+    
+    GENDER_CHOICES = [
+        ('M', 'Male'),
+        ('F', 'Female'),
+        ('O', 'Other'),
+        ('N', 'Prefer not to say'),
+    ]
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default='N')
+    birth_date = models.DateField(null=True, blank=True)
 
     def __str__(self):
         return f'{self.user.username} Profile'
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        
+        # Resize image if too large
+        try:
+            from PIL import Image
+            img = Image.open(self.image.path)
+            if img.height > 300 or img.width > 300:
+                output_size = (300, 300)
+                img.thumbnail(output_size)
+                img.save(self.image.path)
+        except:
+            pass # Handle cases where file might not exist or storage is remote
 
 class SavedSearch(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='saved_searches')
@@ -21,6 +48,34 @@ class SavedSearch(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.name}"
+
+class UserAnimeEntry(models.Model):
+    STATUS_CHOICES = [
+        ('watching', 'Watching'),
+        ('completed', 'Completed'),
+        ('plan_to_watch', 'Plan to Watch'),
+        ('dropped', 'Dropped'),
+        ('on_hold', 'On Hold'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='anime_entries')
+    anime_id = models.IntegerField(help_text="MAL Anime ID")
+    title = models.CharField(max_length=255)
+    image_url = models.URLField(max_length=500, blank=True, null=True)
+    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='plan_to_watch')
+    score = models.IntegerField(default=0, help_text="User score 1-10")
+    episodes_watched = models.IntegerField(default=0)
+    
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'anime_id')
+        ordering = ['-updated_at']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.title} ({self.status})"
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):

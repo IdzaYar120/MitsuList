@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="content-section" style="max-width: 800px; margin: 40px auto; padding: 20px;">
+    <h2 class="mitsulist-header-tag">WRITE A REVIEW</h2>
+
+    <div
+        style="background: var(--glass-bg); padding: 30px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+        <form method="POST">
+            {% csrf_token %}
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; color: var(--color-muted); margin-bottom: 10px;">Select Anime</label>
+                <select name="anime_id" class="mitsulist-input" required style="width: 100%; padding: 12px;">
+                    <option value="" disabled selected>Choose from your list...</option>
+                    {% for anime in user_anime_list %}
+                    <option value="{{ anime.anime_id }}">{{ anime.title }}</option>
+                    {% empty %}
+                    <option disabled>No anime in your list yet</option>
+                    {% endfor %}
+                </select>
+                <small style="display: block; color: var(--color-muted); margin-top: 5px;">
+                    You can only review anime that you have added to your list.
+                </small>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; color: var(--color-muted); margin-bottom: 10px;">Your Review</label>
+                <textarea name="content" class="mitsulist-input" rows="10" required placeholder="Share your thoughts..."
+                    style="width: 100%; padding: 15px;"></textarea>
+            </div>
+
+            <div style="display: flex; gap: 15px;">
+                <button type="submit" class="mitsulist-btn-primary" style="flex: 1;">Post Review</button>
+                <a href="{% url 'profile' %}" class="mitsulist-btn-secondary"
+                    style="text-align: center; text-decoration: none; padding: 12px 20px;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

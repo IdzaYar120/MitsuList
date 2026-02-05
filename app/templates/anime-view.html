@@ -1,20 +1,18 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}{{ anime_data.title }} - MitsuList{% endblock %}
+{% block title %}{{anime_data.title}} - MitsuList{% endblock %}
 
 {% block content %}
 <div id="anime-view-header">
     <div id="title-container">
-        <h1 id="anime-title-main">{{ anime_data.title }}</h1>
-        <h2 id="anime-title-sub">{{ anime_data.title_japanese }}</h2>
-        {% if anime_data.title_english and anime_data.title_english != anime_data.title %}
-        <h3 id="anime-title-eng-sub">{{ anime_data.title_english }}</h3>
-        {% endif %}
+        <h1 id="anime-title-main">{{anime_data.title}}</h1>
+        <h2 id="anime-title-sub">{{anime_data.title_japanese}}</h2>
+        <h3 id="anime-title-eng-sub">{{anime_data.title_english}}</h3>
     </div>
     <div id="genre-tags">
         {% for genre in anime_data.genres %}
-        <span class="mitsulist-tag">{{ genre.name }}</span>
+        <span class="mitsulist-tag">{{genre.name}}</span>
         {% endfor %}
     </div>
 </div>
@@ -23,76 +21,261 @@
     <!-- Left Column: Image and Synopsis -->
     <div class="details-left">
         <div id="main-poster-container">
-            <img src="{{ anime_data.images.jpg.large_image_url }}" id="main-poster" alt="{{ anime_data.title }}">
+            <img src="{{anime_data.images.jpg.large_image_url}}" id="main-poster" alt="{{anime_data.title}}">
         </div>
 
         <div id="synopsis-box">
-            <h2 class="mitsulist-header-tag">SYNOPSIS</h2>
+            <h2 class="mitsulist-header-tag">{% trans "SYNOPSIS" %}</h2>
             <div class="synopsis-text">
-                <p>{{ anime_data.synopsis }}</p>
+                <p>{{anime_data.synopsis}}</p>
             </div>
         </div>
     </div>
 
     <!-- Right Column: Stats and Info -->
     <div class="details-right">
+        <!-- Tracker Card (New) -->
+        <div id="tracker-card"
+            style="background: var(--glass-bg); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
+            <h3 style="color: var(--color-accent); margin: 0 0 15px 0; font-family: var(--font-header);">{% trans "MY PROGRESS" %}
+            </h3>
+
+            {% if user.is_authenticated %}
+            <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+                <button class="status-btn" data-status="watching"
+                    style="flex: 1; border: 1px solid var(--color-primary); background: rgba(123, 47, 247, 0.1); color: white; padding: 8px; border-radius: 6px; cursor: pointer; transition: 0.2s;">{% trans "Watching" %}</button>
+                <button class="status-btn" data-status="completed"
+                    style="flex: 1; border: 1px solid #4ade80; background: rgba(74, 222, 128, 0.1); color: white; padding: 8px; border-radius: 6px; cursor: pointer; transition: 0.2s;">{% trans "Completed" %}</button>
+                <button class="status-btn" data-status="plan_to_watch"
+                    style="flex: 1; border: 1px solid #94a3b8; background: rgba(148, 163, 184, 0.1); color: white; padding: 8px; border-radius: 6px; cursor: pointer; transition: 0.2s;">{% trans "Plan" %}</button>
+                <button class="status-btn" data-status="dropped"
+                    style="flex: 1; border: 1px solid #f87171; background: rgba(248, 113, 113, 0.1); color: white; padding: 8px; border-radius: 6px; cursor: pointer; transition: 0.2s;">{% trans "Dropped" %}</button>
+            </div>
+
+            <div style="width: 100%;">
+                <label
+                    style="display: block; font-size: 0.8rem; color: var(--color-muted); margin-bottom: 10px; text-align: center;">{% trans "RATING" %}</label>
+                <div style="display: flex; gap: 15px; justify-content: center; margin-bottom: 20px;">
+                    <button class="score-btn" data-score="2" title="Appalling"
+                        style="font-size: 1.8rem; background: none; border: none; cursor: pointer; transition: 0.2s; opacity: 0.5;">🤮</button>
+                    <button class="score-btn" data-score="4" title="Bad"
+                        style="font-size: 1.8rem; background: none; border: none; cursor: pointer; transition: 0.2s; opacity: 0.5;">☹️</button>
+                    <button class="score-btn" data-score="6" title="Average"
+                        style="font-size: 1.8rem; background: none; border: none; cursor: pointer; transition: 0.2s; opacity: 0.5;">😐</button>
+                    <button class="score-btn" data-score="8" title="Good"
+                        style="font-size: 1.8rem; background: none; border: none; cursor: pointer; transition: 0.2s; opacity: 0.5;">🙂</button>
+                    <button class="score-btn" data-score="10" title="Masterpiece"
+                        style="font-size: 1.8rem; background: none; border: none; cursor: pointer; transition: 0.2s; opacity: 0.5;">🤩</button>
+                </div>
+                <input type="hidden" id="user-score" value="0">
+                <input type="hidden" id="user-episodes" value="0"> <!-- Hidden to prevent JS errors, always 0 -->
+            </div>
+            <button id="update-tracker-btn"
+                style="width: 100%; margin-top: 15px; background: var(--color-primary); color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600; text-transform: uppercase;">{% trans "Update Status" %}</button>
+            <div id="tracker-msg" style="margin-top: 10px; font-size: 0.9rem; text-align: center; height: 1.2em;"></div>
+
+            <script>
+                document.addEventListener("DOMContentLoaded", () => {
+                    const animeId = "{{anime_data.mal_id}}";
+                    const title = "{{anime_data.title|escapejs}}";
+                    const imageUrl = "{{anime_data.images.jpg.large_image_url}}";
+
+                    const statusBtns = document.querySelectorAll(".status-btn");
+                    const scoreBtns = document.querySelectorAll(".score-btn");
+                    let currentStatus = null;
+
+                    function getCookie(name) {
+                        let cookieValue = null;
+                        if (document.cookie && document.cookie !== '') {
+                            const cookies = document.cookie.split(';');
+                            for (let i = 0; i < cookies.length; i++) {
+                                const cookie = cookies[i].trim();
+                                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                    break;
+                                }
+                            }
+                        }
+                        return cookieValue;
+                    }
+
+                    // Highlight Status Buttons (Watching, Completed, etc.)
+                    function highlightStatusBtn(status) {
+                        statusBtns.forEach(b => {
+                            if (b.dataset.status === status) {
+                                b.style.background = getComputedStyle(b).borderColor; // Use border color as fill
+                                b.style.color = "black";
+                                b.style.fontWeight = "bold";
+                                b.style.boxShadow = "0 0 10px " + getComputedStyle(b).borderColor;
+                            } else {
+                                b.style.background = "rgba(255,255,255,0.05)";
+                                b.style.color = "white";
+                                b.style.fontWeight = "normal";
+                                b.style.boxShadow = "none";
+                            }
+                        });
+                    }
+
+                    // Highlight Score Buttons (Emojis)
+                    function highlightScoreBtn(score) {
+                        scoreBtns.forEach(b => {
+                            const btnScore = parseInt(b.dataset.score);
+                            // Highlight if exact match OR if it falls in the bracket (e.g. 7->8, 9->10)
+                            if (score > 0 && btnScore === Math.ceil(score / 2) * 2) {
+                                b.style.transform = "scale(1.3)";
+                                b.style.opacity = "1";
+                                b.style.filter = "grayscale(0%)";
+                            } else {
+                                b.style.transform = "scale(1)";
+                                b.style.opacity = "0.4";
+                                b.style.filter = "grayscale(100%)";
+                            }
+                        });
+                        document.getElementById("user-score").value = score;
+                    }
+
+                    // Initial Fetch
+                    fetch(`/users/api/anime/status/${animeId}/`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.found) {
+                                currentStatus = data.status;
+                                highlightStatusBtn(data.status);
+                                highlightScoreBtn(data.score);
+                                // Ensure hidden episode input is synced just in case we need it later
+                                document.getElementById("user-episodes").value = data.episodes_watched;
+                            }
+                        });
+
+                    // Event Listeners: Status
+                    statusBtns.forEach(btn => {
+                        btn.addEventListener("click", () => {
+                            currentStatus = btn.dataset.status;
+                            highlightStatusBtn(currentStatus);
+                        });
+                    });
+
+                    // Event Listeners: Score
+                    scoreBtns.forEach(btn => {
+                        btn.addEventListener("click", () => {
+                            const score = btn.dataset.score;
+                            highlightScoreBtn(parseInt(score));
+                        });
+                    });
+
+                    // Submit Update
+                    document.getElementById("update-tracker-btn").addEventListener("click", () => {
+                        if (!currentStatus) {
+                            const msg = document.getElementById("tracker-msg");
+                            msg.style.color = "#fbbf24";
+                            msg.innerText = "Please select a status first.";
+                            return;
+                        }
+
+                        const payload = {
+                            anime_id: animeId,
+                            title: title,
+                            image_url: imageUrl,
+                            status: currentStatus,
+                            score: document.getElementById("user-score").value,
+                            episodes_watched: document.getElementById("user-episodes").value
+                        };
+
+                        const msg = document.getElementById("tracker-msg");
+                        msg.style.color = "var(--color-muted)";
+                        msg.innerText = "Updating...";
+
+                        fetch("/users/api/anime/update/", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRFToken": "{{csrf_token}}"
+                            },
+                            body: JSON.stringify(payload)
+                        })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.status === "success") {
+                                    msg.style.color = "#4ade80";
+                                    msg.innerText = "Success! Progress saved.";
+                                } else {
+                                    msg.style.color = "#f87171";
+                                    msg.innerText = "Error: " + data.message;
+                                }
+                                setTimeout(() => msg.innerText = "", 3000);
+                            })
+                            .catch(err => {
+                                msg.style.color = "#f87171";
+                                msg.innerText = "Network Error";
+                            });
+                    });
+                });
+            </script>
+            {% else %}
+            <div style="text-align: center; padding: 20px; color: var(--color-muted);">
+                <i class="fa-regular fa-bookmark" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                <a href="{% url 'login' %}"
+                    style="color: var(--color-primary); font-weight: bold; text-decoration: none;">Log in</a> to track
+                this anime to your personal list.
+            </div>
+            {% endif %}
+        </div>
         <div class="mitsulist-info-block" id="stats-block">
-            <h2 class="mitsulist-header-tag">STATISTICS</h2>
+            <h2 class="mitsulist-header-tag">{% trans "STATISTICS" %}</h2>
             <div class="info-content">
                 <div class="stat-item">
-                    <span class="stat-label"><i class="fa-solid fa-star"></i> SCORE</span>
-                    <span class="stat-value">{{ anime_data.score }} <small
-                            style="color: var(--color-muted); font-size: 0.8rem;">({{ anime_data.scored_by
-                            }})</small></span>
+                    <span class="stat-label"><i class="fa-solid fa-star"></i> {% trans "SCORE" %}</span>
+                    <span class="stat-value">{{anime_data.score}} <small
+                            style="color: var(--color-muted); font-size: 0.8rem;">({{anime_data.scored_by}})</small></span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-label"><i class="fa-solid fa-heart"></i> POPULARITY</span>
-                    <span class="stat-value">#{{ anime_data.popularity }}</span>
+                    <span class="stat-label"><i class="fa-solid fa-heart"></i> {% trans "POPULARITY" %}</span>
+                    <span class="stat-value">#{{anime_data.popularity}}</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-label"><i class="fa-solid fa-ranking-star"></i> RANKING</span>
-                    <span class="stat-value">#{{ anime_data.rank }}</span>
+                    <span class="stat-label"><i class="fa-solid fa-ranking-star"></i> {% trans "RANKING" %}</span>
+                    <span class="stat-value">#{{anime_data.rank}}</span>
                 </div>
             </div>
         </div>
 
         <div class="mitsulist-info-block" id="info-block">
-            <h2 class="mitsulist-header-tag">INFORMATION</h2>
+            <h2 class="mitsulist-header-tag">{% trans "INFORMATION" %}</h2>
             <div class="info-content">
                 <table class="mitsulist-info-table">
                     <tr>
-                        <td class="stat-label">TYPE</td>
-                        <td class="stat-value" style="font-size: 1rem;">{{ media_type }}</td>
+                        <td class="stat-label">{% trans "TYPE" %}</td>
+                        <td class="stat-value" style="font-size: 1rem;">{{media_type}}</td>
                     </tr>
                     <tr>
-                        <td class="stat-label">RATING</td>
-                        <td class="stat-value" style="font-size: 1rem;">{{ rating }}</td>
+                        <td class="stat-label">{% trans "RATING" %}</td>
+                        <td class="stat-value" style="font-size: 1rem;">{{rating}}</td>
                     </tr>
                     <tr>
-                        <td class="stat-label">EPISODES</td>
-                        <td class="stat-value" style="font-size: 1rem;">{{ episodes }}</td>
+                        <td class="stat-label">{% trans "EPISODES" %}</td>
+                        <td class="stat-value" style="font-size: 1rem;">{{episodes}}</td>
                     </tr>
                     <tr>
-                        <td class="stat-label">DURATION</td>
-                        <td class="stat-value" style="font-size: 1rem;">{{ episode_duration }}</td>
+                        <td class="stat-label">{% trans "DURATION" %}</td>
+                        <td class="stat-value" style="font-size: 1rem;">{{episode_duration}}</td>
                     </tr>
                     <tr>
-                        <td class="stat-label">STATUS</td>
-                        <td class="stat-value" style="font-size: 1rem;">{{ status }}</td>
+                        <td class="stat-label">{% trans "STATUS" %}</td>
+                        <td class="stat-value" style="font-size: 1rem;">{{status}}</td>
                     </tr>
                     <tr>
-                        <td class="stat-label">SOURCE</td>
-                        <td class="stat-value" style="font-size: 1rem;">{{ source }}</td>
+                        <td class="stat-label">{% trans "SOURCE" %}</td>
+                        <td class="stat-value" style="font-size: 1rem;">{{source}}</td>
                     </tr>
                     <tr>
-                        <td class="stat-label">SEASON</td>
-                        <td class="stat-value" style="font-size: 1rem;">{{ season }}</td>
+                        <td class="stat-label">{% trans "SEASON" %}</td>
+                        <td class="stat-value" style="font-size: 1rem;">{{season}}</td>
                     </tr>
                     <tr>
-                        <td class="stat-label">STUDIOS</td>
+                        <td class="stat-label">{% trans "STUDIOS" %}</td>
                         <td class="stat-value" style="font-size: 1rem;">
                             {% for studio in anime_data.studios %}
-                            {{ studio.name }}{% if not forloop.last %}, {% endif %}
+                            {{studio.name}}{% if not forloop.last %}, {% endif %}
                             {% endfor %}
                         </td>
                     </tr>
@@ -101,7 +284,7 @@
         </div>
 
         <div class="mitsulist-info-block" id="relations-block">
-            <h2 class="mitsulist-header-tag">RELATIONS</h2>
+            <h2 class="mitsulist-header-tag">{% trans "RELATIONS" %}</h2>
             <div class="info-content">
                 {% if relation_length == 0 %}
                 <p style="color: var(--color-muted);">N/A</p>
@@ -111,11 +294,9 @@
                     {% for entry in relation.entry %}
                     <li style="margin-bottom: 12px; display: flex; align-items: center; gap: 10px;">
                         <span
-                            style="background: rgba(123, 47, 247, 0.2); color: var(--color-accent); font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; text-transform: uppercase;">{{
-                            relation.relation }}</span>
-                        <a href="id={{ entry.mal_id }}" class="mitsulist-link"
-                            style="color: var(--color-text); text-decoration: none; font-size: 0.95rem; transition: var(--transition);">{{
-                            entry.name }}</a>
+                            style="background: rgba(123, 47, 247, 0.2); color: var(--color-accent); font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; text-transform: uppercase;">{{relation.relation}}</span>
+                        <a href="id={{entry.mal_id}}" class="mitsulist-link"
+                            style="color: var(--color-text); text-decoration: none; font-size: 0.95rem; transition: var(--transition);">{{entry.name}}</a>
                     </li>
                     {% endfor %}
                     {% endfor %}
