@@ -32,15 +32,7 @@ def list_saved_searches(request):
 
 @login_required
 def profile(request):
-    from django.core.paginator import Paginator
-    
-    anime_entries_list = UserAnimeEntry.objects.filter(user=request.user)
-    paginator = Paginator(anime_entries_list, 24)  # 24 items per page
-    
-    page_number = request.GET.get('page')
-    anime_entries = paginator.get_page(page_number)
-    
-    return render(request, 'users/profile.html', {'anime_entries': anime_entries})
+    return redirect('public_profile', username=request.user.username)
 
 @login_required
 def edit_profile(request):
@@ -169,3 +161,72 @@ def logout_view(request):
     logout(request)
     messages.info(request, "You have successfully logged out.")
     return redirect("home")
+
+@login_required
+def follow_user(request, username):
+    from django.shortcuts import get_object_or_404
+    from django.contrib.auth.models import User
+    from .models import Follow
+    
+    target_user = get_object_or_404(User, username=username)
+    
+    if target_user != request.user:
+        Follow.objects.get_or_create(user=request.user, following=target_user)
+        # messages.success(request, f"You are now following {target_user.username}")
+        
+    return redirect('public_profile', username=username)
+
+@login_required
+def unfollow_user(request, username):
+    from django.shortcuts import get_object_or_404
+    from django.contrib.auth.models import User
+    from .models import Follow
+    
+    target_user = get_object_or_404(User, username=username)
+    Follow.objects.filter(user=request.user, following=target_user).delete()
+    # messages.info(request, f"You have unfollowed {target_user.username}")
+        
+    return redirect('public_profile', username=username)
+
+def public_profile(request, username):
+    from django.shortcuts import get_object_or_404
+    from django.contrib.auth.models import User
+    from .models import Follow
+    from django.core.paginator import Paginator
+    
+    viewed_user = get_object_or_404(User, username=username)
+    
+    # Get anime list
+    anime_entries_list = UserAnimeEntry.objects.filter(user=viewed_user)
+    paginator = Paginator(anime_entries_list, 24)
+    page_number = request.GET.get('page')
+    anime_entries = paginator.get_page(page_number)
+    
+    # Follow stats
+    followers_count = Follow.objects.filter(following=viewed_user).count()
+    following_count = Follow.objects.filter(user=viewed_user).count()
+    
+    is_following = False
+    shared_anime = []
+    
+    if request.user.is_authenticated:
+        if request.user != viewed_user:
+            is_following = Follow.objects.filter(user=request.user, following=viewed_user).exists()
+            
+            # Shared Anime Logic
+            viewed_user_anime_ids = UserAnimeEntry.objects.filter(user=viewed_user).values_list('anime_id', flat=True)
+            shared_anime = UserAnimeEntry.objects.filter(
+                user=request.user, 
+                anime_id__in=viewed_user_anime_ids
+            ).select_related('user')[:5] # Limit to 5 for preview
+    
+    context = {
+        'viewed_user': viewed_user,
+        'anime_entries': anime_entries,
+        'followers_count': followers_count,
+        'following_count': following_count,
+        'is_following': is_following,
+        'is_own_profile': request.user == viewed_user,
+        'shared_anime': shared_anime,
+    }
+    return render(request, 'users/profile.html', context)

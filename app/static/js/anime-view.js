@@ -72,55 +72,22 @@ function animeContainer(str) {
     container.appendChild(link);
 }
 
+// Search logic moved to global search.js
+/*
 searchBtn.addEventListener("click", () => {
-    container.style.display = "flex";
-    container.style.flexDirection = "column";
-
-    if (inputBox.value === "") {
-        container.style.display = "none";
-        return false;
-    }
-    container.innerHTML = "";
-    fetch(`/api-proxy/${inputBox.value}`)
-    .then(handleResponse)
-    .then(handleData)
-    .catch(handleError)
-
-    function handleResponse(response) {
-        return response.json().then(function (json) {
-            return response.ok ? json : Promise.reject(json);
-        });
-    }
-
-    function handleData(data) {
-        // console.log(data.data);
-        for (const anime of data.data) {
-            if (anime.length === 1) {
-                container.style.height = "241px";
-                animeContainer(anime);
-            }
-            else {
-                container.style.height = "486px";
-                animeContainer(anime);
-            }
-        }
-    }
-
-    function handleError(error) {
-        alert('Error, check console');
-        console.error(error);
-    }
+    // ... logic removed ...
 });
+*/
 
 const carouselLeftBtn = document.getElementById("carousel-left-button");
 const carouselRightBtn = document.getElementById("carousel-right-button");
 const imageContainer = document.getElementById("image-container");
 
-carouselLeftBtn.addEventListener("click", function() {
+carouselLeftBtn.addEventListener("click", function () {
     imageContainer.scrollLeft -= 400;
 });
 
-carouselRightBtn.addEventListener("click", function() {
+carouselRightBtn.addEventListener("click", function () {
     imageContainer.scrollLeft += 400;
 });
 

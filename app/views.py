@@ -59,6 +59,25 @@ async def index(request):
             from .services import fetch_anime_recommendations
             rec_key = f'rec_{source_id}'
             recommendations_data = await fetch_anime_recommendations(rec_key, source_id)
+            
+        # Activity Feed (Social)
+        
+        # Get IDs of users we are following
+        # We use a subquery or list comprehension. Since this is async, we wrap in sync_to_async
+        def get_activity_feed_sync(current_user):
+            # Get users we follow
+            following_ids = current_user.following.values_list('following_id', flat=True)
+            
+            # Get entries from these users, ordered by update time
+            return list(
+                UserAnimeEntry.objects.filter(user_id__in=following_ids)
+                .select_related('user', 'user__profile')
+                .order_by('-updated_at')[:12]
+            )
+            
+        activity_feed = await sync_to_async(get_activity_feed_sync)(request.user)
+    else:
+        activity_feed = []
         
     context = {
         'news_items': news_items,
@@ -68,6 +87,7 @@ async def index(request):
         'anime_movie': anime_movie,
         'recommendations_data': recommendations_data,
         'source_anime_title': source_anime_title,
+        'activity_feed': activity_feed,
     }
     return render(request, 'index.html', context)
 

@@ -338,4 +338,57 @@ msgid "of"
 msgstr "з"
 
 
+#: Social Features
+msgid "FRIEND ACTIVITY"
+msgstr "АКТИВНІСТЬ ДРУЗІВ"
+
+msgid "started watching"
+msgstr "почав дивитись"
+
+msgid "completed"
+msgstr "завершив"
+
+msgid "plans to watch"
+msgstr "планує подивитись"
+
+msgid "dropped"
+msgstr "кинув"
+
+msgid "updated"
+msgstr "оновив"
+
+msgid "Rated"
+msgstr "Оцінив"
+
+msgid "ago"
+msgstr "тому"
+
+msgid "Followers"
+msgstr "Читачів"
+
+msgid "Following"
+msgstr "Читає"
+
+msgid "Member since"
+msgstr "З нами з"
+
+msgid "Follow"
+msgstr "Стежити"
+
+msgid "Unfollow"
+msgstr "Не стежити"
+
+msgid "Edit"
+msgstr "Редагувати"
+
+msgid "Write Review"
+msgstr "Написати відгук"
+
+msgid "SHARED ANIME"
+msgstr "СПІЛЬНІ АНІМЕ"
+
+msgid "You both watched"
+msgstr "Ви обоє дивились"
+
+
 

@@ -103,35 +103,9 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-    // 3. Perform Search
-    const performSearch = () => {
-        const params = getSearchParams();
-        if (!params.q && !params.genres && !params.year && !params.type) return;
-
-        resultsWrapper.style.display = "block";
-        container.innerHTML = "<div style='color: white; grid-column: 1/-1; text-align: center;'>Searching...</div>";
-        window.scrollTo({ top: resultsWrapper.offsetTop - 100, behavior: 'smooth' });
-
-        const queryStr = new URLSearchParams({
-            genres: params.genres,
-            year: params.year,
-            type: params.type
-        }).toString();
-
-        fetch(`/api-proxy/?q=${params.q}&${queryStr}`)
-            .then(res => res.json())
-            .then(data => {
-                container.innerHTML = "";
-                if (!data.data || data.data.length === 0) {
-                    container.innerHTML = "<div style='color: white; grid-column: 1/-1; text-align: center;'>Nothing found.</div>";
-                    return;
-                }
-                data.data.forEach(anime => animeContainer(anime));
-            });
-    };
-
-    searchBtn.addEventListener("click", performSearch);
-    applyBtn.addEventListener("click", performSearch);
+    // 3. Perform Search (Moved to search.js for global access)
+    // searchBtn.addEventListener("click", performSearch);
+    // applyBtn.addEventListener("click", performSearch);
 
     if (closeSearch) {
         closeSearch.addEventListener("click", () => {
@@ -139,6 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // clearBtn logic remains
     clearBtn.addEventListener("click", () => {
         genreSelect.value = "";
         yearInput.value = "";

@@ -5,6 +5,48 @@
 
 {% block content %}
 <div id="homepage-div">
+    
+    {% if user.is_authenticated and activity_feed %}
+    <div style="margin-bottom: 40px; width: 90%; max-width: 1200px; margin-left: auto; margin-right: auto; padding-top: 20px;">
+        <h1 style="font-family: var(--font-header); font-size: 1.5rem; color: white; display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+            <i class="fa-solid fa-user-group" style="color: var(--color-accent);"></i> {% trans "FRIEND ACTIVITY" %}
+        </h1>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px;">
+            {% for activity in activity_feed %}
+            <div style="background: var(--glass-bg); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); display: flex; gap: 15px; align-items: center;">
+                 <!-- Avatar -->
+                 <a href="{% url 'public_profile' activity.user.username %}" style="display: block; width: 40px; height: 40px; border-radius: 50%; overflow: hidden; flex-shrink: 0; border: 2px solid var(--color-primary);">
+                    <img src="{{ activity.user.profile.image.url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                 </a>
+                 <!-- Info -->
+                 <div style="flex-grow: 1; overflow: hidden;">
+                     <div style="font-size: 0.9rem; margin-bottom: 2px;">
+                        <a href="{% url 'public_profile' activity.user.username %}" style="color: white; font-weight: bold; text-decoration: none;">{{ activity.user.username }}</a>
+                        <span style="color: var(--color-muted); font-size: 0.8rem;">
+                            {% if activity.status == 'watching' %}{% trans "started watching" %}
+                            {% elif activity.status == 'completed' %}{% trans "completed" %}
+                            {% elif activity.status == 'plan_to_watch' %}{% trans "plans to watch" %}
+                            {% elif activity.status == 'dropped' %}{% trans "dropped" %}
+                            {% else %}{% trans "updated" %}{% endif %}
+                        </span>
+                     </div>
+                     <a href="/anime/id={{activity.anime_id}}" style="color: var(--color-primary); font-size: 0.85rem; text-decoration: none; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">
+                        {{ activity.title }}
+                     </a>
+                     <div style="font-size: 0.75rem; color: var(--color-muted); margin-top: 2px;">
+                        {% if activity.score > 0 %}{% trans "Rated" %} <span style="color: gold;"><i class="fa-solid fa-star"></i> {{ activity.score }}</span> &bull; {% endif %}
+                        {{ activity.updated_at|timesince }} {% trans "ago" %}
+                     </div>
+                 </div>
+                 <!-- Anime Image (Optional, small) -->
+                 <a href="/anime/id={{activity.anime_id}}" style="display: block; width: 30px; height: 45px; border-radius: 4px; overflow: hidden; flex-shrink: 0;">
+                    <img src="{{ activity.image_url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                 </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
     <!-- Advanced Filters Panel -->
     <div id="advanced-filters-panel" class="glass-panel"
         style="display: none; margin: 20px auto; width: 90%; max-width: 1200px; padding: 30px; border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.05); background: var(--glass-bg); backdrop-filter: blur(10px);">
