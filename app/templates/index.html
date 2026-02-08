@@ -114,6 +114,16 @@
     </div>
 
     <!-- News Banner -->
+    {% if news_items %}
+    <div id="news-container" style="width: 90%; margin: 20px auto;">
+        {% for news in news_items %}
+        <div class="news-item" style="background: var(--glass-bg); padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.1);">
+            <h2 style="margin-top: 0;">{{ news.title }}</h2>
+            <p>{{ news.description }}</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
 
     <div class="header-and-buttons">
         <h1 id="currently-airing-header"><i class="fa-solid fa-bolt"

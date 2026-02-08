@@ -12,5 +12,12 @@ services:
       - postgres_data:/var/lib/postgresql/data
     restart: always
 
+  redis:
+    image: redis:alpine
+    container_name: mitsulist_redis
+    ports:
+      - "6379:6379"
+    restart: always
+
 volumes:
   postgres_data:

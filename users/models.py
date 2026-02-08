@@ -24,22 +24,35 @@ class Profile(models.Model):
         return f'{self.user.username} Profile'
 
     def save(self, *args, **kwargs):
+        # Check if this is an existing instance to determine if image changed
+        process_image = False
+        if self.pk:
+            try:
+                old_profile = Profile.objects.get(pk=self.pk)
+                if old_profile.image != self.image:
+                    process_image = True
+            except Profile.DoesNotExist:
+                process_image = True # Should be created
+        else:
+            process_image = True # New instance
+
         super().save(*args, **kwargs)
         
-        # Resize image if too large
-        try:
-            from PIL import Image
-            img = Image.open(self.image.path)
-            if img.height > 300 or img.width > 300:
-                output_size = (300, 300)
-                img.thumbnail(output_size)
-                img.save(self.image.path)
-        except FileNotFoundError:
-            pass  # Image file doesn't exist yet (e.g., during initial migration)
-        except Exception as e:
-            import logging
-            logger = logging.getLogger(__name__)
-            logger.warning(f"Could not resize profile image: {e}")
+        if process_image and self.image:
+            # Resize image if too large
+            try:
+                from PIL import Image
+                img = Image.open(self.image.path)
+                if img.height > 300 or img.width > 300:
+                    output_size = (300, 300)
+                    img.thumbnail(output_size)
+                    img.save(self.image.path)
+            except FileNotFoundError:
+                pass  # Image file doesn't exist yet (e.g., during initial migration)
+            except Exception as e:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning(f"Could not resize profile image: {e}")
 
 class SavedSearch(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='saved_searches')
