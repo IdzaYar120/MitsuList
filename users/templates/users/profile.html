@@ -82,7 +82,7 @@
         </p>
         <div style="display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: thin;">
             {% for entry in shared_anime %}
-            <a href="/anime/id={{entry.anime_id}}" title="{{entry.title}}" 
+            <a href="/anime/{{entry.anime_id}}/" title="{{entry.title}}" 
                style="flex-shrink: 0; width: 60px; height: 90px; border-radius: 8px; overflow: hidden; position: relative; border: 1px solid rgba(255,255,255,0.2);">
                 <img src="{{entry.image_url}}" style="width: 100%; height: 100%; object-fit: cover;">
             </a>
@@ -120,7 +120,7 @@
                 {% for entry in anime_entries %}
                 <div class="anime-card entry-item" data-status="{{entry.status}}"
                     style="background: rgba(0,0,0,0.2); border-radius: 12px; overflow: hidden; transition: 0.2s;">
-                    <a href="/anime/id={{entry.anime_id}}" style="text-decoration: none; color: white; display: block;">
+                    <a href="/anime/{{entry.anime_id}}/" style="text-decoration: none; color: white; display: block;">
                         <div style="height: 280px; overflow: hidden;">
                             <img src="{{entry.image_url}}"
                                 style="width: 100%; height: 100%; object-fit: cover; transition: 0.3s;"

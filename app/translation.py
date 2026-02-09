@@ -154,3 +154,24 @@ def translate_text_batch(texts, target_lang='uk'):
     
     # 3. Reconstruct ordered list
     return [results.get(i, texts[i]) for i in range(len(texts))]
+
+
+def translate_anime_data(anime_data, target_lang='uk'):
+    """
+    Translates common fields in the anime data dictionary.
+    """
+    if not anime_data or target_lang != 'uk':
+        return anime_data
+
+    # Fields to translate
+    anime_data['synopsis'] = translate_text(anime_data.get('synopsis'), target_lang)
+    anime_data['status'] = translate_text(anime_data.get('status'), target_lang)
+    anime_data['type'] = translate_text(anime_data.get('type'), target_lang)
+    anime_data['source'] = translate_text(anime_data.get('source'), target_lang)
+
+    # Translate Genres
+    if 'genres' in anime_data:
+        for genre in anime_data['genres']:
+            genre['name'] = translate_text(genre.get('name'), target_lang)
+            
+    return anime_data

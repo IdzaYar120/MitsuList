@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Helper: Render Result Card
     function renderAnimeCard(anime) {
         const link = document.createElement("a");
-        link.href = `/anime/id=${anime.mal_id}`; // Absolute path fix
+        link.href = `/anime/${anime.mal_id}/`; // Absolute path fix
         link.classList.add("anime-card-links");
 
         const card = `
@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (params.year) queryParams.append('year', params.year);
         if (params.type) queryParams.append('type', params.type);
 
-        fetch(`/api-proxy/?${queryParams.toString()}`)
+        fetch(`/api/search/?${queryParams.toString()}`)
             .then(res => res.json())
             .then(data => {
                 if (container) {

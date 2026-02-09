@@ -30,7 +30,7 @@
                             {% else %}{% trans "updated" %}{% endif %}
                         </span>
                      </div>
-                     <a href="/anime/id={{activity.anime_id}}" style="color: var(--color-primary); font-size: 0.85rem; text-decoration: none; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">
+                     <a href="/anime/{{activity.anime_id}}/" style="color: var(--color-primary); font-size: 0.85rem; text-decoration: none; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">
                         {{ activity.title }}
                      </a>
                      <div style="font-size: 0.75rem; color: var(--color-muted); margin-top: 2px;">
@@ -39,7 +39,7 @@
                      </div>
                  </div>
                  <!-- Anime Image (Optional, small) -->
-                 <a href="/anime/id={{activity.anime_id}}" style="display: block; width: 30px; height: 45px; border-radius: 4px; overflow: hidden; flex-shrink: 0;">
+                 <a href="/anime/{{activity.anime_id}}/" style="display: block; width: 30px; height: 45px; border-radius: 4px; overflow: hidden; flex-shrink: 0;">
                     <img src="{{ activity.image_url }}" style="width: 100%; height: 100%; object-fit: cover;">
                  </a>
             </div>
@@ -135,7 +135,7 @@
     </div>
     <div id="airing-now-container">
         {% for airing_now_anime in airing_now_data.data %}
-        <a href="anime/id={{airing_now_anime.mal_id}}" class="anime-card-links">
+        <a href="anime/{{airing_now_anime.mal_id}}/" class="anime-card-links">
             <div class="anime-cards">
                 <img src="{{airing_now_anime.images.jpg.large_image_url}}" class="image" loading="lazy">
                 <p class="anime-title">{{airing_now_anime.title}}</p>
@@ -157,7 +157,7 @@
     </div>
     <div id="popular-anime-container">
         {% for popular_anime in popular_anime_data.data %}
-        <a href="anime/id={{popular_anime.mal_id}}" class="anime-card-links">
+        <a href="anime/{{popular_anime.mal_id}}/" class="anime-card-links">
             <div class="anime-cards">
                 <img src="{{popular_anime.images.jpg.large_image_url}}" class="image" loading="lazy">
                 <p class="anime-title">{{popular_anime.title}}</p>
@@ -178,7 +178,7 @@
     </div>
     <div id="top-anime-container">
         {% for top_anime in top_anime_data.data %}
-        <a href="anime/id={{top_anime.mal_id}}" class="anime-card-links">
+        <a href="anime/{{top_anime.mal_id}}/" class="anime-card-links">
             <div class="anime-cards">
                 <img src="{{top_anime.images.jpg.large_image_url}}" class="image" loading="lazy">
                 <p class="anime-title">{{top_anime.title}}</p>
@@ -204,7 +204,7 @@
 <div id="recommendations-container"
     style="display: flex; overflow-x: auto; padding: 20px 5%; gap: 30px; scrollbar-width: none; -ms-overflow-style: none; scroll-behavior: smooth;">
     {% for rec in recommendations_data.data %}
-    <a href="anime/id={{rec.entry.mal_id}}" class="anime-card-links">
+    <a href="anime/{{rec.entry.mal_id}}/" class="anime-card-links">
         <div class="anime-cards">
             <img src="{{rec.entry.images.jpg.large_image_url}}" class="image" loading="lazy">
             <p class="anime-title">{{rec.entry.title}}</p>
@@ -233,7 +233,7 @@
 </div>
 <div id="anime-movie-container">
     {% for movie in anime_movie.data %}
-    <a href="anime/id={{movie.mal_id}}" class="anime-card-links">
+    <a href="anime/{{movie.mal_id}}/" class="anime-card-links">
         <div class="anime-cards">
             <img src="{{movie.images.jpg.large_image_url}}" class="image" loading="lazy">
             <p class="anime-title">{{movie.title}}</p>

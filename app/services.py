@@ -70,3 +70,20 @@ async def fetch_anime_recommendations(cache_key, anime_id, timeout=86400):
     """
     url = f"https://api.jikan.moe/v4/anime/{anime_id}/recommendations"
     return await fetch_jikan_data(cache_key, url, timeout)
+
+def get_activity_feed(user):
+    """
+    Fetch activity feed for a user (actions of people they follow).
+    """
+    from users.models import UserAnimeEntry
+    
+    # Get users we follow
+    # This triggers a DB call, so this function should be run in a thread/sync_to_async
+    following_ids = user.following.values_list('following_id', flat=True)
+    
+    # Get entries from these users, ordered by update time
+    return list(
+        UserAnimeEntry.objects.filter(user_id__in=following_ids)
+        .select_related('user', 'user__profile')
+        .order_by('-updated_at')[:12]
+    )
