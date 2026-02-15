@@ -44,3 +44,14 @@ class TranslationCache(models.Model):
     
     def __str__(self):
         return f'{self.source_text_hash[:8]}... -> {self.target_lang}'
+
+class AnimeSchedule(models.Model):
+    """
+    Stores daily anime release schedules to reduce API usage.
+    """
+    day = models.CharField(max_length=20, unique=True, db_index=True) # monday, tuesday, etc.
+    data = models.JSONField(default=list)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.day} schedule"

@@ -392,3 +392,52 @@ msgstr "Ви обоє дивились"
 
 
 
+
+#: Import Page
+msgid "Import from MyAnimeList"
+msgstr "Імпорт з MyAnimeList"
+
+msgid "Transfer your anime library instantly."
+msgstr "Перенесіть вашу аніме бібліотеку миттєво."
+
+msgid "We support standard XML exports from MyAnimeList."
+msgstr "Ми підтримуємо стандартний XML експорт з MyAnimeList."
+
+msgid "How to get your file:"
+msgstr "Як отримати файл:"
+
+msgid "Go to"
+msgstr "Перейдіть на"
+
+msgid "MAL Export Page"
+msgstr "Сторінку експорту MAL"
+
+msgid "Select 'Export Anime List' and download the file."
+msgstr "Виберіть 'Export Anime List' та завантажте файл."
+
+msgid "Unzip/Extract the downloaded"
+msgstr "Розпакуйте завантажений"
+
+msgid "file."
+msgstr "файл."
+
+msgid "Upload the"
+msgstr "Завантажте"
+
+msgid "file below."
+msgstr "файл нижче."
+
+msgid "Select XML File"
+msgstr "Виберіть XML файл"
+
+msgid "Start Import"
+msgstr "Почати Імпорт"
+
+msgid "Cancel"
+msgstr "Скасувати"
+
+msgid "Import List"
+msgstr "Імпортувати список"
+
+msgid "Import"
+msgstr "Імпорт"

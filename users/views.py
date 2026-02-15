@@ -9,6 +9,7 @@ from .models import SavedSearch, UserAnimeEntry
 from app.models import Review
 from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm
 from app.forms import ReviewForm
+import datetime
 
 @login_required
 def save_search(request):
@@ -230,3 +231,58 @@ def public_profile(request, username):
         'shared_anime': shared_anime,
     }
     return render(request, 'users/profile.html', context)
+@login_required
+def import_list(request):
+    if request.method == 'POST':
+        xml_file = request.FILES.get('xml_file')
+        if not xml_file or not xml_file.name.endswith('.xml'):
+            messages.error(request, 'Please upload a valid .xml file.')
+            return redirect('import_list')
+        
+        try:
+            import xml.etree.ElementTree as ET
+            tree = ET.parse(xml_file)
+            root = tree.getroot()
+            
+            # MAL Status to MitsuList Status Mapping
+            status_map = {
+                'Watching': 'watching',
+                'Completed': 'completed',
+                'On-Hold': 'on_hold',
+                'Dropped': 'dropped',
+                'Plan to Watch': 'plan_to_watch'
+            }
+            
+            count = 0
+            for anime in root.findall('anime'):
+                mal_id = int(anime.find('series_animedb_id').text)
+                title = anime.find('series_title').text
+                my_status = anime.find('my_status').text
+                my_score = int(anime.find('my_score').text)
+                my_episodes = int(anime.find('my_watched_episodes').text)
+                
+                # Default status if unknown
+                db_status = status_map.get(my_status, 'plan_to_watch')
+                
+                # Update or Create
+                UserAnimeEntry.objects.update_or_create(
+                    user=request.user,
+                    anime_id=mal_id,
+                    defaults={
+                        'title': title, # We save title to avoid API lookups for simple lists
+                        'status': db_status,
+                        'score': my_score,
+                        'episodes_watched': my_episodes,
+                        'updated_at': datetime.datetime.now()
+                    }
+                )
+                count += 1
+                
+            messages.success(request, f'Successfully imported {count} anime entries!')
+            return redirect('profile')
+            
+        except Exception as e:
+            messages.error(request, f'Error parsing file: {e}')
+            return redirect('import_list')
+            
+    return render(request, 'users/import.html')

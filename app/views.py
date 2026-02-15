@@ -6,12 +6,13 @@ import math
 import time
 from django.core.cache import cache
 from django_ratelimit.decorators import ratelimit
-from .services import fetch_jikan_data
+from .services import fetch_jikan_data, JIKAN_API_ENDPOINTS
 
 from .models import News, Review
 from users.models import UserAnimeEntry
 from .forms import ReviewForm
 import random
+import datetime
 from django.utils.translation import get_language
 from .translation import translate_text
 
@@ -28,10 +29,10 @@ async def index(request):
 
     # Fetch API Data using new async helper
     airing_now_data, top_anime_data, popular_anime_data, anime_movie = await asyncio.gather(
-        fetch_jikan_data('airing_now', 'https://api.jikan.moe/v4/seasons/now?limit=24'),
-        fetch_jikan_data('top_anime', 'https://api.jikan.moe/v4/top/anime?limit=24'),
-        fetch_jikan_data('popular_anime', 'https://api.jikan.moe/v4/top/anime?filter=bypopularity&limit=24'),
-        fetch_jikan_data('anime_movie', 'https://api.jikan.moe/v4/top/anime?type=movie&limit=24')
+        fetch_jikan_data('airing_now', JIKAN_API_ENDPOINTS['airing_now']),
+        fetch_jikan_data('top_anime', JIKAN_API_ENDPOINTS['top_anime']),
+        fetch_jikan_data('popular_anime', JIKAN_API_ENDPOINTS['popular_anime']),
+        fetch_jikan_data('anime_movie', JIKAN_API_ENDPOINTS['anime_movie'])
     )
 
     # Title translation disabled - anime names should stay in original language
@@ -84,7 +85,7 @@ async def anime_detail(request, anime_id):
     # Fix for SynchronousOnlyOperation in template
     request.user = await request.auser()
     cache_key = f'anime_detail_{anime_id}'
-    raw_data = await fetch_jikan_data(cache_key, f'https://api.jikan.moe/v4/anime/{anime_id}/full', timeout=600)
+    raw_data = await fetch_jikan_data(cache_key, f"{JIKAN_API_ENDPOINTS['anime_base']}/{anime_id}/full", timeout=600)
     
     anime_data = raw_data.get('data')
     if not anime_data or not isinstance(anime_data, dict):
@@ -166,7 +167,7 @@ async def api_proxy_search(request):
         return JsonResponse({'data': []})
 
     # Build Jikan Search URL
-    base_url = f'https://api.jikan.moe/v4/anime?q={search_query}&limit=20'
+    base_url = f"{JIKAN_API_ENDPOINTS['anime_base']}?q={search_query}&limit=20"
     
     if genres:
         base_url += f'&genres={genres}'
@@ -182,8 +183,55 @@ async def api_proxy_search(request):
 async def get_genres(request):
     from django.http import JsonResponse
     cache_key = 'anime_genres_list'
-    data = await fetch_jikan_data(cache_key, 'https://api.jikan.moe/v4/genres/anime', timeout=86400)
+    data = await fetch_jikan_data(cache_key, JIKAN_API_ENDPOINTS['genres'], timeout=86400)
     return JsonResponse(data)
+
+async def calendar_view(request):
+    """
+    Display anime release calendar.
+    """
+    # Fix for SynchronousOnlyOperation
+    request.user = await request.auser()
+    
+    from .services import get_daily_schedule
+    
+    days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+    
+    # Fetch schedule for each day in parallel
+    # Now using get_daily_schedule which handles DB caching
+    tasks = [get_daily_schedule(day) for day in days]
+    day_results = await asyncio.gather(*tasks)
+    
+    today = datetime.datetime.now().strftime('%A').lower()
+    
+    # Highlight User's Anime
+    user_watching_ids = set()
+    if request.user.is_authenticated:
+        from asgiref.sync import sync_to_async
+        get_ids = sync_to_async(lambda: list(
+            UserAnimeEntry.objects.filter(
+                user=request.user, 
+                status='watching'
+            ).values_list('anime_id', flat=True)
+        ))
+        user_watching_ids = set(await get_ids())
+
+    calendar_data = [] # List of (day_name, anime_list) tuples
+    for i, day in enumerate(days):
+        anime_list = day_results[i].get('data', [])
+        
+        # Mark anime as 'following'
+        for anime in anime_list:
+             if anime.get('mal_id') in user_watching_ids:
+                anime['is_following'] = True
+                
+        calendar_data.append((day, anime_list))
+                
+    context = {
+        'calendar_data': calendar_data,
+        'today': today
+    }
+    return render(request, 'calendar.html', context)
 
         
     
