@@ -441,3 +441,7 @@ msgstr "Імпортувати список"
 
 msgid "Import"
 msgstr "Імпорт"
+
+#: Profile - Recent Activity
+msgid "RECENT ACTIVITY"
+msgstr "ОСТАННЯ АКТИВНІСТЬ"

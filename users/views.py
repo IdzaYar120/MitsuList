@@ -208,7 +208,37 @@ def public_profile(request, username):
     following_count = Follow.objects.filter(user=viewed_user).count()
     
     is_following = False
+    is_following = False
     shared_anime = []
+    
+    # --- Statistics Calculation ---
+    from django.db.models import Sum, Avg
+    
+    stats = {
+        'total_entries': anime_entries_list.count(),
+        'watching': anime_entries_list.filter(status='watching').count(),
+        'completed': anime_entries_list.filter(status='completed').count(),
+        'on_hold': anime_entries_list.filter(status='on_hold').count(),
+        'dropped': anime_entries_list.filter(status='dropped').count(),
+        'plan_to_watch': anime_entries_list.filter(status='plan_to_watch').count(),
+        'total_episodes': anime_entries_list.aggregate(Sum('episodes_watched'))['episodes_watched__sum'] or 0,
+        'mean_score': round(anime_entries_list.exclude(score=0).aggregate(Avg('score'))['score__avg'] or 0.0, 1),
+    }
+    
+    # Calculate Days Watched (Approximation: 24 min per episode)
+    minutes_watched = stats['total_episodes'] * 24
+    stats['days_watched'] = round(minutes_watched / 60 / 24, 1)
+    
+    # --- Badges ---
+    badges = []
+    if stats['total_entries'] >= 10:
+        badges.append({'name': 'Newbie', 'icon': 'fa-seedling', 'color': '#2ecc71', 'desc': 'Watched 10+ anime'})
+    if stats['total_entries'] >= 50:
+        badges.append({'name': 'Otaku', 'icon': 'fa-glasses', 'color': '#3498db', 'desc': 'Watched 50+ anime'})
+    if stats['total_entries'] >= 100:
+        badges.append({'name': 'Veteran', 'icon': 'fa-crown', 'color': '#f1c40f', 'desc': 'Watched 100+ anime'})
+    if stats['completed'] >= 50:
+        badges.append({'name': 'Completionist', 'icon': 'fa-check-double', 'color': '#9b59b6', 'desc': 'Completed 50+ anime'})
     
     if request.user.is_authenticated:
         if request.user != viewed_user:
@@ -220,6 +250,9 @@ def public_profile(request, username):
                 user=request.user, 
                 anime_id__in=viewed_user_anime_ids
             ).select_related('user')[:5] # Limit to 5 for preview
+            
+    # --- Activity History ---
+    recent_updates = anime_entries_list.order_by('-updated_at')[:5]
     
     context = {
         'viewed_user': viewed_user,
@@ -229,6 +262,9 @@ def public_profile(request, username):
         'is_following': is_following,
         'is_own_profile': request.user == viewed_user,
         'shared_anime': shared_anime,
+        'stats': stats,
+        'badges': badges,
+        'recent_updates': recent_updates,
     }
     return render(request, 'users/profile.html', context)
 @login_required
