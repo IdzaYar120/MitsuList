@@ -20,9 +20,35 @@ class Review(models.Model):
     anime_id = models.IntegerField()
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f'{self.user.username} - {self.anime_id}'
+
+    @property
+    def like_count(self):
+        return self.likes.count()
+
+class ReviewLike(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    review = models.ForeignKey(Review, related_name='likes', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'review')
+
+    def __str__(self):
+        return f"{self.user.username} likes review {self.review.id}"
+
+class ReviewComment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    review = models.ForeignKey(Review, related_name='comments', on_delete=models.CASCADE)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Comment by {self.user.username} on review {self.review.id}"
 
 
 class TranslationCache(models.Model):

@@ -15,4 +15,11 @@ urlpatterns = [
     path('import/', views.import_list, name='import_list'),
     path('api/anime/status/<int:anime_id>/', views.get_user_anime_status, name='get_user_anime_status'),
     path('profile/review/', views.create_review, name='create_review'),
+    
+    # Review System
+    path('anime/<int:anime_id>/reviews/', views.anime_reviews_list, name='anime_reviews_list'),
+    path('reviews/<int:review_id>/like/', views.toggle_review_like, name='toggle_review_like'),
+    path('reviews/<int:review_id>/comment/', views.add_review_comment, name='add_review_comment'),
+    path('reviews/<int:review_id>/delete/', views.delete_review, name='delete_review'),
+    path('reviews/comment/<int:comment_id>/delete/', views.delete_review_comment, name='delete_review_comment'),
 ]

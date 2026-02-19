@@ -9,6 +9,9 @@ from .models import SavedSearch, UserAnimeEntry
 from app.models import Review
 from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm
 from app.forms import ReviewForm
+from app.models import Review, ReviewLike, ReviewComment
+from django.shortcuts import get_object_or_404
+from django.db.models import Count, Exists, OuterRef
 import datetime
 
 @login_required
@@ -322,3 +325,80 @@ def import_list(request):
             return redirect('import_list')
             
     return render(request, 'users/import.html')
+
+def anime_reviews_list(request, anime_id):
+    # Get anime details (simplified, no full API call needed if we just show reviews, 
+    # but we need title. For now let's rely on what we have in DB or pass basic info)
+    # Actually, we should probably fetch basic info or at least have a robust template.
+    # For now, let's just fetch reviews.
+    
+    reviews = Review.objects.filter(anime_id=anime_id).select_related('user', 'user__profile').annotate(
+        likes_count=Count('likes'),
+        is_liked=Exists(ReviewLike.objects.filter(review=OuterRef('pk'), user=request.user)) if request.user.is_authenticated else Value(False)
+    ).order_by('-created_at')
+    
+    # We might need anime title. Let's try to get it from one of the reviews or UserAnimeEntry
+    anime_title = "Anime Reviews"
+    if reviews.exists():
+        # Try to find an entry for this anime to get title
+        entry = UserAnimeEntry.objects.filter(anime_id=anime_id).first()
+        if entry:
+            anime_title = entry.title
+
+    context = {
+        'reviews': reviews,
+        'anime_id': anime_id,
+        'anime_title': anime_title
+    }
+    return render(request, 'users/anime_reviews.html', context)
+
+@login_required
+def toggle_review_like(request, review_id):
+    if request.method == 'POST':
+        review = get_object_or_404(Review, id=review_id)
+        like, created = ReviewLike.objects.get_or_create(user=request.user, review=review)
+        
+        if not created:
+            like.delete()
+            liked = False
+        else:
+            liked = True
+            
+        return JsonResponse({'liked': liked, 'count': review.likes.count()})
+    return JsonResponse({'status': 'invalid'}, status=400)
+
+@login_required
+def add_review_comment(request, review_id):
+    if request.method == 'POST':
+        review = get_object_or_404(Review, id=review_id)
+        content = request.POST.get('content')
+        if content:
+            ReviewComment.objects.create(user=request.user, review=review, content=content)
+            messages.success(request, 'Comment added!')
+        else:
+            messages.error(request, 'Comment cannot be empty.')
+            
+    return redirect('anime_reviews_list', anime_id=review.anime_id)
+
+@login_required
+def delete_review(request, review_id):
+    review = get_object_or_404(Review, id=review_id)
+    if request.user == review.user:
+        anime_id = review.anime_id
+        review.delete()
+        messages.success(request, 'Review deleted.')
+        return redirect('anime-view', anime_id=anime_id)
+    else:
+        messages.error(request, 'You cannot delete this review.')
+        return redirect('anime-view', anime_id=review.anime_id)
+
+@login_required
+def delete_review_comment(request, comment_id):
+    comment = get_object_or_404(ReviewComment, id=comment_id)
+    if request.user == comment.user or request.user == comment.review.user:
+        review_id = comment.review.id
+        anime_id = comment.review.anime_id
+        comment.delete()
+        messages.success(request, 'Comment deleted.')
+        return redirect('anime_reviews_list', anime_id=anime_id)
+    return redirect('home')

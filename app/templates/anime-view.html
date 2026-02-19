@@ -283,6 +283,63 @@
             </div>
         </div>
 
+        <div class="mitsulist-info-block" id="reviews-block">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="margin: 0; font-family: var(--font-header);">{% trans "REVIEWS" %}</h2>
+                <a href="{% url 'anime_reviews_list' anime_data.mal_id %}" 
+                   style="color: var(--color-primary); text-decoration: none; font-size: 0.9rem; border: 1px solid var(--color-primary); padding: 5px 15px; border-radius: 20px; transition: 0.2s;"
+                   onmouseover="this.style.background='var(--color-primary)'; this.style.color='white'"
+                   onmouseout="this.style.background='transparent'; this.style.color='var(--color-primary)'">
+                    {% trans "See all reviews" %} <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+
+            {% if user_review %}
+            <div style="background: rgba(123, 47, 247, 0.1); border: 1px solid var(--color-primary); padding: 20px; border-radius: 12px; margin-bottom: 30px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <h4 style="margin: 0; color: var(--color-primary);">{% trans "My Review" %}</h4>
+                    <div style="font-size: 0.8rem; color: var(--color-muted);">{{ user_review.created_at|date:"M d, Y" }}</div>
+                </div>
+                <p style="margin: 0; color: #e2e8f0; line-height: 1.6;">{{ user_review.content }}</p>
+                <div style="margin-top: 15px; display: flex; gap: 10px;">
+                    <a href="{% url 'delete_review' user_review.id %}" onclick="return confirm('{% trans "Delete your review?" %}')"
+                       style="font-size: 0.8rem; color: #f87171; text-decoration: none;">
+                        <i class="fa-solid fa-trash"></i> {% trans "Delete" %}
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if reviews %}
+                {% for review in reviews|slice:":3" %}
+                {% if review != user_review %}
+                <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px; margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <a href="{% url 'public_profile' review.user.username %}" style="font-weight: bold; color: white; text-decoration: none;">
+                            {{ review.user.username }}
+                        </a>
+                        <span style="font-size: 0.8rem; color: var(--color-muted);">{{ review.created_at|date:"M d, Y" }}</span>
+                    </div>
+                    <p style="color: #cbd5e1; font-size: 0.95rem; line-height: 1.5; margin: 0;">
+                        {{ review.content|truncatechars:200 }}
+                    </p>
+                    <div style="margin-top: 10px; font-size: 0.8rem; color: var(--color-muted);">
+                         <i class="fa-regular fa-heart"></i> {{ review.likes.count }} &bull; <i class="fa-regular fa-comment"></i> {{ review.comments.count }}
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+                
+                {% if reviews|length > 3 %}
+                <a href="{% url 'anime_reviews_list' anime_data.mal_id %}" style="display: block; text-align: center; color: var(--color-muted); text-decoration: none; font-size: 0.9rem; margin-top: 10px;">
+                    {% trans "View more reviews" %}
+                </a>
+                {% endif %}
+            {% else %}
+            <p style="color: var(--color-muted);">{% trans "No reviews yet. Be the first to review this anime!" %}</p>
+            {% endif %}
+        </div>
+
         <div class="mitsulist-info-block" id="relations-block">
             <h2 class="mitsulist-header-tag">{% trans "RELATIONS" %}</h2>
             <div class="info-content">

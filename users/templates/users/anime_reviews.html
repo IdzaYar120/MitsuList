@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}{{ anime_title }} - {% trans "Reviews" %} - MitsuList{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto; padding: 40px 20px;">
+    
+    <!-- Header -->
+    <div style="margin-bottom: 30px; display: flex; align-items: center; justify-content: space-between;">
+        <div>
+            <a href="{% url 'anime-view' anime_id %}" style="color: var(--color-muted); text-decoration: none; font-size: 0.9rem; margin-bottom: 5px; display: block;">
+                <i class="fa-solid fa-arrow-left"></i> {% trans "Back to Anime" %}
+            </a>
+            <h1 style="font-family: var(--font-header); margin: 0; font-size: 2rem;">
+                {% trans "Reviews for" %} <span style="color: var(--color-primary);">{{ anime_title }}</span>
+            </h1>
+        </div>
+        
+        <a href="{% url 'create_review' %}?anime_id={{anime_id}}" class="mitsulist-btn-primary">
+            <i class="fa-solid fa-pen-nib"></i> {% trans "Write Review" %}
+        </a>
+    </div>
+
+    <!-- Reviews List -->
+    {% if reviews %}
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            {% for review in reviews %}
+            <div class="review-card" id="review-{{review.id}}" 
+                 style="background: var(--glass-bg); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 20px;">
+                
+                <!-- Review Header -->
+                <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                    <div style="display: flex; gap: 15px; align-items: center;">
+                        <a href="{% url 'public_profile' review.user.username %}" style="width: 45px; height: 45px; border-radius: 50%; overflow: hidden; border: 2px solid var(--color-primary);">
+                            <img src="{{ review.user.profile.image.url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        </a>
+                        <div>
+                            <a href="{% url 'public_profile' review.user.username %}" style="color: white; text-decoration: none; font-weight: bold; font-family: var(--font-header);">
+                                {{ review.user.username }}
+                            </a>
+                            <div style="font-size: 0.8rem; color: var(--color-muted);">
+                                {{ review.created_at|date:"M d, Y" }}
+                                {% if review.updated_at != review.created_at %}
+                                <span title="{{ review.updated_at }}">({% trans "edited" %})</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if request.user == review.user %}
+                    <div class="dropdown">
+                        <button style="background: none; border: none; color: var(--color-muted); cursor: pointer; padding: 5px;">
+                            <i class="fa-solid fa-ellipsis-vertical"></i>
+                        </button>
+                        <div class="dropdown-content" style="display: none; position: absolute; right: 20px; background: #1e1e2e; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; z-index: 10;">
+                             <form action="{% url 'delete_review' review.id %}" method="POST" onsubmit="return confirm('{% trans "Are you sure?" %}');">
+                                {% csrf_token %}
+                                <button type="submit" style="background: none; border: none; color: #f87171; padding: 10px 15px; width: 100%; text-align: left; cursor: pointer;">
+                                    <i class="fa-solid fa-trash"></i> {% trans "Delete" %}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Content -->
+                <div style="line-height: 1.6; color: #e2e8f0; margin-bottom: 20px; white-space: pre-wrap;">{{ review.content }}</div>
+
+                <!-- Actions Bar -->
+                <div style="display: flex; gap: 20px; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+                    <!-- Like Button -->
+                    <button class="like-btn {% if review.is_liked %}liked{% endif %}" data-id="{{review.id}}"
+                            style="background: none; border: none; color: {% if review.is_liked %}#f87171{% else %}var(--color-muted){% endif %}; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.2s;">
+                        <i class="{% if review.is_liked %}fa-solid{% else %}fa-regular{% endif %} fa-heart"></i>
+                        <span class="like-count">{{ review.likes_count }}</span>
+                    </button>
+
+                    <!-- Comment Toggle -->
+                    <button onclick="toggleComments({{review.id}})"
+                            style="background: none; border: none; color: var(--color-muted); cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                        <i class="fa-regular fa-comment"></i> {{ review.comments.count }}
+                    </button>
+                </div>
+
+                <!-- Comments Section -->
+                <div id="comments-{{review.id}}" style="display: none; margin-top: 20px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px;">
+                    <!-- Existing Comments -->
+                    {% for comment in review.comments.all %}
+                    <div style="margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="font-weight: bold; font-size: 0.9rem; color: var(--color-primary);">{{ comment.user.username }}</span>
+                            <span style="font-size: 0.75rem; color: var(--color-muted);">{{ comment.created_at|timesince }} ago</span>
+                        </div>
+                        <div style="font-size: 0.9rem; color: #cbd5e1; margin-top: 3px;">{{ comment.content }}</div>
+                        {% if request.user == comment.user or request.user == review.user %}
+                        <a href="{% url 'delete_review_comment' comment.id %}" style="font-size: 0.7rem; color: #f87171; text-decoration: none; margin-top: 5px; display: inline-block;">{% trans "Delete" %}</a>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+
+                    <!-- Add Comment Form -->
+                    {% if user.is_authenticated %}
+                    <form action="{% url 'add_review_comment' review.id %}" method="POST" style="margin-top: 15px; display: flex; gap: 10px;">
+                        {% csrf_token %}
+                        <input type="text" name="content" placeholder="{% trans 'Write a comment...' %}" required
+                               style="flex-grow: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 8px 15px; color: white;">
+                        <button type="submit" style="background: var(--color-primary); color: white; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer;">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 50px; color: var(--color-muted);">
+            <i class="fa-regular fa-comment-dots" style="font-size: 3rem; margin-bottom: 15px;"></i>
+            <h3>{% trans "No reviews yet." %}</h3>
+            <p>{% trans "Be the first to share your thoughts!" %}</p>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    function toggleComments(id) {
+        const el = document.getElementById('comments-' + id);
+        if (el.style.display === 'none') {
+            el.style.display = 'block';
+        } else {
+            el.style.display = 'none';
+        }
+    }
+
+    document.querySelectorAll('.like-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const reviewId = this.dataset.id;
+            const icon = this.querySelector('i');
+            const countSpan = this.querySelector('.like-count');
+            
+            fetch(`/users/reviews/${reviewId}/like/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.liked) {
+                    this.style.color = '#f87171';
+                    icon.classList.remove('fa-regular');
+                    icon.classList.add('fa-solid');
+                } else {
+                    this.style.color = 'var(--color-muted)';
+                    icon.classList.remove('fa-solid');
+                    icon.classList.add('fa-regular');
+                }
+                countSpan.innerText = data.count;
+            });
+        });
+    });
+</script>
+{% endblock %}

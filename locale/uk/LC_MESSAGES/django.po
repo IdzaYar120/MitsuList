@@ -445,3 +445,25 @@ msgstr "Імпорт"
 #: Profile - Recent Activity
 msgid "RECENT ACTIVITY"
 msgstr "ОСТАННЯ АКТИВНІСТЬ"
+
+#: Review System
+msgid "Reviews for"
+msgstr "Відгуки для"
+
+msgid "Back to Anime"
+msgstr "Назад до аніме"
+
+msgid "Write a comment..."
+msgstr "Написати коментар..."
+
+msgid "See all reviews"
+msgstr "Всі відгуки"
+
+msgid "View more reviews"
+msgstr "Дивитись більше відгуків"
+
+msgid "No reviews yet. Be the first to review this anime!"
+msgstr "Відгуків ще немає. Будьте першим!"
+
+msgid "Delete your review?"
+msgstr "Видалити ваш відгук?"
