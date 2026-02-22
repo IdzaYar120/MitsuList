@@ -467,3 +467,43 @@ msgstr "Відгуків ще немає. Будьте першим!"
 
 msgid "Delete your review?"
 msgstr "Видалити ваш відгук?"
+
+#: Activity Feed
+msgid "Global Feed"
+msgstr "Глобальна стрічка"
+
+msgid "Activity Feed"
+msgstr "Стрічка активності"
+
+msgid "Following"
+msgstr "Підписки"
+
+msgid "Global"
+msgstr "Глобальна"
+
+msgid "See what's happening across MitsuList."
+msgstr "Дивіться, що відбувається на MitsuList."
+
+msgid "Activity from users you follow."
+msgstr "Активність користувачів, на яких ви підписані."
+
+msgid "updated status for"
+msgstr "оновив статус для"
+
+msgid "posted a review for"
+msgstr "опублікував відгук до"
+
+msgid "liked a review for"
+msgstr "вподобав відгук до"
+
+msgid "Read full review"
+msgstr "Читати весь відгук"
+
+msgid "No activities found."
+msgstr "Активностей не знайдено."
+
+msgid "Follow more users or check the Global feed!"
+msgstr "Підпишіться на когось або перегляньте Глобальну стрічку!"
+
+msgid "Explore Global Feed"
+msgstr "Дослідити Глобальну стрічку"

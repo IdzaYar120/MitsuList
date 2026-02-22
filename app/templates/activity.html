@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}
+    {% if feed_type == 'global' %}{% trans "Global Feed" %}{% else %}{% trans "Activity Feed" %}{% endif %} - MitsuList
+{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto; padding: 40px 20px;">
+    
+    <!-- Feed Header / Tabs -->
+    <div style="margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <h1 style="font-family: var(--font-header); margin: 0; font-size: 2.2rem; text-transform: uppercase;">
+                {% if feed_type == 'global' %}{% trans "Global Feed" %}{% else %}{% trans "Activity Feed" %}{% endif %}
+            </h1>
+            <p style="color: var(--color-muted); margin-top: 5px;">
+                {% if feed_type == 'global' %}
+                    {% trans "See what's happening across MitsuList." %}
+                {% else %}
+                    {% trans "Activity from users you follow." %}
+                {% endif %}
+            </p>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.05); padding: 5px; border-radius: 30px; display: flex; gap: 5px;">
+            <a href="{% url 'activity-feed' %}" 
+               style="padding: 8px 20px; border-radius: 25px; text-decoration: none; font-size: 0.9rem; font-weight: 600; 
+                      {% if feed_type == 'following' %}background: var(--color-primary); color: white;{% else %}color: var(--color-muted);{% endif %} transition: 0.3s;">
+               {% trans "Following" %}
+            </a>
+            <a href="{% url 'global-feed' %}" 
+               style="padding: 8px 20px; border-radius: 25px; text-decoration: none; font-size: 0.9rem; font-weight: 600; 
+                      {% if feed_type == 'global' %}background: var(--color-primary); color: white;{% else %}color: var(--color-muted);{% endif %} transition: 0.3s;">
+               {% trans "Global" %}
+            </a>
+        </div>
+    </div>
+
+    <!-- Activities List -->
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+        {% for activity in page_obj %}
+        <div class="activity-card" style="background: var(--glass-bg); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; display: flex; gap: 15px; transition: 0.2s;"
+             onmouseover="this.style.borderColor='rgba(123, 47, 247, 0.4)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">
+            
+            <!-- User Avatar -->
+            <a href="{% url 'public_profile' activity.user.username %}" style="flex-shrink: 0;">
+                <img src="{{ activity.user.profile.image.url }}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--color-primary);">
+            </a>
+
+            <!-- Activity Content -->
+            <div style="flex-grow: 1;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px;">
+                    <div>
+                        <a href="{% url 'public_profile' activity.user.username %}" style="color: white; font-weight: bold; text-decoration: none; font-family: var(--font-header);">{{ activity.user.username }}</a>
+                        
+                        <span style="color: var(--color-muted);">
+                            {% if activity.activity_type == 'status_update' %}
+                                {% trans "updated status for" %}
+                            {% elif activity.activity_type == 'new_review' %}
+                                {% trans "posted a review for" %}
+                            {% elif activity.activity_type == 'review_like' %}
+                                {% trans "liked a review for" %}
+                            {% endif %}
+                        </span>
+
+                        <a href="{% url 'anime-view' activity.anime_id %}" style="color: var(--color-accent); font-weight: 600; text-decoration: none;">
+                            {{ activity.anime_title }}
+                        </a>
+                    </div>
+                    <span style="font-size: 0.8rem; color: var(--color-muted); white-space: nowrap;">
+                        {{ activity.created_at|timesince }} {% trans "ago" %}
+                    </span>
+                </div>
+
+                {% if activity.activity_type == 'new_review' %}
+                <div style="font-size: 0.95rem; color: #cbd5e1; font-style: italic; background: rgba(0,0,0,0.2); padding: 10px 15px; border-radius: 8px; margin-top: 10px; border-left: 3px solid var(--color-primary);">
+                    <a href="{% url 'anime_reviews_list' activity.anime_id %}#review-{{activity.related_id}}" style="color: inherit; text-decoration: none;">
+                        {% trans "Read full review" %} <i class="fa-solid fa-chevron-right" style="font-size: 0.7rem;"></i>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div style="text-align: center; padding: 60px; color: var(--color-muted); background: var(--glass-bg); border-radius: 12px; border: 1px dashed rgba(255,255,255,0.2);">
+            <i class="fa-solid fa-rss" style="font-size: 3rem; margin-bottom: 20px; opacity: 0.3;"></i>
+            <h3>{% trans "No activities found." %}</h3>
+            {% if feed_type == 'following' %}
+                <p>{% trans "Follow more users or check the Global feed!" %}</p>
+                <a href="{% url 'global-feed' %}" class="mitsulist-btn-primary" style="display: inline-block; margin-top: 15px; text-decoration: none;">{% trans "Explore Global Feed" %}</a>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div id="pagination" style="display: flex; justify-content: center; gap: 10px; margin-top: 40px;">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}" class="mitsulist-btn-primary" style="padding: 8px 15px; text-decoration: none;">
+                <i class="fa-solid fa-chevron-left"></i>
+            </a>
+        {% endif %}
+
+        <span style="padding: 8px 20px; background: var(--glass-bg); border-radius: 8px; color: var(--color-muted);">
+            {% trans "Page" %} {{ page_obj.number }} {% trans "of" %} {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="mitsulist-btn-primary" style="padding: 8px 15px; text-decoration: none;">
+                <i class="fa-solid fa-chevron-right"></i>
+            </a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

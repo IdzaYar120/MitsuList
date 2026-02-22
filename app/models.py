@@ -79,5 +79,24 @@ class AnimeSchedule(models.Model):
     data = models.JSONField(default=list)
     updated_at = models.DateTimeField(auto_now=True)
     
+
+class Activity(models.Model):
+    ACTIVITY_TYPES = [
+        ('status_update', 'Status Update'),
+        ('new_review', 'New Review'),
+        ('review_like', 'Review Like'),
+    ]
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='activities')
+    activity_type = models.CharField(max_length=20, choices=ACTIVITY_TYPES)
+    anime_id = models.IntegerField()
+    anime_title = models.CharField(max_length=255)
+    related_id = models.IntegerField(null=True, blank=True) # ID of review/entry
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name_plural = "Activities"
+
     def __str__(self):
-        return f"{self.day} schedule"
+        return f"{self.user.username} - {self.activity_type} - {self.anime_title}"

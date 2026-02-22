@@ -8,7 +8,7 @@ from django.core.cache import cache
 from django_ratelimit.decorators import ratelimit
 from .services import fetch_jikan_data, JIKAN_API_ENDPOINTS
 
-from .models import News, Review
+from .models import News, Review, Activity
 from users.models import UserAnimeEntry
 from .forms import ReviewForm
 import random
@@ -232,6 +232,65 @@ async def calendar_view(request):
         'today': today
     }
     return render(request, 'calendar.html', context)
+
+async def activity_feed_view(request):
+    """Feed of people you follow."""
+    request.user = await request.auser()
+    if not request.user.is_authenticated:
+        from django.shortcuts import redirect
+        return redirect('login')
+
+    from asgiref.sync import sync_to_async
+    from django.core.paginator import Paginator
+
+    # Fetch users we follow
+    # Note: user.following is related name from Follow model
+    def get_following_ids():
+        return list(request.user.following.values_list('following_id', flat=True))
+    
+    get_following = sync_to_async(get_following_ids)
+    following_ids = await get_following()
+
+    # Fetch activities
+    from .models import Activity
+    activities_qs = Activity.objects.filter(user_id__in=following_ids).select_related('user', 'user__profile')
+    
+    # Pagination
+    def paginate(qs, page_num):
+        paginator = Paginator(qs, 20)
+        return paginator.get_page(page_num)
+
+    get_page = sync_to_async(paginate)
+    page_obj = await get_page(activities_qs, request.GET.get('page'))
+
+    context = {
+        'page_obj': page_obj,
+        'feed_type': 'following'
+    }
+    return render(request, 'activity.html', context)
+
+async def global_feed_view(request):
+    """Feed of everyone."""
+    request.user = await request.auser()
+    from asgiref.sync import sync_to_async
+    from django.core.paginator import Paginator
+
+    from .models import Activity
+    activities_qs = Activity.objects.all().select_related('user', 'user__profile')
+    
+    # Pagination
+    def paginate(qs, page_num):
+        paginator = Paginator(qs, 20)
+        return paginator.get_page(page_num)
+
+    get_page = sync_to_async(paginate)
+    page_obj = await get_page(activities_qs, request.GET.get('page'))
+
+    context = {
+        'page_obj': page_obj,
+        'feed_type': 'global'
+    }
+    return render(request, 'activity.html', context)
 
         
     
