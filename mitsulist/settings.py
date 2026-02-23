@@ -268,3 +268,9 @@ LOGGING = {
     },
 }
 
+# =============================================================================
+# DISCORD INTEGRATION
+# =============================================================================
+DISCORD_CLIENT_ID = os.getenv('DISCORD_CLIENT_ID', '')
+DISCORD_CLIENT_SECRET = os.getenv('DISCORD_CLIENT_SECRET', '')
+DISCORD_REDIRECT_URI = os.getenv('DISCORD_REDIRECT_URI', 'http://127.0.0.1:8000/users/discord/callback/')

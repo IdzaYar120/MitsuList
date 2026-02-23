@@ -20,6 +20,12 @@ class Profile(models.Model):
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default='N')
     birth_date = models.DateField(null=True, blank=True)
 
+    # Discord Integration
+    discord_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
+    discord_username = models.CharField(max_length=255, blank=True, null=True)
+    discord_access_token = models.CharField(max_length=255, blank=True, null=True)
+    discord_refresh_token = models.CharField(max_length=255, blank=True, null=True)
+
     def __str__(self):
         return f'{self.user.username} Profile'
 

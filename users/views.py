@@ -401,4 +401,121 @@ def delete_review_comment(request, comment_id):
         comment.delete()
         messages.success(request, 'Comment deleted.')
         return redirect('anime_reviews_list', anime_id=anime_id)
+        return redirect('anime_reviews_list', anime_id=anime_id)
     return redirect('home')
+
+# =============================================================================
+# DISCORD INTEGRATION
+# =============================================================================
+import requests
+from django.conf import settings
+from urllib.parse import urlencode
+
+@login_required
+def discord_login(request):
+    """Redirects the user to Discord's OAuth2 authorization page."""
+    base_url = "https://discord.com/api/oauth2/authorize"
+    params = {
+        'client_id': settings.DISCORD_CLIENT_ID,
+        'redirect_uri': settings.DISCORD_REDIRECT_URI,
+        'response_type': 'code',
+        'scope': 'identify',
+    }
+    url = f"{base_url}?{urlencode(params)}"
+    return redirect(url)
+
+@login_required
+def discord_callback(request):
+    """Handles the callback from Discord, exchanges code for token, and fetches user info."""
+    code = request.GET.get('code')
+    if not code:
+        messages.error(request, "Discord authorization failed or was canceled.")
+        return redirect('edit_profile')
+
+    # Exchange code for token
+    token_url = "https://discord.com/api/oauth2/token"
+    data = {
+        'client_id': settings.DISCORD_CLIENT_ID,
+        'client_secret': settings.DISCORD_CLIENT_SECRET,
+        'grant_type': 'authorization_code',
+        'code': code,
+        'redirect_uri': settings.DISCORD_REDIRECT_URI,
+    }
+    headers = {
+        'Content-Type': 'application/x-www-form-urlencoded'
+    }
+
+    try:
+        token_response = requests.post(token_url, data=data, headers=headers)
+        token_response.raise_for_status()
+        token_data = token_response.json()
+
+        access_token = token_data.get('access_token')
+        refresh_token = token_data.get('refresh_token')
+
+        # Fetch user info from Discord
+        user_url = "https://discord.com/api/users/@me"
+        user_headers = {
+            'Authorization': f"Bearer {access_token}"
+        }
+        user_response = requests.get(user_url, headers=user_headers)
+        user_response.raise_for_status()
+        user_info = user_response.json()
+
+        discord_id = user_info.get('id')
+        discord_username = user_info.get('username')
+
+        # Save to Profile
+        profile = request.user.profile
+        profile.discord_id = discord_id
+        profile.discord_username = discord_username
+        profile.discord_access_token = access_token
+        profile.discord_refresh_token = refresh_token
+        profile.save()
+
+        messages.success(request, f"Successfully connected Discord account: {discord_username}")
+    except Exception as e:
+        messages.error(request, f"Failed to connect to Discord. Please ensure Client ID/Secret are valid in settings.")
+        print(f"Discord API Error: {e}")
+
+    return redirect('edit_profile')
+
+@login_required
+def discord_disconnect(request):
+    """Removes the Discord connection from the user's profile."""
+    if request.method == 'POST':
+        profile = request.user.profile
+        profile.discord_id = None
+        profile.discord_username = None
+        profile.discord_access_token = None
+        profile.discord_refresh_token = None
+        profile.save()
+        messages.success(request, "Discord account disconnected.")
+    return redirect('edit_profile')
+
+def discord_presence_api(request, discord_id):
+    """
+    Public API endpoint for a Discord bot/RPC client to fetch a user's current activity.
+    Returns the latest watched anime or status update.
+    """
+    from django.contrib.auth.models import User
+    
+    # Find user by discord_id
+    try:
+        user = User.objects.get(profile__discord_id=discord_id)
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User not found or Discord not linked'}, status=404)
+
+    # Get their most recent anime entry (watching)
+    latest_entry = UserAnimeEntry.objects.filter(user=user, status='watching').order_by('-updated_at').first()
+    
+    if not latest_entry:
+        return JsonResponse({'status': 'idle', 'message': 'Not currently watching anything.'})
+        
+    return JsonResponse({
+        'status': 'watching',
+        'anime_title': latest_entry.title,
+        'anime_id': latest_entry.anime_id,
+        'episodes_watched': latest_entry.episodes_watched,
+        'updated_at': latest_entry.updated_at.isoformat()
+    })
