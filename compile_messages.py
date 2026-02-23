@@ -37,18 +37,24 @@ def make_mo(po_path, mo_path):
                 current_msgid += continuation
         
         i += 1
-    
     # Add last entry
     if current_msgid is not None:
         messages[current_msgid] = current_msgstr or ''
     
     # The empty msgid entry must contain charset info
-    # This is the header that tells gettext the encoding
     header = (
-        'Project-Id-Version: MitsuList 1.0\\n'
-        'Content-Type: text/plain; charset=UTF-8\\n'
-        'Content-Transfer-Encoding: 8bit\\n'
-    )
+        b'Project-Id-Version: MitsuList 1.0\n'
+        b'Report-Msgid-Bugs-To: \n'
+        b'POT-Creation-Date: 2026-02-06 00:00+0000\n'
+        b'PO-Revision-Date: 2026-02-06 00:00+0000\n'
+        b'Last-Translator: MitsuList Team\n'
+        b'Language-Team: Ukrainian\n'
+        b'Language: uk\n'
+        b'MIME-Version: 1.0\n'
+        b'Content-Type: text/plain; charset=UTF-8\n'
+        b'Content-Transfer-Encoding: 8bit\n'
+        b'Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n'
+    ).decode('utf-8')
     messages[''] = header
     
     # Sort by msgid (but empty string must be first)
