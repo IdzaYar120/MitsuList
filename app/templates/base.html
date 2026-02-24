@@ -29,7 +29,10 @@
     {% block extra_css %}{% endblock %}
 </head>
 
-<body>
+<body {% if user.is_authenticated and user.profile.theme_preference == 'light' %}class="theme-light"{% endif %}
+      {% if user.is_authenticated and user.profile.accent_color %}
+      style="--color-primary: {{ user.profile.accent_color }}; --color-accent: {{ user.profile.accent_color }};"
+      {% endif %}>
     <center>
         <div id="navbar">
             <a href="{% url 'home' %}" style="text-decoration: none;">

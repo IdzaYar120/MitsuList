@@ -20,6 +20,22 @@ class Profile(models.Model):
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default='N')
     birth_date = models.DateField(null=True, blank=True)
 
+    # Theme & Customization
+    THEME_CHOICES = [
+        ('dark', 'Dark Mode'),
+        ('light', 'Light Mode'),
+    ]
+    ACCENT_CHOICES = [
+        ('#7b2ff7', 'Mitsu Purple'),
+        ('#ff6b6b', 'Ruby Red'),
+        ('#4ecdc4', 'Mint Green'),
+        ('#feca57', 'Sunset Orange'),
+        ('#54a0ff', 'Ocean Blue'),
+        ('#ff9ff3', 'Sakura Pink'),
+    ]
+    theme_preference = models.CharField(max_length=10, choices=THEME_CHOICES, default='dark')
+    accent_color = models.CharField(max_length=10, choices=ACCENT_CHOICES, default='#7b2ff7')
+
     # Discord Integration
     discord_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
     discord_username = models.CharField(max_length=255, blank=True, null=True)

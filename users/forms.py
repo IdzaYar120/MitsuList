@@ -25,10 +25,12 @@ from .models import Profile
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['image', 'bio', 'gender', 'birth_date']
+        fields = ['image', 'bio', 'gender', 'birth_date', 'theme_preference', 'accent_color']
         widgets = {
             'bio': forms.Textarea(attrs={'class': 'mitsulist-input', 'rows': 4}),
             'gender': forms.Select(attrs={'class': 'mitsulist-input'}),
             'birth_date': forms.DateInput(attrs={'type': 'date', 'class': 'mitsulist-input', 'style': 'color-scheme: dark;'}),
             'image': forms.FileInput(attrs={'class': 'mitsulist-input'}),
+            'theme_preference': forms.Select(attrs={'class': 'mitsulist-input'}),
+            'accent_color': forms.Select(attrs={'class': 'mitsulist-input'}),
         }

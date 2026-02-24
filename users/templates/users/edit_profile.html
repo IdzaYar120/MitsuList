@@ -38,6 +38,20 @@
             <label style="display: block; margin-bottom: 5px; color: var(--color-muted);">Birth Date</label>
             {{ p_form.birth_date }}
         </div>
+        
+        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 30px 0;">
+        <h3 style="font-family: var(--font-header); margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-palette" style="color: var(--color-accent); font-size: 1.5rem;"></i> Personalization
+        </h3>
+
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 5px; color: var(--color-muted);">Theme</label>
+            {{ p_form.theme_preference }}
+        </div>
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 5px; color: var(--color-muted);">Accent Color</label>
+            {{ p_form.accent_color }}
+        </div>
 
         <button type="submit" class="mitsulist-btn-primary" style="width: 100%;">Save Changes</button>
     </form>
