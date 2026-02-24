@@ -142,4 +142,28 @@
         background-color: var(--color-primary);
     }
 </style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const themeSelect = document.getElementById("id_theme_preference");
+        const colorSelect = document.getElementById("id_accent_color");
+
+        if (themeSelect) {
+            themeSelect.addEventListener("change", (e) => {
+                if (e.target.value === 'light') {
+                    document.body.classList.add("theme-light");
+                } else {
+                    document.body.classList.remove("theme-light");
+                }
+            });
+        }
+
+        if (colorSelect) {
+            colorSelect.addEventListener("change", (e) => {
+                document.body.style.setProperty("--color-primary", e.target.value);
+                document.body.style.setProperty("--color-accent", e.target.value);
+            });
+        }
+    });
+</script>
 {% endblock %}
