@@ -54,6 +54,22 @@ document.addEventListener("DOMContentLoaded", () => {
             container.style.gridTemplateColumns = "repeat(auto-fill, minmax(200px, 1fr))";
             container.style.gap = "20px";
             container.style.padding = "20px";
+
+            // If we are not on the homepage, resultsWrapper might not exist.
+            // In that case, we just show the results in the #container directly under the navbar.
+            if (!resultsWrapper) {
+                container.style.position = 'absolute';
+                container.style.top = '70px';
+                container.style.left = '5%';
+                container.style.right = '5%';
+                container.style.background = 'var(--glass-bg)';
+                container.style.backdropFilter = 'blur(15px)';
+                container.style.borderRadius = 'var(--border-radius)';
+                container.style.zIndex = '1000';
+                container.style.boxShadow = '0 10px 40px rgba(0,0,0,0.5)';
+                container.style.maxHeight = '80vh';
+                container.style.overflowY = 'auto';
+            }
         }
 
         if (resultsWrapper) {
@@ -108,4 +124,11 @@ document.addEventListener("DOMContentLoaded", () => {
             resultsWrapper.style.display = "none";
         });
     }
+
+    // Global close for the navbar search dropdown
+    document.addEventListener("click", (e) => {
+        if (container && !container.contains(e.target) && inputBox && !inputBox.contains(e.target) && searchBtn && !searchBtn.contains(e.target)) {
+            container.style.display = "none";
+        }
+    });
 });
