@@ -47,3 +47,14 @@ def track_review_like(sender, instance, created, **kwargs):
             anime_title=f"Review by {instance.review.user.username}",
             related_id=instance.review.id
         )
+
+        # Create a notification for the review owner (if it's not their own like)
+        if instance.user != instance.review.user:
+            from .models import Notification
+            Notification.objects.create(
+                recipient=instance.review.user,
+                sender=instance.user,
+                notification_type='review_like',
+                message=f"{instance.user.username} liked your review.",
+                link=f"/anime/{instance.review.anime_id}/reviews/"
+            )

@@ -292,5 +292,49 @@ async def global_feed_view(request):
     }
     return render(request, 'activity.html', context)
 
-        
+    return render(request, 'activity.html', context)
+
+async def notifications_view(request):
+    """View to list user notifications."""
+    request.user = await request.auser()
+    if not request.user.is_authenticated:
+        from django.shortcuts import redirect
+        return redirect('login')
+
+    from asgiref.sync import sync_to_async
+    from .models import Notification
+
+    # Fetch all notifications for the user
+    get_notifications = sync_to_async(lambda: list(
+        Notification.objects.filter(recipient=request.user).select_related('sender', 'sender__profile')
+    ))
+    notifications = await get_notifications()
+
+    # Mark them all as read when viewed? Or let the user click them?
+    # Usually, viewing the drop down might not mark them, but visiting the page does.
+    # Let's mark all as read automatically to keep it simple.
+    @sync_to_async
+    def mark_all_read():
+        Notification.objects.filter(recipient=request.user, is_read=False).update(is_read=True)
     
+    await mark_all_read()
+
+    context = {
+        'notifications': notifications
+    }
+    return render(request, 'notifications.html', context)
+
+async def check_unread_notifications(request):
+    """AJAX endpoint to check unread notification count."""
+    request.user = await request.auser()
+    from django.http import JsonResponse
+    if not request.user.is_authenticated:
+        return JsonResponse({'unread': 0})
+        
+    from asgiref.sync import sync_to_async
+    from .models import Notification
+    
+    get_unread = sync_to_async(lambda: Notification.objects.filter(recipient=request.user, is_read=False).count())
+    count = await get_unread()
+    
+    return JsonResponse({'unread': count})
