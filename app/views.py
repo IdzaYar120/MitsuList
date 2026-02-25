@@ -338,3 +338,19 @@ async def check_unread_notifications(request):
     count = await get_unread()
     
     return JsonResponse({'unread': count})
+
+async def discovery_view(request):
+    """View to display AI recommendations based on user's anime list."""
+    request.user = await request.auser()
+    if not request.user.is_authenticated:
+        from django.shortcuts import redirect
+        return redirect('login')
+        
+    from .services import get_smart_recommendations
+    
+    _, recommendations = await get_smart_recommendations(request.user, limit=20)
+    
+    context = {
+        'recommendations': recommendations
+    }
+    return render(request, 'discover.html', context)

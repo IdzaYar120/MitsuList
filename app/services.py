@@ -146,3 +146,103 @@ def get_activity_feed(user):
         .select_related('user', 'user__profile')
         .order_by('-updated_at')[:12]
     )
+
+
+async def get_smart_recommendations(user, limit=20):
+    """
+    Analyzes user's completed/watching animes and aggregates recommendations
+    from Jikan API to provide personalized suggestions.
+    """
+    from users.models import UserAnimeEntry
+    from asgiref.sync import sync_to_async
+    from collections import defaultdict
+
+    # 1. Fetch user's anime list
+    @sync_to_async
+    def get_user_anime():
+        return list(UserAnimeEntry.objects.filter(user=user).values('anime_id', 'title', 'score', 'status'))
+    
+    user_anime_list = await get_user_anime()
+    
+    # Fast exit if list is empty
+    if not user_anime_list:
+        # Fallback: Just return popular anime
+        return await fetch_jikan_data('popular_anime_fallback', JIKAN_API_ENDPOINTS['popular_anime']), []
+
+    # Map of all IDs the user already has, so we don't recommend them
+    user_anime_ids = {entry['anime_id'] for entry in user_anime_list}
+
+    # Pick top N seed anime to base recommendations on.
+    # We prefer highly scored or recently completed animes.
+    sorted_seeds = sorted(
+        [a for a in user_anime_list if a['status'] in ('completed', 'watching') and a['score'] is not None],
+        key=lambda x: x['score'],
+        reverse=True
+    )
+    
+    # If no scored anime, just take any completed/watching
+    if not sorted_seeds:
+         sorted_seeds = [a for a in user_anime_list if a['status'] in ('completed', 'watching')]
+         
+    # Take top 5 seeds to avoid too many API calls
+    seed_animes = sorted_seeds[:5]
+    
+    if not seed_animes:
+        return await fetch_jikan_data('top_anime_fallback', JIKAN_API_ENDPOINTS['top_anime']), []
+
+    # 2. Fetch recommendations for all seeds concurrently
+    tasks = []
+    for seed in seed_animes:
+        cache_key = f"rec_{seed['anime_id']}"
+        tasks.append(fetch_anime_recommendations(cache_key, seed['anime_id']))
+        
+    results = await asyncio.gather(*tasks)
+
+    # 3. Aggregate results
+    # We'll score recommendations by how many times they appear and from which seeds.
+    rec_scores = defaultdict(lambda: {'score': 0, 'data': None, 'sources': []})
+    
+    for i, res in enumerate(results):
+        seed_title = seed_animes[i]['title']
+        recs = res.get('data', [])
+        
+        # Jikan sometimes returns hundreds, just take top 10 from each seed for aggregation
+        for rec in recs[:15]:
+            entry = rec.get('entry', {})
+            rec_id = entry.get('mal_id')
+            
+            # Skip if user already watched it
+            if not rec_id or rec_id in user_anime_ids:
+                continue
+                
+            # Increase aggregation score (base + votes from Jikan)
+            votes = rec.get('votes', 1)
+            # Add some normalized weight
+            weight = min(votes / 10.0, 5.0) + 1.0 
+            
+            rec_scores[rec_id]['score'] += weight
+            rec_scores[rec_id]['data'] = entry
+            
+            # Track why it was recommended
+            if seed_title not in rec_scores[rec_id]['sources']:
+                rec_scores[rec_id]['sources'].append(seed_title)
+
+    # 4. Sort aggregated results by score
+    sorted_recs = sorted(rec_scores.values(), key=lambda x: x['score'], reverse=True)
+    
+    # Format the final list
+    final_recommendations = []
+    for item in sorted_recs[:limit]:
+        # Build context string: "Because you liked X and Y"
+        sources = item['sources']
+        if len(sources) > 2:
+            context = f"Because you liked {sources[0]}, {sources[1]}, and more"
+        else:
+            context = f"Because you liked {' and '.join(sources)}"
+            
+        final_recommendations.append({
+            'anime': item['data'],
+            'context': context
+        })
+
+    return None, final_recommendations

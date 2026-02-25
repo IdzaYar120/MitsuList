@@ -11,4 +11,5 @@ urlpatterns = [
     path("feed/global/", views.global_feed_view, name="global-feed"),
     path("notifications/", views.notifications_view, name="notifications"),
     path("api/notifications/unread/", views.check_unread_notifications, name="api-notifications-unread"),
+    path("discover/", views.discovery_view, name="discover"),
 ]
