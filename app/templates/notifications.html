@@ -6,7 +6,7 @@
 {% block content %}
 <div style="max-width: 800px; margin: 40px auto; padding: 0 20px;">
     <h2 style="font-family: var(--font-header); margin-bottom: 30px; display: flex; align-items: center; gap: 10px;">
-        <i class="fa-solid fa-bell" style="color: var(--color-accent);"></i> Notifications
+        <i class="fa-solid fa-bell" style="color: var(--color-accent);"></i> {% trans "Notifications" %}
     </h2>
 
     <div style="display: flex; flex-direction: column; gap: 15px;">
@@ -30,9 +30,9 @@
                 
                 <div style="flex: 1;">
                     <p style="margin: 0 0 5px 0; font-family: var(--font-body); font-size: 1.05rem; color: var(--color-text);">
-                        {{ notification.message }}
+                        {% trans notification.message %}
                     </p>
-                    <small style="color: var(--color-muted);">{{ notification.created_at|timesince }} ago</small>
+                    <small style="color: var(--color-muted);">{{ notification.created_at|timesince }} {% trans "ago" %}</small>
                 </div>
                 
                 {% if not notification.is_read %}
@@ -43,8 +43,8 @@
         {% empty %}
         <div style="text-align: center; padding: 40px; background: var(--glass-bg); border-radius: var(--border-radius); border: 1px dashed rgba(255,255,255,0.1);">
             <i class="fa-regular fa-bell-slash" style="font-size: 3rem; color: var(--color-muted); margin-bottom: 15px;"></i>
-            <h3 style="color: var(--color-text);">No notifications yet</h3>
-            <p style="color: var(--color-muted);">When you interact with the community or get likes on your reviews, they will appear here.</p>
+            <h3 style="color: var(--color-text);">{% trans "No notifications yet" %}</h3>
+            <p style="color: var(--color-muted);">{% trans "When you interact with the community or get likes on your reviews, they will appear here." %}</p>
         </div>
         {% endfor %}
     </div>

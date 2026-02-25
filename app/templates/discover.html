@@ -8,10 +8,10 @@
     
     <div style="margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px;">
         <h2 style="font-family: var(--font-header); font-size: 2.2rem; margin-bottom: 10px; display: flex; align-items: center; gap: 15px;">
-            <i class="fa-solid fa-compass" style="color: var(--color-accent);"></i> Discover
+            <i class="fa-solid fa-compass" style="color: var(--color-accent);"></i> {% trans "Discover" %}
         </h2>
         <p style="color: var(--color-muted); font-size: 1.1rem; max-width: 800px;">
-            Personalized recommendations based on the anime you've highly rated or recently completed. The more you watch and score, the better these suggestions become!
+            {% trans "Personalized recommendations based on the anime you've highly rated or recently completed. The more you watch and score, the better these suggestions become!" %}
         </p>
     </div>
 
@@ -37,7 +37,7 @@
                             <!-- Context Tag -->
                             <div style="background: rgba(123, 47, 247, 0.15); border: 1px solid rgba(123, 47, 247, 0.3); border-radius: 6px; padding: 8px; font-size: 0.75rem; color: var(--color-text); line-height: 1.2;">
                                 <i class="fa-solid fa-lightbulb" style="color: var(--color-accent); margin-right: 5px;"></i>
-                                {{ item.context }}
+                                {% trans item.context %}
                             </div>
                             
                         </div>
@@ -47,11 +47,11 @@
         {% else %}
              <div style="text-align: center; padding: 60px 20px; background: var(--glass-bg); border-radius: var(--border-radius); border: 1px dashed rgba(255,255,255,0.1);">
                 <i class="fa-solid fa-ghost" style="font-size: 4rem; color: var(--color-muted); margin-bottom: 20px;"></i>
-                <h3 style="color: var(--color-text); font-family: var(--font-header); font-size: 1.5rem; margin-bottom: 10px;">Not enough data yet</h3>
+                <h3 style="color: var(--color-text); font-family: var(--font-header); font-size: 1.5rem; margin-bottom: 10px;">{% trans "Not enough data yet" %}</h3>
                 <p style="color: var(--color-muted); max-width: 500px; margin: 0 auto;">
-                    We need a bit more info to recommend anime for you. Try adding some shows you've completed to your list and give them a score!
+                    {% trans "We need a bit more info to recommend anime for you. Try adding some shows you've completed to your list and give them a score!" %}
                 </p>
-                <a href="{% url 'home' %}" class="mitsulist-btn-primary" style="display: inline-block; margin-top: 25px; text-decoration: none;">Explore Popular Anime</a>
+                <a href="{% url 'home' %}" class="mitsulist-btn-primary" style="display: inline-block; margin-top: 25px; text-decoration: none;">{% trans "Explore Popular Anime" %}</a>
             </div>
         {% endif %}
     </div>

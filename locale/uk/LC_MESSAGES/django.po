@@ -507,3 +507,40 @@ msgstr "Підпишіться на когось або перегляньте �
 
 msgid "Explore Global Feed"
 msgstr "Дослідити Глобальну стрічку"
+
+#: Notifications
+msgid "Notifications"
+msgstr "Сповіщення"
+
+msgid "No notifications yet"
+msgstr "Сповіщень ще немає"
+
+msgid "When you interact with the community or get likes on your reviews, they will appear here."
+msgstr "Коли ви взаємодієте зі спільнотою або отримуєте лайки на ваші відгуки, вони з'являться тут."
+
+#: Discover Page
+msgid "Discover"
+msgstr "Дослідити"
+
+msgid "Personalized recommendations based on the anime you've highly rated or recently completed. The more you watch and score, the better these suggestions become!"
+msgstr "Персоналізовані рекомендації на основі аніме, які ви високо оцінили або нещодавно переглянули. Чим більше ви дивитесь і оцінюєте, тим кращими стають ці пропозиції!"
+
+msgid "Not enough data yet"
+msgstr "Ще недостатньо даних"
+
+msgid "We need a bit more info to recommend anime for you. Try adding some shows you've completed to your list and give them a score!"
+msgstr "Нам потрібно трохи більше інформації, щоб рекомендувати вам аніме. Спробуйте додати кілька серіалів, які ви переглянули, до вашого списку та оцініть їх!"
+
+msgid "Explore Popular Anime"
+msgstr "Дослідити популярні аніме"
+
+#: Calendar Page
+msgid "Release Schedule"
+msgstr "Розклад виходів"
+
+#: Navigation
+msgid "Calendar"
+msgstr "Календар"
+
+msgid "Feed"
+msgstr "Стрічка"

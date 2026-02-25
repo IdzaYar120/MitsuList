@@ -52,21 +52,21 @@
             </div>
             <div style="margin-left: 20px;">
                 <a href="{% url 'calendar' %}" style="color: var(--color-text); text-decoration: none; font-weight: 600; font-family: var(--font-header); transition: var(--transition);">
-                    <i class="fa-regular fa-calendar-days" style="color: var(--color-primary);"></i> Calendar
+                    <i class="fa-regular fa-calendar-days" style="color: var(--color-primary);"></i> {% trans "Calendar" %}
                 </a>
             </div>
             
             {% if user.is_authenticated %}
             <div style="margin-left: 20px;">
                 <a href="{% url 'discover' %}" style="color: var(--color-text); text-decoration: none; font-weight: 600; font-family: var(--font-header); transition: var(--transition);">
-                    <i class="fa-solid fa-compass" style="color: #38bdf8;"></i> Discover
+                    <i class="fa-solid fa-compass" style="color: #38bdf8;"></i> {% trans "Discover" %}
                 </a>
             </div>
             {% endif %}
             
             <div style="margin-left: 20px;">
                 <a href="{% url 'activity-feed' %}" style="color: var(--color-text); text-decoration: none; font-weight: 600; font-family: var(--font-header); transition: var(--transition);">
-                    <i class="fa-solid fa-rss" style="color: #ff9ff3;"></i> Feed
+                    <i class="fa-solid fa-rss" style="color: #ff9ff3;"></i> {% trans "Feed" %}
                 </a>
             </div>
             
