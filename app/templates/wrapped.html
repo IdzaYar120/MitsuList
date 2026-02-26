@@ -1,0 +1,361 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}MitsuList Wrapped {{ year }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Wrapped specific variables and resets */
+    :root {
+        --wrapped-bg-1: #ff0055;
+        --wrapped-bg-2: #4338ca;
+        --wrapped-bg-3: #10b981;
+        --wrapped-bg-4: #f59e0b;
+        --wrapped-bg-5: #db2777;
+    }
+
+    body {
+        margin: 0;
+        overflow-x: hidden;
+        background-color: #000;
+    }
+    
+    #navbar, #messages-container, footer {
+        display: none !important; /* Hide standard UI for immersive experience */
+    }
+
+    /* Slides Container */
+    .wrapped-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        scroll-snap-type: y mandatory;
+        overflow-y: scroll;
+        scroll-behavior: smooth;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none;  /* IE and Edge */
+    }
+    .wrapped-container::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Individual Slide */
+    .slide {
+        height: 100vh;
+        width: 100vw;
+        scroll-snap-align: start;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        padding: 40px;
+        box-sizing: border-box;
+        text-align: center;
+        background-size: cover;
+        background-position: center;
+        font-family: var(--font-header);
+    }
+    
+    .slide-content {
+        max-width: 800px;
+        z-index: 10;
+        animation: fadeIn 1s ease-out forwards;
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    /* Slide specific backgrounds */
+    #slide-intro { background: linear-gradient(135deg, var(--wrapped-bg-1), #9333ea); }
+    #slide-stats { background: linear-gradient(135deg, var(--wrapped-bg-2), #3b82f6); }
+    #slide-anime { background: linear-gradient(135deg, var(--wrapped-bg-3), #047857); }
+    #slide-genres { background: linear-gradient(135deg, var(--wrapped-bg-4), #b45309); }
+    #slide-hero { background: linear-gradient(135deg, var(--wrapped-bg-5), #9d174d); }
+
+    /* Typography */
+    .w-title {
+        font-size: clamp(3rem, 8vw, 6rem);
+        font-weight: 800;
+        line-height: 1.1;
+        margin-bottom: 20px;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: -2px;
+        text-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    
+    .w-subtitle {
+        font-size: clamp(1.5rem, 4vw, 2.5rem);
+        font-weight: 600;
+        margin-bottom: 30px;
+        color: rgba(255,255,255,0.9);
+    }
+
+    .w-highlight {
+        color: #fbbf24;
+        text-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+    }
+
+    .w-stat-huge {
+        font-size: clamp(4rem, 12vw, 8rem);
+        font-weight: 800;
+        margin: 20px 0;
+        color: white;
+        text-shadow: 4px 4px 0px rgba(0,0,0,0.2);
+    }
+
+    /* Cards */
+    .top-anime-grid {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        align-items: flex-end;
+        height: 60vh;
+        margin-top: 40px;
+    }
+
+    .top-anime-card {
+        background: rgba(0,0,0,0.4);
+        border: 2px solid rgba(255,255,255,0.2);
+        border-radius: 16px;
+        overflow: hidden;
+        width: clamp(120px, 15vw, 200px);
+        transform-origin: bottom;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+
+    .top-anime-card.rank-1 {
+        transform: scale(1.2);
+        z-index: 5;
+        border-color: #fbbf24;
+    }
+    
+    .top-anime-card img {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 2/3;
+        object-fit: cover;
+    }
+
+    /* Navigation */
+    .scroll-down {
+        position: absolute;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: white;
+        opacity: 0.7;
+        font-size: 2rem;
+        animation: bounce 2s infinite;
+        cursor: pointer;
+    }
+
+    .exit-wrapped {
+        position: fixed;
+        top: 20px;
+        right: 30px;
+        color: white;
+        font-size: 2rem;
+        z-index: 100;
+        text-decoration: none;
+        opacity: 0.7;
+        transition: 0.3s;
+    }
+    
+    .exit-wrapped:hover {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+
+    /* Share Card */
+    .share-card {
+        background: rgba(0,0,0,0.8);
+        border-radius: 24px;
+        padding: 40px;
+        width: 100%;
+        max-width: 500px;
+        text-align: left;
+        border: 1px solid rgba(255,255,255,0.1);
+        backdrop-filter: blur(20px);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% { transform: translate(-50%, 0); }
+        40% { transform: translate(-50%, -20px); }
+        60% { transform: translate(-50%, -10px); }
+    }
+
+    /* Intersection Observer class */
+    .is-visible .slide-content {
+        animation: fadeIn 1s ease-out forwards;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<a href="{% url 'profile' %}" class="exit-wrapped" title="Back to profile"><i class="fa-solid fa-xmark"></i></a>
+
+<div class="wrapped-container" id="wrapped-scroll">
+    <!-- Slide 1: Intro -->
+    <div class="slide" id="slide-intro">
+        <div class="slide-content" style="opacity: 1; transform: translateY(0);">
+            <div style="font-size: 1.5rem; letter-spacing: 5px; margin-bottom: 20px; opacity: 0.8;">MITSULIST WRAPPED</div>
+            <h1 class="w-title">YOUR <span class="w-highlight">{{ year }}</span></h1>
+            <p class="w-subtitle">{{ title_phrase }}</p>
+        </div>
+        <i class="fa-solid fa-chevron-down scroll-down" onclick="document.getElementById('slide-stats').scrollIntoView();"></i>
+    </div>
+
+    <!-- Slide 2: Watch Time -->
+    <div class="slide" id="slide-stats">
+        <div class="slide-content">
+            <h2 class="w-subtitle">You spent a total of</h2>
+            <div class="w-stat-huge">{{ stats.total_episodes }}</div>
+            <h2 class="w-subtitle">episodes immersed in anime.</h2>
+            <p style="font-size: 1.2rem; font-family: var(--font-body); opacity: 0.8;">That's roughly <span class="w-highlight">{{ stats.days_spent }} days</span> straight.</p>
+        </div>
+        <i class="fa-solid fa-chevron-down scroll-down" onclick="document.getElementById('slide-anime').scrollIntoView();"></i>
+    </div>
+
+    <!-- Slide 3: Top Anime -->
+    <div class="slide" id="slide-anime">
+        <div class="slide-content" style="max-width: 1000px;">
+            <h2 class="w-title" style="font-size: clamp(2rem, 5vw, 4rem);">YOUR TOP SHOWS</h2>
+            <div class="top-anime-grid">
+                {% for anime in stats.top_anime|slice:"1:3" %}
+                <div class="top-anime-card">
+                    <img src="{{ anime.image_url }}" alt="{{ anime.title }}">
+                    <div style="padding: 10px; font-size: 0.9rem; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: rgba(0,0,0,0.8);">
+                        <i class="fa-solid fa-star" style="color: gold;"></i> {{ anime.score }}
+                    </div>
+                </div>
+                {% endfor %}
+                
+                {% for anime in stats.top_anime|slice:"0:1" %}
+                <div class="top-anime-card rank-1">
+                    <img src="{{ anime.image_url }}" alt="{{ anime.title }}">
+                    <div style="padding: 15px 10px; font-size: 1rem; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: #fbbf24; color: black;">
+                        #1 OF {{ year }}
+                    </div>
+                </div>
+                {% endfor %}
+                
+                {% for anime in stats.top_anime|slice:"3:5" %}
+                <div class="top-anime-card">
+                    <img src="{{ anime.image_url }}" alt="{{ anime.title }}">
+                    <div style="padding: 10px; font-size: 0.9rem; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: rgba(0,0,0,0.8);">
+                        <i class="fa-solid fa-star" style="color: gold;"></i> {{ anime.score }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <i class="fa-solid fa-chevron-down scroll-down" onclick="document.getElementById('slide-genres').scrollIntoView();"></i>
+    </div>
+
+    <!-- Slide 4: Genres -->
+    <div class="slide" id="slide-genres">
+        <div class="slide-content">
+            <h2 class="w-subtitle" style="margin-bottom: 50px;">Your cinematic palette.<br>You couldn't get enough of:</h2>
+            
+            <div style="text-align: left; display: inline-block; width: 100%; max-width: 400px;">
+                {% for genre in stats.genres %}
+                <div style="margin-bottom: 25px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 1.5rem; font-weight: bold; margin-bottom: 10px;">
+                        <span>#{{ forloop.counter }} {{ genre.name }}</span>
+                    </div>
+                    <div style="height: 15px; background: rgba(0,0,0,0.5); border-radius: 10px; overflow: hidden;">
+                        {% widthratio genre.count stats.genres.0.count 100 as percentage %}
+                        <div style="height: 100%; width: {{ percentage }}%; background: #fbbf24; border-radius: 10px;"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <i class="fa-solid fa-chevron-down scroll-down" onclick="document.getElementById('slide-hero').scrollIntoView();"></i>
+    </div>
+
+    <!-- Slide 5: Summary Card -->
+    <div class="slide" id="slide-hero">
+        <div class="slide-content">
+            <div class="share-card" id="share-card">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px;">
+                    <div>
+                        <div style="font-size: 0.9rem; letter-spacing: 2px; color: var(--color-muted);">MITSULIST WRAPPED</div>
+                        <div style="font-size: 2rem; font-weight: 800; color: white;">{{ user.username }}'s {{ year }}</div>
+                    </div>
+                    <div style="font-size: 2.5rem; color: var(--wrapped-bg-5);"><i class="fa-solid fa-circle-play"></i></div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+                    <div>
+                        <div style="font-size: 0.8rem; color: var(--color-muted); text-transform: uppercase;">Top Anime</div>
+                        <div style="font-size: 1.2rem; font-weight: bold; color: white;">
+                            {% if stats.top_anime %}{{ stats.top_anime.0.title }}{% else %}N/A{% endif %}
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.8rem; color: var(--color-muted); text-transform: uppercase;">Top Genre</div>
+                        <div style="font-size: 1.2rem; font-weight: bold; color: white;">
+                            {% if stats.genres %}{{ stats.genres.0.name }}{% else %}N/A{% endif %}
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.8rem; color: var(--color-muted); text-transform: uppercase;">Episodes</div>
+                        <div style="font-size: 1.2rem; font-weight: bold; color: white;">{{ stats.total_episodes }}</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.8rem; color: var(--color-muted); text-transform: uppercase;">Avg Score</div>
+                        <div style="font-size: 1.2rem; font-weight: bold; color: white;">{{ stats.average_score }}</div>
+                    </div>
+                </div>
+
+                <!-- Add user profile image -->
+                <div style="display: flex; align-items: center; gap: 15px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <img src="{{ user.profile.image.url }}" alt="{{ user.username }}" style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid white;">
+                    <div style="font-size: 0.9rem; color: white; opacity: 0.8;">mitsulist.com/wrapped</div>
+                </div>
+            </div>
+            
+            <button onclick="alert('In a real app, this would use html2canvas to save the #share-card as an image.')" 
+                    style="margin-top: 30px; background: white; color: black; border: none; padding: 15px 30px; border-radius: 30px; font-weight: bold; font-family: var(--font-header); font-size: 1.1rem; cursor: pointer; transition: 0.2s;">
+                <i class="fa-solid fa-share-nodes"></i> Share
+            </button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Simple intersection observer to trigger animations when scrolling to a slide
+    document.addEventListener("DOMContentLoaded", () => {
+        const slides = document.querySelectorAll('.slide');
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // Reset animation by removing and re-adding class
+                    const content = entry.target.querySelector('.slide-content');
+                    content.style.animation = 'none';
+                    content.offsetHeight; /* trigger reflow */
+                    content.style.animation = null; 
+                    entry.target.classList.add('is-visible');
+                } else {
+                    entry.target.classList.remove('is-visible');
+                }
+            });
+        }, { threshold: 0.5 });
+        
+        slides.forEach(slide => observer.observe(slide));
+    });
+</script>
+{% endblock %}

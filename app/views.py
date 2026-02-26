@@ -354,3 +354,32 @@ async def discovery_view(request):
         'recommendations': recommendations
     }
     return render(request, 'discover.html', context)
+
+async def wrapped_view(request, year=None):
+    """View to display MitsuList Wrapped (Year in Review) statistics."""
+    request.user = await request.auser()
+    if not request.user.is_authenticated:
+        from django.shortcuts import redirect
+        return redirect('login')
+        
+    from .services import generate_wrapped_data
+    from datetime import datetime
+    
+    # Use current year if not provided
+    if not year:
+        year = datetime.now().year
+        
+    # Generate stats
+    stats = await generate_wrapped_data(request.user, year)
+    
+    if not stats:
+        # User has no entries for this year
+        return render(request, 'wrapped_empty.html', {'year': year})
+        
+    context = {
+        'year': year,
+        'stats': stats,
+        # Generate some fun dynamic phrases based on stats
+        'title_phrase': "You're basically a professional otaku" if stats['total_episodes'] > 500 else "A solid year of anime"
+    }
+    return render(request, 'wrapped.html', context)

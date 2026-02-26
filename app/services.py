@@ -246,3 +246,108 @@ async def get_smart_recommendations(user, limit=20):
         })
 
     return None, final_recommendations
+
+async def generate_wrapped_data(user, year):
+    """
+    Analyzes a user's anime list to generate 'Year in Review' statistics.
+    Returns aggregated data like total episodes, average score, top animes, and a genre breakdown.
+    """
+    from users.models import UserAnimeEntry
+    from asgiref.sync import sync_to_async
+    import datetime
+    from collections import Counter
+
+    @sync_to_async
+    def get_yearly_entries():
+        # Get all entries updated in the specified year
+        # We assume 'updated_at' roughly correlates with when they finished it or watched it
+        return list(UserAnimeEntry.objects.filter(
+            user=user,
+            updated_at__year=year
+        ).values('anime_id', 'title', 'score', 'episodes_watched', 'status', 'image_url'))
+
+    entries = await get_yearly_entries()
+    
+    if not entries:
+        return None  # No data for this year
+
+    stats = {
+        'total_completed': 0,
+        'total_episodes': 0,
+        'average_score': 0.0,
+        'top_anime': [],
+        'genres': [],
+        'days_spent': 0.0
+    }
+
+    scored_entries_count = 0
+    total_score = 0
+    anime_ids_to_fetch_genres = []
+
+    for entry in entries:
+        stats['total_episodes'] += entry['episodes_watched']
+        
+        if entry['status'] == 'completed':
+            stats['total_completed'] += 1
+            
+        if entry['score'] > 0:
+            total_score += entry['score']
+            scored_entries_count += 1
+            
+        # Collect IDs to fetch genres later
+        anime_ids_to_fetch_genres.append(entry['anime_id'])
+
+    # Calculate average score
+    if scored_entries_count > 0:
+        stats['average_score'] = round(total_score / scored_entries_count, 1)
+
+    # Calculate approximate days spent (assuming 24 mins per episode)
+    stats['days_spent'] = round((stats['total_episodes'] * 24.0) / (60.0 * 24.0), 1)
+
+    # Find Top Anime (highest scored, then most episodes watched as tie-breaker)
+    # We only want to highlight ones they actually scored highly
+    top_candidates = sorted(
+        [e for e in entries if e['score'] > 0], 
+        key=lambda x: (x['score'], x['episodes_watched']), 
+        reverse=True
+    )
+    
+    # If no scored anime, just take the ones with most episodes watched
+    if not top_candidates:
+        top_candidates = sorted(
+            entries, 
+            key=lambda x: x['episodes_watched'], 
+            reverse=True
+        )
+
+    stats['top_anime'] = top_candidates[:5] # Top 5
+
+    # Fetch Genres concurrently for the top ~20 anime to build a genre profile
+    genre_counter = Counter()
+    
+    # To keep API calls reasonable, we'll only fetch details for up to 20 anime
+    # from their list to build the genre profile.
+    sample_ids = anime_ids_to_fetch_genres[:20] 
+    
+    tasks = []
+    for anime_id in sample_ids:
+        # We use a long cache timeout (7 days) because anime genres rarely change
+        cache_key = f"anime_details_{anime_id}"
+        url = f"{JIKAN_API_ENDPOINTS['anime_base']}/{anime_id}"
+        tasks.append(fetch_jikan_data(cache_key, url, timeout=604800))
+        
+    results = await asyncio.gather(*tasks)
+    
+    for res in results:
+        data = res.get('data')
+        if data and 'genres' in data:
+            for g in data['genres']:
+                genre_counter[g['name']] += 1
+                
+    # Top 3 genres
+    stats['genres'] = [
+        {'name': name, 'count': count} 
+        for name, count in genre_counter.most_common(3)
+    ]
+
+    return stats

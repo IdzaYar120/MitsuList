@@ -12,4 +12,6 @@ urlpatterns = [
     path("notifications/", views.notifications_view, name="notifications"),
     path("api/notifications/unread/", views.check_unread_notifications, name="api-notifications-unread"),
     path("discover/", views.discovery_view, name="discover"),
+    path("wrapped/", views.wrapped_view, name="wrapped_current"),
+    path("wrapped/<int:year>/", views.wrapped_view, name="wrapped"),
 ]
