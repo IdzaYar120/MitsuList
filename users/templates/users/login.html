@@ -18,11 +18,17 @@
                 <button type="submit"
                     style="background: var(--color-primary); color: white; border: none; padding: 14px 30px; font-family: var(--font-header); font-size: 1.2rem; font-weight: 600; border-radius: 10px; cursor: pointer; margin-top: 20px; width: 100%; transition: var(--transition); box-shadow: 0 4px 15px rgba(123, 47, 247, 0.4);">{% trans "Log In" %}</button>
             </form>
-            <div style="margin-top: 30px; font-family: var(--font-body); color: var(--color-muted);">
-                {% trans "Need an account?" %} <a href="{% url 'register' %}"
-                    style="color: var(--color-accent); text-decoration: none; font-weight: 600;">{% trans "Register" %}</a>
+            <div style="margin-top: 30px; font-family: var(--font-body); color: var(--color-muted); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                <div>
+                    {% trans "Need an account?" %} <a href="{% url 'register' %}"
+                        style="color: var(--color-accent); text-decoration: none; font-weight: 600;">{% trans "Register" %}</a>
+                </div>
+                <div>
+                    <a href="{% url 'password_reset' %}" style="color: var(--color-muted); text-decoration: none; font-size: 0.95rem; transition: 0.2s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='var(--color-muted)'">
+                        {% trans "Forgot Password?" %}
+                    </a>
+                </div>
             </div>
-        </div>
     </div>
 </div>
 {% endblock %}
