@@ -23,6 +23,9 @@
     <meta name="twitter:card" content="summary_large_image">
     {% endblock %}
 
+    <!-- PWA Theme Color -->
+    <meta name="theme-color" content="#0f172a">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -178,6 +181,21 @@
     </script>
     {% endif %}
     
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+    </script>
+
     {% block scripts %}{% endblock %}
 </body>
 
