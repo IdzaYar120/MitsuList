@@ -13,6 +13,16 @@
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'ico/favicon-16x16.png' %}">
     <link rel="manifest" href="{% static 'ico/site.webmanifest' %}">
 
+    <!-- SEO & Open Graph (Default) -->
+    {% block meta %}
+    <meta property="og:title" content="MitsuList - Track & Discover Anime">
+    <meta property="og:description" content="Track your progress, discover new anime, and connect with friends on MitsuList.">
+    <!-- Replace this with a real banner image URL once hosted -->
+    <meta property="og:image" content="https://i.imgur.com/example-banner.png">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    {% endblock %}
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

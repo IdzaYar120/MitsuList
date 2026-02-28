@@ -3,6 +3,15 @@
 
 {% block title %}MitsuList Wrapped {{ year }}{% endblock %}
 
+{% block meta %}
+<meta property="og:title" content="My MitsuList Wrapped {{year}}!">
+<meta property="og:description" content="I watched {{stats.total_episodes}} episodes and gave an average score of {{stats.average_score|floatformat:1}} this year on MitsuList!">
+<meta property="og:type" content="profile">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="My MitsuList Wrapped {{year}}!">
+<meta name="twitter:description" content="I watched {{stats.total_episodes}} episodes and gave an average score of {{stats.average_score|floatformat:1}} this year on MitsuList!">
+{% endblock %}
+
 {% block extra_css %}
 <style>
     /* Wrapped specific variables and resets */

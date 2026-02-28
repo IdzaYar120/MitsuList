@@ -3,6 +3,17 @@
 
 {% block title %}{{anime_data.title}} - MitsuList{% endblock %}
 
+{% block meta %}
+<meta property="og:title" content="{{anime_data.title}} - MitsuList">
+<meta property="og:description" content="{{anime_data.synopsis|truncatewords:30}}">
+<meta property="og:image" content="{{anime_data.images.jpg.large_image_url}}">
+<meta property="og:type" content="video.tv_show">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{anime_data.title}} - MitsuList">
+<meta name="twitter:description" content="{{anime_data.synopsis|truncatewords:30}}">
+<meta name="twitter:image" content="{{anime_data.images.jpg.large_image_url}}">
+{% endblock %}
+
 {% block content %}
 <div id="anime-view-header">
     <div id="title-container">
