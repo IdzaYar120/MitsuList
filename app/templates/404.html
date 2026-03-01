@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}404 {% trans "Not Found" %} - MitsuList{% endblock %}
+
+{% block content %}
+<div style="text-align: center; margin-top: 100px; padding: 2rem;">
+    <h1 style="font-size: 8rem; color: var(--accent-color); margin-bottom: 0; line-height: 1;"><i class="fa-solid fa-ghost"></i> 404</h1>
+    <h2 style="font-size: 2.5rem; margin-bottom: 1rem;">{% trans "Lost in the Anime Void" %}</h2>
+    <p style="color: var(--text-color-muted); max-width: 500px; margin: 0 auto 2rem auto; font-size: 1.2rem; line-height: 1.6;">
+        {% trans "It seems the page you are looking for has been isekaied to another world. Let's get you back to familiar territory." %}
+    </p>
+    <a href="{% url 'home' %}" class="btn" style="background: var(--accent-color); color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; font-size: 1.1rem; display: inline-block; transition: opacity 0.2s;"><i class="fa-solid fa-home"></i> {% trans "Return Home" %}</a>
+</div>
+{% endblock %}

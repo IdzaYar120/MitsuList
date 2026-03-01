@@ -383,3 +383,9 @@ async def wrapped_view(request, year=None):
         'title_phrase': "You're basically a professional otaku" if stats['total_episodes'] > 500 else "A solid year of anime"
     }
     return render(request, 'wrapped.html', context)
+
+def custom_404(request, exception):
+    return render(request, '404.html', status=404)
+
+def custom_500(request):
+    return render(request, '500.html', status=500)

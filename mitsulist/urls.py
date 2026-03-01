@@ -12,3 +12,6 @@ urlpatterns = [
     path('users/', include('users.urls')),
     path('sw.js', TemplateView.as_view(template_name='sw.js', content_type='application/javascript'), name='sw.js'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+handler404 = 'app.views.custom_404'
+handler500 = 'app.views.custom_500'

@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}500 {% trans "Server Error" %} - MitsuList{% endblock %}
+
+{% block content %}
+<div style="text-align: center; margin-top: 100px; padding: 2rem;">
+    <h1 style="font-size: 8rem; color: #e74c3c; margin-bottom: 0; line-height: 1;"><i class="fa-solid fa-server"></i> 500</h1>
+    <h2 style="font-size: 2.5rem; margin-bottom: 1rem;">{% trans "Server Hiccup" %}</h2>
+    <p style="color: var(--text-color-muted); max-width: 500px; margin: 0 auto 2rem auto; font-size: 1.2rem; line-height: 1.6;">
+        {% trans "Oops! Our servers got a little too excited watching anime and tripped over a cable. We've been notified and are working to fix it." %}
+    </p>
+    <a href="{% url 'home' %}" class="btn" style="background: var(--accent-color); color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; font-size: 1.1rem; display: inline-block; transition: opacity 0.2s; margin-right: 10px;"><i class="fa-solid fa-home"></i> {% trans "Return Home" %}</a>
+    <a href="javascript:location.reload()" class="btn" style="background: var(--surface-color); color: var(--text-color); border: 1px solid var(--border-color); text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; font-size: 1.1rem; display: inline-block; transition: opacity 0.2s;"><i class="fa-solid fa-rotate-right"></i> {% trans "Try Again" %}</a>
+</div>
+{% endblock %}
