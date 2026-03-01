@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Too Many Requests" %} - MitsuList{% endblock %}
+
+{% block content %}
+<div style="text-align: center; margin-top: 100px; padding: 2rem;">
+    <h1 style="font-size: 4rem; color: var(--accent-color); margin-bottom: 1rem;"><i class="fa-solid fa-hand"></i> 403</h1>
+    <h2 style="font-size: 2rem; margin-bottom: 1rem;">{% trans "Whoa there, speedster!" %}</h2>
+    <p style="color: var(--text-color-muted); max-width: 500px; margin: 0 auto 2rem auto; line-height: 1.6;">
+        {% trans "You've hit our rate limit for this action. This helps us protect the site from spam and bots. Please wait a moment and try again." %}
+    </p>
+    <a href="{% url 'home' %}" class="btn" style="background: var(--accent-color); color: #fff; text-decoration: none; padding: 10px 20px; border-radius: 8px; display: inline-block;">{% trans "Return to Home Space" %}</a>
+</div>
+{% endblock %}

@@ -13,6 +13,7 @@ from app.models import Review, ReviewLike, ReviewComment
 from django.shortcuts import get_object_or_404
 from django.db.models import Count, Exists, OuterRef
 import datetime
+from django_ratelimit.decorators import ratelimit
 
 @login_required
 def save_search(request):
@@ -102,6 +103,7 @@ def get_user_anime_status(request, anime_id):
     except UserAnimeEntry.DoesNotExist:
         return JsonResponse({'found': False})
 
+@ratelimit(key='ip', rate='5/h', block=True, method='POST')
 def register(request):
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
@@ -114,6 +116,7 @@ def register(request):
         form = UserRegisterForm()
     return render(request, 'users/register.html', {'form': form})
 
+@ratelimit(key='ip', rate='10/m', block=True, method='POST')
 def login_view(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
@@ -133,6 +136,7 @@ def login_view(request):
     return render(request, "users/login.html", {"form": form})
 
 @login_required
+@ratelimit(key='ip', rate='3/m', block=True, method='POST')
 def create_review(request):
     # Get anime list for dropdown (only from user's list)
     user_anime_list = UserAnimeEntry.objects.filter(user=request.user).values('anime_id', 'title')
@@ -368,6 +372,7 @@ def toggle_review_like(request, review_id):
     return JsonResponse({'status': 'invalid'}, status=400)
 
 @login_required
+@ratelimit(key='ip', rate='3/m', block=True, method='POST')
 def add_review_comment(request, review_id):
     if request.method == 'POST':
         review = get_object_or_404(Review, id=review_id)
