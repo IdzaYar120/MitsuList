@@ -98,11 +98,11 @@ class UserAnimeEntry(models.Model):
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='anime_entries')
-    anime_id = models.IntegerField(help_text="MAL Anime ID")
+    anime_id = models.IntegerField(help_text="MAL Anime ID", db_index=True)
     title = models.CharField(max_length=255)
     image_url = models.URLField(max_length=500, blank=True, null=True)
     
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='plan_to_watch')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='plan_to_watch', db_index=True)
     score = models.IntegerField(default=0, help_text="User score 1-10")
     episodes_watched = models.IntegerField(default=0)
     

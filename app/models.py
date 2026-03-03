@@ -17,7 +17,7 @@ from django.contrib.auth.models import User
 
 class Review(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    anime_id = models.IntegerField()
+    anime_id = models.IntegerField(db_index=True)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -88,8 +88,8 @@ class Activity(models.Model):
     ]
     
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='activities')
-    activity_type = models.CharField(max_length=20, choices=ACTIVITY_TYPES)
-    anime_id = models.IntegerField()
+    activity_type = models.CharField(max_length=20, choices=ACTIVITY_TYPES, db_index=True)
+    anime_id = models.IntegerField(db_index=True)
     anime_title = models.CharField(max_length=255)
     related_id = models.IntegerField(null=True, blank=True) # ID of review/entry
     created_at = models.DateTimeField(auto_now_add=True)
