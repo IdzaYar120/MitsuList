@@ -19,6 +19,7 @@ class Review(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     anime_id = models.IntegerField(db_index=True)
     content = models.TextField()
+    is_spoiler = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -66,7 +66,18 @@
                 </div>
 
                 <!-- Content -->
-                <div style="line-height: 1.6; color: #e2e8f0; margin-bottom: 20px; white-space: pre-wrap;">{{ review.content }}</div>
+                <div style="line-height: 1.6; color: #e2e8f0; margin-bottom: 20px; white-space: pre-wrap; position: relative;">
+                    {% if review.is_spoiler %}
+                    <div class="spoiler-content" onclick="this.classList.remove('spoiler-content'); this.querySelector('.spoiler-warning').style.display='none';">
+                        <div class="spoiler-warning" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.7); padding: 5px 15px; border-radius: 20px; border: 1px solid var(--color-primary); color: white; user-select: none; pointer-events: none; z-index: 2;">
+                            <i class="fa-solid fa-eye-slash"></i> Contains Spoilers
+                        </div>
+                        <span style="filter: blur(8px); transition: filter 0.3s;">{{ review.content }}</span>
+                    </div>
+                    {% else %}
+                    {{ review.content }}
+                    {% endif %}
+                </div>
 
                 <!-- Actions Bar -->
                 <div style="display: flex; gap: 20px; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">

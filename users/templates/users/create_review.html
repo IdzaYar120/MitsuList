@@ -31,6 +31,13 @@
                     style="width: 100%; padding: 15px;"></textarea>
             </div>
 
+            <div style="margin-bottom: 20px;">
+                <label style="display: flex; align-items: center; gap: 10px; color: var(--color-muted); cursor: pointer;">
+                    <input type="checkbox" name="is_spoiler" style="width: 18px; height: 18px; accent-color: var(--color-primary);">
+                    <span>This review contains spoilers</span>
+                </label>
+            </div>
+
             <div style="display: flex; gap: 15px;">
                 <button type="submit" class="mitsulist-btn-primary" style="flex: 1;">Post Review</button>
                 <a href="{% url 'profile' %}" class="mitsulist-btn-secondary"

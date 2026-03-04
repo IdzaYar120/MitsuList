@@ -74,7 +74,7 @@
                 </div>
 
                 {% if activity.activity_type == 'new_review' %}
-                <div style="font-size: 0.95rem; color: #cbd5e1; font-style: italic; background: rgba(0,0,0,0.2); padding: 10px 15px; border-radius: 8px; margin-top: 10px; border-left: 3px solid var(--color-primary);">
+                <div style="font-size: 0.95rem; color: #cbd5e1; font-style: italic; background: rgba(0,0,0,0.2); padding: 10px 15px; border-radius: 8px; margin-top: 10px; border-left: 3px solid var(--color-primary); display: flex; justify-content: space-between; align-items: center;">
                     <a href="{% url 'anime_reviews_list' activity.anime_id %}#review-{{activity.related_id}}" style="color: inherit; text-decoration: none;">
                         {% trans "Read full review" %} <i class="fa-solid fa-chevron-right" style="font-size: 0.7rem;"></i>
                     </a>
