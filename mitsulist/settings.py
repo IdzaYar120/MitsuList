@@ -30,6 +30,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'csp',
+    'cloudinary_storage',
+    'cloudinary',
     'app',
     'users',
 ]
@@ -109,6 +111,32 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# =============================================================================
+# STORAGE SETTINGS (Cloudinary / Local)
+# =============================================================================
+
+# If CLOUDINARY_URL is set in environment (e.g. cloudinary://API_KEY:API_SECRET@CLOUD_NAME)
+if os.getenv('CLOUDINARY_URL'):
+    # Default behavior for django 4.2+
+    STORAGES = {
+        "default": {
+            "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
+else:
+    # Fallback to local file system if no Cloudinary URL
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # =============================================================================
@@ -170,6 +198,7 @@ CONTENT_SECURITY_POLICY = {
             "'self'",
             'https:',  # Allow images from HTTPS sources (anime posters from API)
             'data:',   # Allow data URIs
+            'https://res.cloudinary.com', # Cloudinary user avatars
         ),
         'connect-src': (
             "'self'",
