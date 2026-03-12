@@ -333,56 +333,81 @@ def public_profile(request, username):
 @login_required
 def import_list(request):
     if request.method == 'POST':
-        xml_file = request.FILES.get('xml_file')
-        if not xml_file or not xml_file.name.endswith('.xml'):
-            messages.error(request, 'Please upload a valid .xml file.')
-            return redirect('import_list')
-        
-        try:
-            import xml.etree.ElementTree as ET
-            tree = ET.parse(xml_file)
-            root = tree.getroot()
+        if 'xml_file' in request.FILES:
+            xml_file = request.FILES.get('xml_file')
+            if not xml_file or not xml_file.name.endswith('.xml'):
+                messages.error(request, 'Please upload a valid .xml file.')
+                return redirect('import_list')
             
-            # MAL Status to MitsuList Status Mapping
-            status_map = {
-                'Watching': 'watching',
-                'Completed': 'completed',
-                'On-Hold': 'on_hold',
-                'Dropped': 'dropped',
-                'Plan to Watch': 'plan_to_watch'
-            }
+            try:
+                import xml.etree.ElementTree as ET
+                tree = ET.parse(xml_file)
+                root = tree.getroot()
+                
+                # MAL Status to MitsuList Status Mapping
+                status_map = {
+                    'Watching': 'watching',
+                    'Completed': 'completed',
+                    'On-Hold': 'on_hold',
+                    'Dropped': 'dropped',
+                    'Plan to Watch': 'plan_to_watch'
+                }
+                
+                count = 0
+                for anime in root.findall('anime'):
+                    try:
+                        mal_id_elem = anime.find('series_animedb_id')
+                        if mal_id_elem is None: continue
+                        mal_id = int(mal_id_elem.text)
+                        
+                        title_elem = anime.find('series_title')
+                        title = title_elem.text if title_elem is not None else "Unknown Title"
+                        
+                        status_elem = anime.find('my_status')
+                        my_status = status_elem.text if status_elem is not None else "Plan to Watch"
+                        
+                        score_elem = anime.find('my_score')
+                        my_score = int(score_elem.text) if score_elem is not None and score_elem.text else 0
+                        
+                        episodes_elem = anime.find('my_watched_episodes')
+                        my_episodes = int(episodes_elem.text) if episodes_elem is not None and episodes_elem.text else 0
+                        
+                        db_status = status_map.get(my_status, 'plan_to_watch')
+                        
+                        # Update or Create
+                        UserAnimeEntry.objects.update_or_create(
+                            user=request.user,
+                            anime_id=mal_id,
+                            defaults={
+                                'title': title, # We save title to avoid API lookups for simple lists
+                                'status': db_status,
+                                'score': my_score,
+                                'episodes_watched': my_episodes,
+                                'updated_at': datetime.datetime.now()
+                            }
+                        )
+                        count += 1
+                    except Exception as loop_e:
+                        print(f"Skipping bad entry in XML import: {loop_e}")
+                        continue
+                        
+                messages.success(request, f'Successfully imported {count} anime entries from XML!')
+                return redirect('profile')
+                
+            except Exception as e:
+                messages.error(request, f'Error parsing file: {e}')
+                return redirect('import_list')
+                
+        elif 'mal_username' in request.POST:
+            mal_username = request.POST.get('mal_username')
+            if not mal_username:
+                messages.error(request, 'Please enter a MAL username.')
+                return redirect('import_list')
             
-            count = 0
-            for anime in root.findall('anime'):
-                mal_id = int(anime.find('series_animedb_id').text)
-                title = anime.find('series_title').text
-                my_status = anime.find('my_status').text
-                my_score = int(anime.find('my_score').text)
-                my_episodes = int(anime.find('my_watched_episodes').text)
-                
-                # Default status if unknown
-                db_status = status_map.get(my_status, 'plan_to_watch')
-                
-                # Update or Create
-                UserAnimeEntry.objects.update_or_create(
-                    user=request.user,
-                    anime_id=mal_id,
-                    defaults={
-                        'title': title, # We save title to avoid API lookups for simple lists
-                        'status': db_status,
-                        'score': my_score,
-                        'episodes_watched': my_episodes,
-                        'updated_at': datetime.datetime.now()
-                    }
-                )
-                count += 1
-                
-            messages.success(request, f'Successfully imported {count} anime entries!')
+            from app.services import import_mal_username_background
+            import_mal_username_background(request.user.id, mal_username)
+            messages.success(request, f'Import started for "{mal_username}" in the background! Please wait a minute or two and refresh your profile.')
             return redirect('profile')
-            
-        except Exception as e:
-            messages.error(request, f'Error parsing file: {e}')
-            return redirect('import_list')
             
     return render(request, 'users/import.html')
 
