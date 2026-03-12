@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; color: #333; line-height: 1.6; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px; }
+        .header { text-align: center; margin-bottom: 20px; }
+        h1 { color: #7b2ff7; }
+        .button { display: inline-block; padding: 12px 24px; background-color: #7b2ff7; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; margin-top: 20px; }
+        .footer { margin-top: 30px; font-size: 12px; color: #999; text-align: center; border-top: 1px solid #eee; padding-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Welcome to MitsuList! 🌸</h1>
+        </div>
+        <p>Hi {{ user.username }},</p>
+        <p>Thanks for creating an account on MitsuList! Before you can start tracking your favorite anime, we just need to verify your email address.</p>
+        <p>Please click the button below to activate your account:</p>
+        
+        <div style="text-align: center;">
+            <a href="{{ activation_link }}" class="button" style="color: white;">Verify Email Address</a>
+        </div>
+        
+        <p style="margin-top: 25px;">If the button doesn't work, you can copy and paste the following link into your browser:</p>
+        <p style="word-break: break-all; color: #555;">{{ activation_link }}</p>
+        
+        <p>If you didn't request this email, you can safely ignore it.</p>
+        <p>Happy watching!<br>The MitsuList Team</p>
+        
+        <div class="footer">
+            <p>This is an automated message, please do not reply.</p>
+            <p>&copy; MitsuList, {{ domain }}</p>
+        </div>
+    </div>
+</body>
+</html>

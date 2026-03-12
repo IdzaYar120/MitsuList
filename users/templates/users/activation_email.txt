@@ -1,0 +1,13 @@
+Welcome to MitsuList!
+
+Hi {{ user.username }},
+
+Thanks for creating an account on MitsuList! Before you can start tracking your favorite anime, we just need to verify your email address.
+
+Please visit the following link to activate your account:
+{{ activation_link }}
+
+If you didn't request this email, you can safely ignore it.
+
+Happy watching!
+The MitsuList Team

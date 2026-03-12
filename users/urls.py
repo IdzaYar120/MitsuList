@@ -9,6 +9,7 @@ urlpatterns = [
     path('profile/review/', views.create_review, name='create_review'),
     path('profile/<str:username>/', views.public_profile, name='public_profile'),
     path('register/', views.register, name='register'),
+    path('activate/<uidb64>/<token>/', views.activate, name='activate'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('api/save-search/', views.save_search, name='save-search'),

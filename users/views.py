@@ -103,18 +103,74 @@ def get_user_anime_status(request, anime_id):
     except UserAnimeEntry.DoesNotExist:
         return JsonResponse({'found': False})
 
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.urls import reverse
+from django.contrib.sites.shortcuts import get_current_site
+from django.contrib.auth.models import User
+
 @ratelimit(key='ip', rate='5/h', block=True, method='POST')
 def register(request):
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            username = form.cleaned_data.get('username')
-            messages.success(request, f'Account created for {username}! You can now log in.')
-            return redirect('login')
+            user = form.save(commit=False)
+            user.is_active = False # Deactivate account till email is confirmed
+            user.save()
+            
+            # Email Verification Logic
+            current_site = get_current_site(request)
+            mail_subject = 'Activate your MitsuList account'
+            
+            # Generate the activation link
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = default_token_generator.make_token(user)
+            activation_link = f"http://{current_site.domain}{reverse('activate', kwargs={'uidb64': uid, 'token': token})}"
+            
+            # Context for templates
+            context = {
+                'user': user,
+                'activation_link': activation_link,
+                'domain': current_site.domain,
+            }
+            
+            # Render templates
+            text_content = render_to_string('users/activation_email.txt', context)
+            html_content = render_to_string('users/activation_email.html', context)
+            
+            # Send Email
+            email = EmailMultiAlternatives(
+                subject=mail_subject,
+                body=text_content,
+                from_email=None, # Uses DEFAULT_FROM_EMAIL from settings
+                to=[user.email]
+            )
+            email.attach_alternative(html_content, "text/html")
+            email.send()
+            
+            return render(request, 'users/registration_done.html', {'email': user.email})
     else:
         form = UserRegisterForm()
     return render(request, 'users/register.html', {'form': form})
+
+def activate(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and default_token_generator.check_token(user, token):
+        user.is_active = True
+        user.save()
+        messages.success(request, 'Thank you for your email confirmation. Your account has been activated! You are now logged in.')
+        login(request, user)
+        return redirect('home')
+    else:
+        return render(request, 'users/activation_invalid.html')
 
 @ratelimit(key='ip', rate='10/m', block=True, method='POST')
 def login_view(request):
