@@ -36,14 +36,32 @@
         integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-    <!-- Styles -->
+    <!-- Theme Variables & Styles -->
     <link rel="stylesheet" href="{% static 'css/variables.css' %}">
     <link rel="stylesheet" href="{% static 'css/index.css' %}">
     {% block extra_css %}{% endblock %}
+
+    <!-- Anti-FOUC Theme Script -->
+    <script>
+        (function() {
+            var theme = window.localStorage.getItem('mitsulist_theme');
+            {% if user.is_authenticated %}
+                var dbTheme = '{{ user.profile.theme_preference|default:"dark" }}';
+                // Sync local with DB on load
+                if (dbTheme && dbTheme !== theme) {
+                    window.localStorage.setItem('mitsulist_theme', dbTheme);
+                    theme = dbTheme;
+                }
+            {% endif %}
+            
+            if (theme === 'light') {
+                document.documentElement.classList.add('theme-light');
+            }
+        })();
+    </script>
 </head>
 
-<body {% if user.is_authenticated and user.profile.theme_preference == 'light' %}class="theme-light"{% endif %}
-      {% if user.is_authenticated and user.profile.accent_color %}
+<body {% if user.is_authenticated and user.profile.accent_color %}
       style="--color-primary: {{ user.profile.accent_color }}; --color-accent: {{ user.profile.accent_color }};"
       {% endif %}>
     <center>
@@ -94,6 +112,12 @@
             
             <div id="auth-links"
                 style="margin-left: 20px; font-family: var(--font-body); font-weight: 600; display: flex; align-items: center;">
+                
+                <!-- Theme Toggle Button -->
+                <button id="theme-toggle" style="background: transparent; border: none; color: var(--color-text); font-size: 1.2rem; cursor: pointer; margin-right: 15px; transition: var(--transition);" title="Toggle Theme">
+                    <i class="fa-solid fa-moon" id="theme-icon"></i>
+                </button>
+
                 <!-- Language Switcher -->
                 <form action="{% url 'set_language' %}" method="post" style="margin-right: 15px;">
                     {% csrf_token %}
@@ -196,6 +220,49 @@
         }
     </script>
 
+    <!-- Theme Toggle Scripts -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const toggleBtn = document.getElementById('theme-toggle');
+            const icon = document.getElementById('theme-icon');
+            
+            // Set initial icon correct
+            if (document.documentElement.classList.contains('theme-light')) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+            
+            toggleBtn.addEventListener('click', () => {
+                const isLight = document.documentElement.classList.toggle('theme-light');
+                const theme = isLight ? 'light' : 'dark';
+                
+                // Update Icon
+                if (isLight) {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                } else {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                }
+                
+                // Save locally
+                localStorage.setItem('mitsulist_theme', theme);
+                
+                // Sync with Django if logged in
+                {% if user.is_authenticated %}
+                fetch('{% url "toggle_theme" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ theme: theme })
+                }).catch(err => console.error('Theme sync error', err));
+                {% endif %}
+            });
+        });
+    </script>
+    
     {% block scripts %}{% endblock %}
 </body>
 

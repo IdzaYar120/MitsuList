@@ -61,6 +61,15 @@ textarea {
     outline: none !important;
 }
 
+html.theme-light input[type="text"],
+html.theme-light input[type="email"],
+html.theme-light input[type="password"],
+html.theme-light input[type="number"],
+html.theme-light textarea {
+    background: white !important;
+    border: 1px solid rgba(0, 0, 0, 0.2) !important;
+}
+
 input:focus,
 textarea:focus {
     background: rgba(123, 47, 247, 0.05) !important;
@@ -93,11 +102,17 @@ label {
     padding: 10px 20px !important;
     font-family: var(--font-body) !important;
     font-size: 1rem !important;
-    color: white !important;
+    color: var(--color-text) !important;
     width: 280px !important;
     outline: none !important;
     transition: var(--transition) !important;
     border-radius: var(--border-radius) 0 0 var(--border-radius) !important;
+}
+
+html.theme-light #input-box,
+body.theme-light #input-box {
+    background-color: transparent !important;
+    border-color: rgba(0, 0, 0, 0.2) !important;
 }
 
 #input-box:focus {

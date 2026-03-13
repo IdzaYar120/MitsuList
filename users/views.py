@@ -605,3 +605,20 @@ def discord_presence_api(request, discord_id):
         'episodes_watched': latest_entry.episodes_watched,
         'updated_at': latest_entry.updated_at.isoformat()
     })
+
+from django.views.decorators.http import require_POST
+
+@login_required
+@require_POST
+def toggle_theme(request):
+    try:
+        data = json.loads(request.body)
+        theme = data.get('theme')
+        if theme in ['light', 'dark']:
+            profile = request.user.profile
+            profile.theme_preference = theme
+            profile.save()
+            return JsonResponse({'status': 'success', 'theme': theme})
+        return JsonResponse({'status': 'error', 'message': 'Invalid theme'}, status=400)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
