@@ -235,8 +235,16 @@ def follow_user(request, username):
     target_user = get_object_or_404(User, username=username)
     
     if target_user != request.user:
-        Follow.objects.get_or_create(user=request.user, following=target_user)
-        # messages.success(request, f"You are now following {target_user.username}")
+        follow, created = Follow.objects.get_or_create(user=request.user, following=target_user)
+        if created:
+            from app.models import Notification
+            Notification.objects.create(
+                recipient=target_user,
+                sender=request.user,
+                notification_type='new_follower',
+                message=f"{request.user.username} started following you",
+                link=f"/profile/{request.user.username}/"
+            )
         
     return redirect('public_profile', username=username)
 
@@ -449,6 +457,16 @@ def toggle_review_like(request, review_id):
         else:
             liked = True
             
+            from app.models import Notification
+            if request.user != review.user:
+                Notification.objects.create(
+                    recipient=review.user,
+                    sender=request.user,
+                    notification_type='review_like',
+                    message=f"{request.user.username} liked your review",
+                    link=f"/anime/{review.anime_id}/reviews/"
+                )
+            
         return JsonResponse({'liked': liked, 'count': review.likes.count()})
     return JsonResponse({'status': 'invalid'}, status=400)
 
@@ -460,6 +478,17 @@ def add_review_comment(request, review_id):
         content = request.POST.get('content')
         if content:
             ReviewComment.objects.create(user=request.user, review=review, content=content)
+            
+            from app.models import Notification
+            if request.user != review.user:
+                Notification.objects.create(
+                    recipient=review.user,
+                    sender=request.user,
+                    notification_type='review_comment',
+                    message=f"{request.user.username} commented on your review",
+                    link=f"/anime/{review.anime_id}/reviews/"
+                )
+                
             messages.success(request, 'Comment added!')
         else:
             messages.error(request, 'Comment cannot be empty.')

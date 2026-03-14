@@ -105,6 +105,8 @@ class Activity(models.Model):
 class Notification(models.Model):
     NOTIFICATION_TYPES = [
         ('review_like', 'Review Like'),
+        ('review_comment', 'Review Comment'),
+        ('new_follower', 'New Follower'),
         ('system', 'System Message'),
     ]
 
