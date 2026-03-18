@@ -20,9 +20,25 @@ async def get_jikan_data(cache_key, url, timeout=300):
     """Bridge for internal calls to the new async service."""
     return await fetch_jikan_data(cache_key, url, timeout)
 
-async def index(request):
-    # Fix for SynchronousOnlyOperation in template
+
+async def _prefetch_user_profile(request):
+    """
+    Resolve the async user AND pre-warm the related Profile in the ORM
+    field cache. This prevents SynchronousOnlyOperation when the template
+    accesses user.profile inside an async view.
+    """
+    from asgiref.sync import sync_to_async
     request.user = await request.auser()
+    if request.user.is_authenticated:
+        # Accessing user.profile runs a sync ORM query; wrapping it with
+        # sync_to_async executes it in a thread and caches the result on
+        # the user instance so subsequent template lookups are free.
+        await sync_to_async(lambda: request.user.profile)()
+    return request.user
+
+
+async def index(request):
+    await _prefetch_user_profile(request)
     # Fetch News (Database - synchronous for now, Django handles it)
     from asgiref.sync import sync_to_async
     news_items = await sync_to_async(list)(News.objects.all().order_by('-created_at'))
@@ -83,7 +99,7 @@ async def index(request):
 
 async def anime_detail(request, anime_id):
     # Fix for SynchronousOnlyOperation in template
-    request.user = await request.auser()
+    await _prefetch_user_profile(request)
     cache_key = f'anime_detail_{anime_id}'
     raw_data = await fetch_jikan_data(cache_key, f"{JIKAN_API_ENDPOINTS['anime_base']}/{anime_id}/full", timeout=600)
     
@@ -191,7 +207,7 @@ async def calendar_view(request):
     Display anime release calendar.
     """
     # Fix for SynchronousOnlyOperation
-    request.user = await request.auser()
+    await _prefetch_user_profile(request)
     
     from .services import get_daily_schedule
     
@@ -235,7 +251,7 @@ async def calendar_view(request):
 
 async def activity_feed_view(request):
     """Feed of people you follow."""
-    request.user = await request.auser()
+    await _prefetch_user_profile(request)
     if not request.user.is_authenticated:
         from django.shortcuts import redirect
         return redirect('login')
@@ -271,7 +287,7 @@ async def activity_feed_view(request):
 
 async def global_feed_view(request):
     """Feed of everyone."""
-    request.user = await request.auser()
+    await _prefetch_user_profile(request)
     from asgiref.sync import sync_to_async
     from django.core.paginator import Paginator
 
@@ -296,7 +312,7 @@ async def global_feed_view(request):
 
 async def notifications_view(request):
     """View to list user notifications."""
-    request.user = await request.auser()
+    await _prefetch_user_profile(request)
     if not request.user.is_authenticated:
         from django.shortcuts import redirect
         return redirect('login')
@@ -326,7 +342,7 @@ async def notifications_view(request):
 
 async def check_unread_notifications(request):
     """AJAX endpoint to check unread notification count."""
-    request.user = await request.auser()
+    await _prefetch_user_profile(request)
     from django.http import JsonResponse
     if not request.user.is_authenticated:
         return JsonResponse({'unread': 0})
@@ -341,7 +357,7 @@ async def check_unread_notifications(request):
 
 async def discovery_view(request):
     """View to display AI recommendations based on user's anime list."""
-    request.user = await request.auser()
+    await _prefetch_user_profile(request)
     if not request.user.is_authenticated:
         from django.shortcuts import redirect
         return redirect('login')
@@ -357,7 +373,7 @@ async def discovery_view(request):
 
 async def wrapped_view(request, year=None):
     """View to display MitsuList Wrapped (Year in Review) statistics."""
-    request.user = await request.auser()
+    await _prefetch_user_profile(request)
     if not request.user.is_authenticated:
         from django.shortcuts import redirect
         return redirect('login')
