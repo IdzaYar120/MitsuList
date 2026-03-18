@@ -235,16 +235,8 @@ def follow_user(request, username):
     target_user = get_object_or_404(User, username=username)
     
     if target_user != request.user:
-        follow, created = Follow.objects.get_or_create(user=request.user, following=target_user)
-        if created:
-            from app.models import Notification
-            Notification.objects.create(
-                recipient=target_user,
-                sender=request.user,
-                notification_type='new_follower',
-                message=f"{request.user.username} started following you",
-                link=f"/profile/{request.user.username}/"
-            )
+        # Follow creation is enough — users/signals.py will dispatch the notification
+        Follow.objects.get_or_create(user=request.user, following=target_user)
         
     return redirect('public_profile', username=username)
 
@@ -265,6 +257,8 @@ def public_profile(request, username):
     from django.contrib.auth.models import User
     from .models import Follow
     from django.core.paginator import Paginator
+    from django.core.cache import cache
+    from django.db.models import Sum, Avg
     
     viewed_user = get_object_or_404(User, username=username)
     
@@ -279,37 +273,38 @@ def public_profile(request, username):
     following_count = Follow.objects.filter(user=viewed_user).count()
     
     is_following = False
-    is_following = False
     shared_anime = []
     
-    # --- Statistics Calculation ---
-    from django.db.models import Sum, Avg
-    
-    stats = {
-        'total_entries': anime_entries_list.count(),
-        'watching': anime_entries_list.filter(status='watching').count(),
-        'completed': anime_entries_list.filter(status='completed').count(),
-        'on_hold': anime_entries_list.filter(status='on_hold').count(),
-        'dropped': anime_entries_list.filter(status='dropped').count(),
-        'plan_to_watch': anime_entries_list.filter(status='plan_to_watch').count(),
-        'total_episodes': anime_entries_list.aggregate(Sum('episodes_watched'))['episodes_watched__sum'] or 0,
-        'mean_score': round(anime_entries_list.exclude(score=0).aggregate(Avg('score'))['score__avg'] or 0.0, 1),
-    }
-    
-    # Calculate Days Watched (Approximation: 24 min per episode)
-    minutes_watched = stats['total_episodes'] * 24
-    stats['days_watched'] = round(minutes_watched / 60 / 24, 1)
-    
-    # --- Badges ---
-    badges = []
-    if stats['total_entries'] >= 10:
-        badges.append({'name': 'Newbie', 'icon': 'fa-seedling', 'color': '#2ecc71', 'desc': 'Watched 10+ anime'})
-    if stats['total_entries'] >= 50:
-        badges.append({'name': 'Otaku', 'icon': 'fa-glasses', 'color': '#3498db', 'desc': 'Watched 50+ anime'})
-    if stats['total_entries'] >= 100:
-        badges.append({'name': 'Veteran', 'icon': 'fa-crown', 'color': '#f1c40f', 'desc': 'Watched 100+ anime'})
-    if stats['completed'] >= 50:
-        badges.append({'name': 'Completionist', 'icon': 'fa-check-double', 'color': '#9b59b6', 'desc': 'Completed 50+ anime'})
+    # --- Statistics & Badges: Cache in Redis for 5 minutes ---
+    cache_key = f'profile_stats_{viewed_user.pk}'
+    cached = cache.get(cache_key)
+    if cached:
+        stats, badges = cached
+    else:
+        stats = {
+            'total_entries': anime_entries_list.count(),
+            'watching': anime_entries_list.filter(status='watching').count(),
+            'completed': anime_entries_list.filter(status='completed').count(),
+            'on_hold': anime_entries_list.filter(status='on_hold').count(),
+            'dropped': anime_entries_list.filter(status='dropped').count(),
+            'plan_to_watch': anime_entries_list.filter(status='plan_to_watch').count(),
+            'total_episodes': anime_entries_list.aggregate(Sum('episodes_watched'))['episodes_watched__sum'] or 0,
+            'mean_score': round(anime_entries_list.exclude(score=0).aggregate(Avg('score'))['score__avg'] or 0.0, 1),
+        }
+        minutes_watched = stats['total_episodes'] * 24
+        stats['days_watched'] = round(minutes_watched / 60 / 24, 1)
+        
+        badges = []
+        if stats['total_entries'] >= 10:
+            badges.append({'name': 'Newbie', 'icon': 'fa-seedling', 'color': '#2ecc71', 'desc': 'Watched 10+ anime'})
+        if stats['total_entries'] >= 50:
+            badges.append({'name': 'Otaku', 'icon': 'fa-glasses', 'color': '#3498db', 'desc': 'Watched 50+ anime'})
+        if stats['total_entries'] >= 100:
+            badges.append({'name': 'Veteran', 'icon': 'fa-crown', 'color': '#f1c40f', 'desc': 'Watched 100+ anime'})
+        if stats['completed'] >= 50:
+            badges.append({'name': 'Completionist', 'icon': 'fa-check-double', 'color': '#9b59b6', 'desc': 'Completed 50+ anime'})
+        
+        cache.set(cache_key, (stats, badges), 300)  # 5 minutes
     
     if request.user.is_authenticated:
         if request.user != viewed_user:
@@ -320,7 +315,7 @@ def public_profile(request, username):
             shared_anime = UserAnimeEntry.objects.filter(
                 user=request.user, 
                 anime_id__in=viewed_user_anime_ids
-            ).select_related('user')[:5] # Limit to 5 for preview
+            ).select_related('user')[:5]
             
     # --- Activity History ---
     recent_updates = anime_entries_list.order_by('-updated_at')[:5]
@@ -456,16 +451,7 @@ def toggle_review_like(request, review_id):
             liked = False
         else:
             liked = True
-            
-            from app.models import Notification
-            if request.user != review.user:
-                Notification.objects.create(
-                    recipient=review.user,
-                    sender=request.user,
-                    notification_type='review_like',
-                    message=f"{request.user.username} liked your review",
-                    link=f"/anime/{review.anime_id}/reviews/"
-                )
+            # Notification dispatched automatically via app/signals.py (track_review_like)
             
         return JsonResponse({'liked': liked, 'count': review.likes.count()})
     return JsonResponse({'status': 'invalid'}, status=400)
@@ -478,17 +464,7 @@ def add_review_comment(request, review_id):
         content = request.POST.get('content')
         if content:
             ReviewComment.objects.create(user=request.user, review=review, content=content)
-            
-            from app.models import Notification
-            if request.user != review.user:
-                Notification.objects.create(
-                    recipient=review.user,
-                    sender=request.user,
-                    notification_type='review_comment',
-                    message=f"{request.user.username} commented on your review",
-                    link=f"/anime/{review.anime_id}/reviews/"
-                )
-                
+            # Notification dispatched automatically via users/signals.py (notify_review_comment)
             messages.success(request, 'Comment added!')
         else:
             messages.error(request, 'Comment cannot be empty.')

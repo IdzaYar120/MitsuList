@@ -263,7 +263,35 @@
         });
     </script>
     
+    <!-- Lazy-load Scroll Reveal (IntersectionObserver) -->
+    <script>
+        (function () {
+            const observer = new IntersectionObserver(
+                (entries) => {
+                    entries.forEach((entry) => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('visible');
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                },
+                { threshold: 0.12 }
+            );
+            function observeAll() {
+                document.querySelectorAll('.reveal, .reveal-stagger').forEach((el) => {
+                    observer.observe(el);
+                });
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', observeAll);
+            } else {
+                observeAll();
+            }
+        })();
+    </script>
+
     {% block scripts %}{% endblock %}
 </body>
+
 
 </html>

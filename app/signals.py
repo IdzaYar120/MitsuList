@@ -6,9 +6,11 @@ from users.models import UserAnimeEntry
 
 @receiver(post_save, sender=UserAnimeEntry)
 def track_status_update(sender, instance, created, **kwargs):
+    # Invalidate cached profile stats whenever an entry changes
+    from django.core.cache import cache
+    cache.delete(f'profile_stats_{instance.user_id}')
+
     # For status updates, we track both creation and changes
-    # But only if it's not 'plan_to_watch' initially maybe? 
-    # Actually, let's track everything for now.
     Activity.objects.create(
         user=instance.user,
         activity_type='status_update',
