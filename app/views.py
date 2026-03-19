@@ -28,12 +28,10 @@ async def _prefetch_user_profile(request):
     accesses user.profile inside an async view.
     """
     from asgiref.sync import sync_to_async
+    from django.contrib.auth import aget_user
     
-    # Django 6.0 removed auser(). request.user is natively awaitable.
-    # In test environments request.user might just be a model instance or AnonymousUser,
-    # so we conditionally await it if it has an __await__ method, otherwise use it directly.
-    if hasattr(request.user, '__await__'):
-        request.user = await request.user
+    # Properly resolve the user asynchronously without triggering lazy evaluation
+    request.user = await aget_user(request)
 
     if request.user.is_authenticated:
         # Accessing user.profile runs a sync ORM query; wrapping it with
