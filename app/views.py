@@ -28,12 +28,23 @@ async def _prefetch_user_profile(request):
     accesses user.profile inside an async view.
     """
     from asgiref.sync import sync_to_async
-    request.user = await request.auser()
+    
+    # Django 6.0 removed auser(). request.user is natively awaitable.
+    # In test environments request.user might just be a model instance or AnonymousUser,
+    # so we conditionally await it if it has an __await__ method, otherwise use it directly.
+    if hasattr(request.user, '__await__'):
+        request.user = await request.user
+
     if request.user.is_authenticated:
         # Accessing user.profile runs a sync ORM query; wrapping it with
         # sync_to_async executes it in a thread and caches the result on
         # the user instance so subsequent template lookups are free.
-        await sync_to_async(lambda: request.user.profile)()
+        def _get_profile():
+            try:
+                return request.user.profile
+            except Exception: # RelatedObjectDoesNotExist
+                return None
+        await sync_to_async(_get_profile)()
     return request.user
 
 
@@ -50,6 +61,15 @@ async def index(request):
         fetch_jikan_data('popular_anime', JIKAN_API_ENDPOINTS['popular_anime']),
         fetch_jikan_data('anime_movie', JIKAN_API_ENDPOINTS['anime_movie'])
     )
+    
+    # DEBUG
+    print(f"DEBUG: airing_now_data type: {type(airing_now_data)}")
+    if airing_now_data:
+        print(f"DEBUG: airing_now_data keys: {airing_now_data.keys()}")
+        if 'data' in airing_now_data:
+            print(f"DEBUG: airing_now_data length: {len(airing_now_data['data'])}")
+    else:
+        print("DEBUG: airing_now_data is NONE")
 
     # Title translation disabled - anime names should stay in original language
     # (Literal translation looks bad for proper nouns)
