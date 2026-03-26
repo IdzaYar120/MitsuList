@@ -1,0 +1,1304 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MitsuList</title>
+
+    <!-- P5 Favicons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/ico/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/ico/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/ico/favicon-16x16.png">
+    <link rel="manifest" href="/static/ico/site.webmanifest">
+
+    <!-- SEO & Open Graph (Default) -->
+    
+    <meta property="og:title" content="MitsuList - Track & Discover Anime">
+    <meta property="og:description" content="Track your progress, discover new anime, and connect with friends on MitsuList.">
+    <!-- Replace this with a real banner image URL once hosted -->
+    <meta property="og:image" content="https://i.imgur.com/example-banner.png">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    
+
+    <!-- PWA Theme Color -->
+    <meta name="theme-color" content="#0f172a">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@400;600;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Theme Variables & Styles -->
+    <link rel="stylesheet" href="/static/css/variables.css">
+    <link rel="stylesheet" href="/static/css/index.css">
+    
+
+    <!-- Anti-FOUC Theme Script -->
+    <script>
+        (function() {
+            var theme = window.localStorage.getItem('mitsulist_theme');
+            
+            
+            if (theme === 'light') {
+                document.documentElement.classList.add('theme-light');
+            }
+        })();
+    </script>
+</head>
+
+<body >
+    <center>
+        <div id="navbar">
+            <a href="/" style="text-decoration: none;">
+                <span id="name-header" style="font-family: var(--font-header); font-weight: 800; letter-spacing: -1px;">
+                    <span style="color: var(--color-accent);">Mitsu</span>List
+                </span>
+            </a>
+            <div id="search-container-nav" style="display: flex; align-items: center; gap: 0;">
+                <input id="input-box" placeholder="Explore Anime..."
+                    style="border-radius: var(--border-radius) 0 0 var(--border-radius);">
+                <button id="search-button"
+                    style="background: var(--color-primary); border: none; color: white; padding: 10px 15px; cursor: pointer;"><i
+                        class="fa-solid fa-magnifying-glass"></i></button>
+                <button id="toggle-filters" title="Advanced Filters"
+                    style="border-radius: 0 var(--border-radius) var(--border-radius) 0; background: var(--color-secondary); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--color-accent); padding: 10px 15px; cursor: pointer; transition: var(--transition);"><i
+                        class="fa-solid fa-sliders"></i></button>
+            </div>
+            <div style="margin-left: 20px;">
+                <a href="/calendar/" style="color: var(--color-text); text-decoration: none; font-weight: 600; font-family: var(--font-header); transition: var(--transition);">
+                    <i class="fa-regular fa-calendar-days" style="color: var(--color-primary);"></i> Calendar
+                </a>
+            </div>
+            
+            
+            
+            <div style="margin-left: 20px;">
+                <a href="/feed/" style="color: var(--color-text); text-decoration: none; font-weight: 600; font-family: var(--font-header); transition: var(--transition);">
+                    <i class="fa-solid fa-rss" style="color: #ff9ff3;"></i> Feed
+                </a>
+            </div>
+            
+            
+            
+            <div id="auth-links"
+                style="margin-left: 20px; font-family: var(--font-body); font-weight: 600; display: flex; align-items: center;">
+                
+                <!-- Theme Toggle Button -->
+                <button id="theme-toggle" style="background: transparent; border: none; color: var(--color-text); font-size: 1.2rem; cursor: pointer; margin-right: 15px; transition: var(--transition);" title="Toggle Theme">
+                    <i class="fa-solid fa-moon" id="theme-icon"></i>
+                </button>
+
+                <!-- Language Switcher -->
+                <form action="/i18n/setlang/" method="post" style="margin-right: 15px;">
+                    <input type="hidden" name="csrfmiddlewaretoken" value="R6EfOLGKPDSWwWBUAWULKuWtlWx6LcQqCpq2I0qGDrWgQJxdTNozABB8HUdyhMn2">
+                    <input name="next" type="hidden" value="">
+                    <select name="language" onchange="this.form.submit()"
+                        style="background: transparent; color: var(--color-muted); border: 1px solid rgba(255,255,255,0.1); padding: 5px; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">
+                        
+                        
+                        
+                        
+                        <option value="en"  selected
+                            style="background: #222; color: white;">
+                            English
+                        </option>
+                        
+                        <option value="uk" 
+                            style="background: #222; color: white;">
+                            Українська
+                        </option>
+                        
+                    </select>
+                </form>
+
+                
+                <a href="/users/login/" style="color: var(--color-text); text-decoration: none; margin-right: 20px; transition: var(--transition);">Login</a>
+                <a href="/users/register/" style="color: white; text-decoration: none; background: var(--color-primary); padding: 8px 20px; border-radius: var(--border-radius); transition: var(--transition); border: 1px solid var(--color-primary);">Join</a>
+                
+            </div>
+        </div>
+
+        <!-- Messages Section -->
+        
+
+        <!-- AJAX Search Results Container -->
+        <div id="container"></div>
+
+        <main>
+            
+<div id="homepage-div">
+    
+    
+    <!-- Advanced Filters Panel -->
+    <div id="advanced-filters-panel" class="glass-panel"
+        style="display: none; margin: 20px auto; width: 90%; max-width: 1200px; padding: 30px; border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.05); background: var(--glass-bg); backdrop-filter: blur(10px);">
+        <div
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; align-items: end;">
+            <div>
+                <label for="filter-genre">GENRE</label>
+                <select id="filter-genre" class="mitsulist-input">
+                    <option value="">All Genres</option>
+                    <!-- Populated via JS -->
+                </select>
+            </div>
+            <div>
+                <label for="filter-year">YEAR</label>
+                <input type="number" id="filter-year" class="mitsulist-input" placeholder="e.g. 2024" min="1950"
+                    max="2026">
+            </div>
+            <div>
+                <label for="filter-type">TYPE</label>
+                <select id="filter-type" class="mitsulist-input">
+                    <option value="">All Types</option>
+                    <option value="tv">TV Series</option>
+                    <option value="movie">Movie</option>
+                    <option value="ova">OVA</option>
+                    <option value="special">Special</option>
+                    <option value="ona">ONA</option>
+                    <option value="music">Music</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button id="apply-filters" class="mitsulist-btn-primary">Apply Filters</button>
+                <button id="clear-filters" class="mitsulist-btn-secondary">Clear</button>
+            </div>
+        </div>
+
+        
+    </div>
+
+    <!-- Search Results Container -->
+    <div id="search-results-container" style="display: none; width: 90%; margin: 20px auto;">
+        <div class="header-and-buttons">
+            <h1 id="search-results-header"><i class="fa-solid fa-magnifying-glass"
+                    style="color: var(--color-accent);"></i>&nbsp;&nbsp;SEARCH RESULTS</h1>
+            <button id="close-search" class="scroll-buttons" style="margin-left: auto; margin-right: 5%;"><i
+                    class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div id="container"
+            style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 30px; padding: 40px; justify-content: center;">
+            <!-- Results go here -->
+        </div>
+    </div>
+
+    <!-- News Banner -->
+    
+
+    <div class="header-and-buttons">
+        <h1 id="currently-airing-header"><i class="fa-solid fa-bolt"
+                style="color: var(--color-accent);"></i>&nbsp;&nbsp;THIS SEASON</h1>
+        <div class="scroll-btns-group" style="display: flex; gap: 10px; margin-left: auto; margin-right: 5%;">
+            <button class="scroll-buttons" id="previous-airing"><i class="fa-solid fa-chevron-left"></i></button>
+            <button class="scroll-buttons" id="next-airing"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+    </div>
+    <div id="airing-now-container">
+        
+        <a href="anime/59978/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1921/154528l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Sousou no Frieren 2nd Season</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;9.15
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/57658/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1659/154920l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Jujutsu Kaisen: Shimetsu Kaiyuu - Zenpen</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.59
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/55825/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1772/154456l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Jigokuraku 2nd Season</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.24
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/56009/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1062/151911l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Yuusha-kei ni Shosu: Choubatsu Yuusha 9004-tai Keimu Kiroku</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.14
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/60058/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1979/153329l.jpg" class="image" loading="lazy">
+                <p class="anime-title">[Oshi no Ko] 3rd Season</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.6
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/59229/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1508/152472l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Enen no Shouboutai: San no Shou Part 2</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.06
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/55830/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1752/150192l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Fate/strange Fake</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.5
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/60371/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1140/154457l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Seihantai na Kimi to Boku</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.22
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/61128/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1486/153135l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Yuusha Party wo Oidasareta Kiyoubinbou</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;6.66
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/59711/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1834/151169l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Shibou Yuugi de Meshi wo Kuu.</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;7.37
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/58505/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1668/148737l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Mato Seihei no Slave 2</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;7.47
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/61469/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1448/154111l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Steel Ball Run: JoJo no Kimyou na Bouken</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;None
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/58788/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1791/154233l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Ikoku Nikki</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.7
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/61942/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1592/154049l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Vigilante: Boku no Hero Academia Illegals 2nd Season</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;7.35
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/59047/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1474/153320l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Tamon-kun Ima Docchi!?</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;7.9
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/62896/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1758/153953l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Chou Kaguya-hime!</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.5
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/61983/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1573/152828l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Yuusha Party ni Kawaii Ko ga Ita node, Kokuhaku shitemita.</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;6.26
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/54863/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1219/154541l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Trigun Stargaze</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;7.19
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/61663/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1999/154569l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Uruwashi no Yoi no Tsuki</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;7.47
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/61211/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1769/152823l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Mayonaka Heart Tune</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;7.26
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/60692/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1629/153722l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Kizoku Tensei: Megumareta Umare kara Saikyou no Chikara wo Eru</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;6.25
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/55772/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1288/154763l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Golden Kamuy: Saishuushou</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.39
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/60810/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1704/154459l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Majutsushi Kunon wa Mieteiru</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;6.57
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/61549/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1264/153908l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Okiraku Ryoushu no Tanoshii Ryouchi Bouei: Seisankei Majutsu de Na mo Naki Mura wo Saikyou no Jousai Toshi ni</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;6.83
+                </div>
+            </div>
+        </a>
+        
+    </div>
+
+    <div class="header-and-buttons">
+        <h1 id="popular-anime-header"><i class="fa-solid fa-fire"
+                style="color: var(--color-accent);"></i>&nbsp;&nbsp;POPULAR</h1>
+        <div class="scroll-btns-group" style="display: flex; gap: 10px; margin-left: auto; margin-right: 5%;">
+            <button class="scroll-buttons" id="previous-popular-anime"><i class="fa-solid fa-chevron-left"></i></button>
+            <button class="scroll-buttons" id="next-popular-anime"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+    </div>
+    <div id="popular-anime-container">
+        
+        <a href="anime/16498/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/10/47347l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Shingeki no Kyojin</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.57
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/1535/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1079/138100l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Death Note</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.62
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/5114/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1208/94745l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Fullmetal Alchemist: Brotherhood</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;9.11
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/30276/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/12/76049l.jpg" class="image" loading="lazy">
+                <p class="anime-title">One Punch Man</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.48
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/38000/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1286/99889l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Kimetsu no Yaiba</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.41
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/11757/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/11/39717l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Sword Art Online</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;7.22
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/31964/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/10/78745l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Boku no Hero Academia</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;7.83
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/11061/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1337/99013l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Hunter x Hunter (2011)</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;9.03
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/20/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1141/142503l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Naruto</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.02
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/22319/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1498/134443l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Tokyo Ghoul</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;7.79
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/32281/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/5/87048l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Kimi no Na wa.</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.82
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/25777/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/4/84177l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Shingeki no Kyojin Season 2</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.54
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/40748/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1171/109222l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Jujutsu Kaisen</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.51
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/9253/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1935/127974l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Steins;Gate</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;9.07
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/1735/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1565/111305l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Naruto: Shippuuden</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.29
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/33486/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/12/85221l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Boku no Hero Academia 2nd Season</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.05
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/21/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1244/138851l.jpg" class="image" loading="lazy">
+                <p class="anime-title">One Piece</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.73
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/35760/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1173/92110l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Shingeki no Kyojin Season 3</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.64
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/28851/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1122/96435l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Koe no Katachi</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.93
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/38524/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1517/100633l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Shingeki no Kyojin Season 3 Part 2</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;9.05
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/19815/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1074/111944l.jpg" class="image" loading="lazy">
+                <p class="anime-title">No Game No Life</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.03
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/1575/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1032/135088l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Code Geass: Hangyaku no Lelouch</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.71
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/31240/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1522/128039l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Re:Zero kara Hajimeru Isekai Seikatsu</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.24
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/23273/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1405/143284l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Shigatsu wa Kimi no Uso</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.64
+                </div>
+            </div>
+        </a>
+        
+    </div>
+
+    <div class="header-and-buttons">
+        <h1 id="top-anime-header"><i class="fa-solid fa-crown" style="color: var(--color-accent);"></i>&nbsp;&nbsp;TOP ANIME</h1>
+        <div class="scroll-btns-group" style="display: flex; gap: 10px; margin-left: auto; margin-right: 5%;">
+            <button class="scroll-buttons" id="previous-top-anime"><i class="fa-solid fa-chevron-left"></i></button>
+            <button class="scroll-buttons" id="next-top-anime"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+    </div>
+    <div id="top-anime-container">
+        
+        <a href="anime/52991/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1015/138006l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Sousou no Frieren</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;9.28
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/59978/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1921/154528l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Sousou no Frieren 2nd Season</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;9.15
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/5114/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1208/94745l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Fullmetal Alchemist: Brotherhood</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;9.11
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/57555/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1763/150638l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Chainsaw Man Movie: Reze-hen</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;9.09
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/9253/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1935/127974l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Steins;Gate</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;9.07
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/38524/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1517/100633l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Shingeki no Kyojin Season 3 Part 2</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;9.05
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/28977/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/3/72078l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Gintama°</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;9.05
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/39486/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1245/116760l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Gintama: The Final</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;9.05
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/11061/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1337/99013l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Hunter x Hunter (2011)</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;9.03
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/60022/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1455/146229l.jpg" class="image" loading="lazy">
+                <p class="anime-title">One Piece Fan Letter</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;9.02
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/9969/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/4/50361l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Gintama&#x27;</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;9.02
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/15417/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1452/123686l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Gintama&#x27;: Enchousen</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;9.02
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/820/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1976/142016l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Ginga Eiyuu Densetsu</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;9.02
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/34096/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/3/83528l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Gintama.</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.98
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/41467/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1908/135431l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Bleach: Sennen Kessen-hen</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.98
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/43608/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1160/122627l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Kaguya-sama wa Kokurasetai: Ultra Romantic</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.96
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/42938/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1085/114792l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Fruits Basket: The Final</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.94
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/4181/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1299/110774l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Clannad: After Story</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.93
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/918/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/10/73274l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Gintama</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.93
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/28851/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1122/96435l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Koe no Katachi</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.93
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/2904/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1088/135089l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Code Geass: Hangyaku no Lelouch R2</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.92
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/58514/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/1025/147458l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Kusuriya no Hitorigoto 2nd Season</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.91
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/35180/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/3/88469l.jpg" class="image" loading="lazy">
+                <p class="anime-title">3-gatsu no Lion 2nd Season</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.9
+                </div>
+            </div>
+        </a>
+        
+        <a href="anime/15335/" class="anime-card-links">
+            <div class="anime-cards">
+                <img src="https://myanimelist.net/images/anime/10/51723l.jpg" class="image" loading="lazy">
+                <p class="anime-title">Gintama Movie 2: Kanketsu-hen - Yorozuya yo Eien Nare</p>
+                <div class="airing-now-details-table">
+                    <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.89
+                </div>
+            </div>
+        </a>
+        
+    </div>
+
+</div>
+
+
+
+<div class="header-and-buttons">
+    <h1 id="anime-movie-header"><i class="fa-solid fa-ticket" style="color: var(--color-accent);"></i>&nbsp;&nbsp;MOVIES
+    </h1>
+    <div class="scroll-btns-group" style="display: flex; gap: 10px; margin-left: auto; margin-right: 5%;">
+        <button class="scroll-buttons" id="previous-anime-movie"><i class="fa-solid fa-chevron-left"></i></button>
+        <button class="scroll-buttons" id="next-anime-movie"><i class="fa-solid fa-chevron-right"></i></button>
+    </div>
+</div>
+<div id="anime-movie-container">
+    
+    <a href="anime/57555/" class="anime-card-links">
+        <div class="anime-cards">
+            <img src="https://myanimelist.net/images/anime/1763/150638l.jpg" class="image" loading="lazy">
+            <p class="anime-title">Chainsaw Man Movie: Reze-hen</p>
+            <div class="airing-now-details-table">
+                <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;9.09
+            </div>
+        </div>
+    </a>
+    
+    <a href="anime/39486/" class="anime-card-links">
+        <div class="anime-cards">
+            <img src="https://myanimelist.net/images/anime/1245/116760l.jpg" class="image" loading="lazy">
+            <p class="anime-title">Gintama: The Final</p>
+            <div class="airing-now-details-table">
+                <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;9.05
+            </div>
+        </div>
+    </a>
+    
+    <a href="anime/28851/" class="anime-card-links">
+        <div class="anime-cards">
+            <img src="https://myanimelist.net/images/anime/1122/96435l.jpg" class="image" loading="lazy">
+            <p class="anime-title">Koe no Katachi</p>
+            <div class="airing-now-details-table">
+                <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.93
+            </div>
+        </div>
+    </a>
+    
+    <a href="anime/15335/" class="anime-card-links">
+        <div class="anime-cards">
+            <img src="https://myanimelist.net/images/anime/10/51723l.jpg" class="image" loading="lazy">
+            <p class="anime-title">Gintama Movie 2: Kanketsu-hen - Yorozuya yo Eien Nare</p>
+            <div class="airing-now-details-table">
+                <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.89
+            </div>
+        </div>
+    </a>
+    
+    <a href="anime/59571/" class="anime-card-links">
+        <div class="anime-cards">
+            <img src="https://myanimelist.net/images/anime/1379/145452l.jpg" class="image" loading="lazy">
+            <p class="anime-title">Shingeki no Kyojin Movie: Kanketsu-hen - The Last Attack</p>
+            <div class="airing-now-details-table">
+                <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.83
+            </div>
+        </div>
+    </a>
+    
+    <a href="anime/37987/" class="anime-card-links">
+        <div class="anime-cards">
+            <img src="https://myanimelist.net/images/anime/1825/110716l.jpg" class="image" loading="lazy">
+            <p class="anime-title">Violet Evergarden Movie</p>
+            <div class="airing-now-details-table">
+                <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.83
+            </div>
+        </div>
+    </a>
+    
+    <a href="anime/32281/" class="anime-card-links">
+        <div class="anime-cards">
+            <img src="https://myanimelist.net/images/anime/5/87048l.jpg" class="image" loading="lazy">
+            <p class="anime-title">Kimi no Na wa.</p>
+            <div class="airing-now-details-table">
+                <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.82
+            </div>
+        </div>
+    </a>
+    
+    <a href="anime/31758/" class="anime-card-links">
+        <div class="anime-cards">
+            <img src="https://myanimelist.net/images/anime/1084/112813l.jpg" class="image" loading="lazy">
+            <p class="anime-title">Kizumonogatari III: Reiketsu-hen</p>
+            <div class="airing-now-details-table">
+                <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.78
+            </div>
+        </div>
+    </a>
+    
+    <a href="anime/199/" class="anime-card-links">
+        <div class="anime-cards">
+            <img src="https://myanimelist.net/images/anime/6/79597l.jpg" class="image" loading="lazy">
+            <p class="anime-title">Sen to Chihiro no Kamikakushi</p>
+            <div class="airing-now-details-table">
+                <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.77
+            </div>
+        </div>
+    </a>
+    
+    <a href="anime/52198/" class="anime-card-links">
+        <div class="anime-cards">
+            <img src="https://myanimelist.net/images/anime/1670/130060l.jpg" class="image" loading="lazy">
+            <p class="anime-title">Kaguya-sama wa Kokurasetai: First Kiss wa Owaranai</p>
+            <div class="airing-now-details-table">
+                <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.72
+            </div>
+        </div>
+    </a>
+    
+    <a href="anime/45649/" class="anime-card-links">
+        <div class="anime-cards">
+            <img src="https://myanimelist.net/images/anime/1745/129284l.jpg" class="image" loading="lazy">
+            <p class="anime-title">The First Slam Dunk</p>
+            <div class="airing-now-details-table">
+                <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.71
+            </div>
+        </div>
+    </a>
+    
+    <a href="anime/59192/" class="anime-card-links">
+        <div class="anime-cards">
+            <img src="https://myanimelist.net/images/anime/1681/148216l.jpg" class="image" loading="lazy">
+            <p class="anime-title">Kimetsu no Yaiba Movie 1: Mugenjou-hen - Akaza Sairai</p>
+            <div class="airing-now-details-table">
+                <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.67
+            </div>
+        </div>
+    </a>
+    
+    <a href="anime/431/" class="anime-card-links">
+        <div class="anime-cards">
+            <img src="https://myanimelist.net/images/anime/1470/138723l.jpg" class="image" loading="lazy">
+            <p class="anime-title">Howl no Ugoku Shiro</p>
+            <div class="airing-now-details-table">
+                <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.67
+            </div>
+        </div>
+    </a>
+    
+    <a href="anime/164/" class="anime-card-links">
+        <div class="anime-cards">
+            <img src="https://myanimelist.net/images/anime/1355/147277l.jpg" class="image" loading="lazy">
+            <p class="anime-title">Mononoke Hime</p>
+            <div class="airing-now-details-table">
+                <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.67
+            </div>
+        </div>
+    </a>
+    
+    <a href="anime/57647/" class="anime-card-links">
+        <div class="anime-cards">
+            <img src="https://myanimelist.net/images/anime/1427/142210l.jpg" class="image" loading="lazy">
+            <p class="anime-title">Uma Musume: Pretty Derby - Shin Jidai no Tobira</p>
+            <div class="airing-now-details-table">
+                <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.64
+            </div>
+        </div>
+    </a>
+    
+    <a href="anime/33050/" class="anime-card-links">
+        <div class="anime-cards">
+            <img src="https://myanimelist.net/images/anime/1142/112957l.jpg" class="image" loading="lazy">
+            <p class="anime-title">Fate/stay night Movie: Heaven&#x27;s Feel - III. Spring Song</p>
+            <div class="airing-now-details-table">
+                <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.63
+            </div>
+        </div>
+    </a>
+    
+    <a href="anime/58125/" class="anime-card-links">
+        <div class="anime-cards">
+            <img src="https://myanimelist.net/images/anime/1716/142633l.jpg" class="image" loading="lazy">
+            <p class="anime-title">Look Back</p>
+            <div class="airing-now-details-table">
+                <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.62
+            </div>
+        </div>
+    </a>
+    
+    <a href="anime/61952/" class="anime-card-links">
+        <div class="anime-cards">
+            <img src="https://myanimelist.net/images/anime/1288/151853l.jpg" class="image" loading="lazy">
+            <p class="anime-title">Luo Xiaohei Zhanji 2</p>
+            <div class="airing-now-details-table">
+                <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.61
+            </div>
+        </div>
+    </a>
+    
+    <a href="anime/52742/" class="anime-card-links">
+        <div class="anime-cards">
+            <img src="https://myanimelist.net/images/anime/1665/140360l.jpg" class="image" loading="lazy">
+            <p class="anime-title">Haikyuu!! Movie: Gomisuteba no Kessen</p>
+            <div class="airing-now-details-table">
+                <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.61
+            </div>
+        </div>
+    </a>
+    
+    <a href="anime/4565/" class="anime-card-links">
+        <div class="anime-cards">
+            <img src="https://myanimelist.net/images/anime/12/19698l.jpg" class="image" loading="lazy">
+            <p class="anime-title">Tengen Toppa Gurren Lagann Movie 2: Lagann-hen</p>
+            <div class="airing-now-details-table">
+                <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.61
+            </div>
+        </div>
+    </a>
+    
+    <a href="anime/36862/" class="anime-card-links">
+        <div class="anime-cards">
+            <img src="https://myanimelist.net/images/anime/1803/117183l.jpg" class="image" loading="lazy">
+            <p class="anime-title">Made in Abyss Movie 3: Fukaki Tamashii no Reimei</p>
+            <div class="airing-now-details-table">
+                <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.6
+            </div>
+        </div>
+    </a>
+    
+    <a href="anime/38329/" class="anime-card-links">
+        <div class="anime-cards">
+            <img src="https://myanimelist.net/images/anime/1613/102179l.jpg" class="image" loading="lazy">
+            <p class="anime-title">Seishun Buta Yarou wa Yumemiru Shoujo no Yume wo Minai</p>
+            <div class="airing-now-details-table">
+                <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.59
+            </div>
+        </div>
+    </a>
+    
+    <a href="anime/7311/" class="anime-card-links">
+        <div class="anime-cards">
+            <img src="https://myanimelist.net/images/anime/1248/112352l.jpg" class="image" loading="lazy">
+            <p class="anime-title">Suzumiya Haruhi no Shoushitsu</p>
+            <div class="airing-now-details-table">
+                <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.59
+            </div>
+        </div>
+    </a>
+    
+    <a href="anime/3786/" class="anime-card-links">
+        <div class="anime-cards">
+            <img src="https://myanimelist.net/images/anime/1422/113533l.jpg" class="image" loading="lazy">
+            <p class="anime-title">Shin Evangelion Movie:||</p>
+            <div class="airing-now-details-table">
+                <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;8.58
+            </div>
+        </div>
+    </a>
+    
+</div>
+</div>
+
+        </main>
+
+
+        <footer>
+            
+            <!-- Add footer content if needed later -->
+            
+        </footer>
+    </center>
+
+    <!-- Scripts -->
+    <script src="/static/js/search.js"></script>
+    
+    
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+    </script>
+
+    <!-- Theme Toggle Scripts -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const toggleBtn = document.getElementById('theme-toggle');
+            const icon = document.getElementById('theme-icon');
+            
+            // Set initial icon correct
+            if (document.documentElement.classList.contains('theme-light')) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+            
+            toggleBtn.addEventListener('click', () => {
+                const isLight = document.documentElement.classList.toggle('theme-light');
+                const theme = isLight ? 'light' : 'dark';
+                
+                // Update Icon
+                if (isLight) {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                } else {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                }
+                
+                // Save locally
+                localStorage.setItem('mitsulist_theme', theme);
+                
+                // Sync with Django if logged in
+                
+            });
+        });
+    </script>
+    
+    <!-- Lazy-load Scroll Reveal (IntersectionObserver) -->
+    <script>
+        (function () {
+            const observer = new IntersectionObserver(
+                (entries) => {
+                    entries.forEach((entry) => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('visible');
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                },
+                { threshold: 0.12 }
+            );
+            function observeAll() {
+                document.querySelectorAll('.reveal, .reveal-stagger').forEach((el) => {
+                    observer.observe(el);
+                });
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', observeAll);
+            } else {
+                observeAll();
+            }
+        })();
+    </script>
+
+    
+<script src="/static/js/index.js"></script>
+
+</body>
+
+
+</html>

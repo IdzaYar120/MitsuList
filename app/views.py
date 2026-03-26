@@ -20,9 +20,34 @@ async def get_jikan_data(cache_key, url, timeout=300):
     """Bridge for internal calls to the new async service."""
     return await fetch_jikan_data(cache_key, url, timeout)
 
+
+async def _prefetch_user_profile(request):
+    """
+    Resolve the async user AND pre-warm the related Profile in the ORM
+    field cache. This prevents SynchronousOnlyOperation when the template
+    accesses user.profile inside an async view.
+    """
+    from asgiref.sync import sync_to_async
+    from django.contrib.auth import aget_user
+    
+    # Properly resolve the user asynchronously without triggering lazy evaluation
+    request.user = await aget_user(request)
+
+    if request.user.is_authenticated:
+        # Accessing user.profile runs a sync ORM query; wrapping it with
+        # sync_to_async executes it in a thread and caches the result on
+        # the user instance so subsequent template lookups are free.
+        def _get_profile():
+            try:
+                return request.user.profile
+            except Exception: # RelatedObjectDoesNotExist
+                return None
+        await sync_to_async(_get_profile)()
+    return request.user
+
+
 async def index(request):
-    # Fix for SynchronousOnlyOperation in template
-    request.user = await request.auser()
+    await _prefetch_user_profile(request)
     # Fetch News (Database - synchronous for now, Django handles it)
     from asgiref.sync import sync_to_async
     news_items = await sync_to_async(list)(News.objects.all().order_by('-created_at'))
@@ -34,6 +59,15 @@ async def index(request):
         fetch_jikan_data('popular_anime', JIKAN_API_ENDPOINTS['popular_anime']),
         fetch_jikan_data('anime_movie', JIKAN_API_ENDPOINTS['anime_movie'])
     )
+    
+    # DEBUG
+    print(f"DEBUG: airing_now_data type: {type(airing_now_data)}")
+    if airing_now_data:
+        print(f"DEBUG: airing_now_data keys: {airing_now_data.keys()}")
+        if 'data' in airing_now_data:
+            print(f"DEBUG: airing_now_data length: {len(airing_now_data['data'])}")
+    else:
+        print("DEBUG: airing_now_data is NONE")
 
     # Title translation disabled - anime names should stay in original language
     # (Literal translation looks bad for proper nouns)
@@ -83,7 +117,7 @@ async def index(request):
 
 async def anime_detail(request, anime_id):
     # Fix for SynchronousOnlyOperation in template
-    request.user = await request.auser()
+    await _prefetch_user_profile(request)
     cache_key = f'anime_detail_{anime_id}'
     raw_data = await fetch_jikan_data(cache_key, f"{JIKAN_API_ENDPOINTS['anime_base']}/{anime_id}/full", timeout=600)
     
@@ -191,7 +225,7 @@ async def calendar_view(request):
     Display anime release calendar.
     """
     # Fix for SynchronousOnlyOperation
-    request.user = await request.auser()
+    await _prefetch_user_profile(request)
     
     from .services import get_daily_schedule
     
@@ -235,7 +269,7 @@ async def calendar_view(request):
 
 async def activity_feed_view(request):
     """Feed of people you follow."""
-    request.user = await request.auser()
+    await _prefetch_user_profile(request)
     if not request.user.is_authenticated:
         from django.shortcuts import redirect
         return redirect('login')
@@ -271,7 +305,7 @@ async def activity_feed_view(request):
 
 async def global_feed_view(request):
     """Feed of everyone."""
-    request.user = await request.auser()
+    await _prefetch_user_profile(request)
     from asgiref.sync import sync_to_async
     from django.core.paginator import Paginator
 
@@ -296,7 +330,7 @@ async def global_feed_view(request):
 
 async def notifications_view(request):
     """View to list user notifications."""
-    request.user = await request.auser()
+    await _prefetch_user_profile(request)
     if not request.user.is_authenticated:
         from django.shortcuts import redirect
         return redirect('login')
@@ -326,7 +360,7 @@ async def notifications_view(request):
 
 async def check_unread_notifications(request):
     """AJAX endpoint to check unread notification count."""
-    request.user = await request.auser()
+    await _prefetch_user_profile(request)
     from django.http import JsonResponse
     if not request.user.is_authenticated:
         return JsonResponse({'unread': 0})
@@ -341,7 +375,7 @@ async def check_unread_notifications(request):
 
 async def discovery_view(request):
     """View to display AI recommendations based on user's anime list."""
-    request.user = await request.auser()
+    await _prefetch_user_profile(request)
     if not request.user.is_authenticated:
         from django.shortcuts import redirect
         return redirect('login')
@@ -357,7 +391,7 @@ async def discovery_view(request):
 
 async def wrapped_view(request, year=None):
     """View to display MitsuList Wrapped (Year in Review) statistics."""
-    request.user = await request.auser()
+    await _prefetch_user_profile(request)
     if not request.user.is_authenticated:
         from django.shortcuts import redirect
         return redirect('login')
@@ -389,3 +423,64 @@ def custom_404(request, exception):
 
 def custom_500(request):
     return render(request, '500.html', status=500)
+
+async def global_search(request):
+    """
+    Advanced Global Search using PostgreSQL Full-Text Search and Jikan API.
+    """
+    from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
+    from django.contrib.auth.models import User
+    from asgiref.sync import sync_to_async
+    import urllib.parse
+    
+    await _prefetch_user_profile(request)
+    query = request.GET.get('q', '').strip()
+    
+    users = []
+    reviews = []
+    news = []
+    anime_results = []
+    
+    if query:
+        @sync_to_async
+        def do_db_search():
+            search_query = SearchQuery(query)
+            
+            # Users: Username (A weight) and Bio (B weight)
+            u_vector = SearchVector('username', weight='A') + SearchVector('profile__bio', weight='B')
+            found_users = list(User.objects.annotate(
+                rank=SearchRank(u_vector, search_query)
+            ).filter(rank__gte=0.01).select_related('profile').order_by('-rank')[:20])
+            
+            # Reviews: Content
+            r_vector = SearchVector('content')
+            found_reviews = list(Review.objects.annotate(
+                rank=SearchRank(r_vector, search_query)
+            ).filter(rank__gte=0.01).select_related('user', 'user__profile').order_by('-rank')[:20])
+            
+            # News: Title and Description
+            n_vector = SearchVector('title', weight='A') + SearchVector('description', weight='B')
+            found_news = list(News.objects.annotate(
+                rank=SearchRank(n_vector, search_query)
+            ).filter(rank__gte=0.01).order_by('-rank')[:10])
+            
+            return found_users, found_reviews, found_news
+            
+        # Execute DB Search
+        users, reviews, news = await do_db_search()
+        
+        # Execute Jikan API Search in parallel
+        encoded_query = urllib.parse.quote(query)
+        url = f"https://api.jikan.moe/v4/anime?q={encoded_query}&sfw=true&limit=12"
+        jikan_data = await fetch_jikan_data(f"search_global_{encoded_query}", url)
+        if jikan_data and 'data' in jikan_data:
+            anime_results = jikan_data['data']
+
+    context = {
+        'query': query,
+        'users': users,
+        'reviews': reviews,
+        'news': news,
+        'anime_results': anime_results
+    }
+    return render(request, 'global_search.html', context)

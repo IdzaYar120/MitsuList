@@ -23,17 +23,20 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1').split(',')
 CSRF_TRUSTED_ORIGINS = ['https://*.vercel.app']
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
     'csp',
     'cloudinary_storage',
     'cloudinary',
     'app',
     'users',
+    'chat',
 ]
 
 MIDDLEWARE = [
@@ -67,7 +70,17 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'mitsulist.wsgi.app'
+ASGI_APPLICATION = 'mitsulist.asgi.application'
+
+# Channels Redis Layer Config
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [os.getenv('REDIS_URL', 'redis://127.0.0.1:6379/1')], # Using DB 1 for channels to separate from cache DB 0
+        },
+    },
+}
 
 DATABASES = {
     'default': {

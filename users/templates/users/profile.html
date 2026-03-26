@@ -50,15 +50,27 @@
                         </a>
                     </div>
                     {% elif is_following %}
-                    <a href="{% url 'unfollow_user' viewed_user.username %}"
-                        style="font-size: 0.9rem; background: rgba(248, 113, 113, 0.2); color: #f87171; border: 1px solid #f87171; padding: 5px 15px; border-radius: 6px; text-decoration: none; transition: 0.2s;">
-                        <i class="fa-solid fa-user-minus"></i> {% trans "Unfollow" %}
-                    </a>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <a href="{% url 'unfollow_user' viewed_user.username %}"
+                            style="font-size: 0.9rem; background: rgba(248, 113, 113, 0.2); color: #f87171; border: 1px solid #f87171; padding: 5px 15px; border-radius: 6px; text-decoration: none; transition: 0.2s;">
+                            <i class="fa-solid fa-user-minus"></i> {% trans "Unfollow" %}
+                        </a>
+                        <a href="{% url 'chat:start_chat' viewed_user.username %}"
+                           style="font-size: 0.9rem; color: #fff; background: rgba(123, 47, 247, 0.2); border: 1px solid var(--color-accent); padding: 5px 15px; border-radius: 6px; text-decoration: none; transition: 0.2s; display: inline-flex; align-items: center; gap: 5px;">
+                            <i class="fa-solid fa-envelope"></i> {% trans "Message" %}
+                        </a>
+                    </div>
                 {% else %}
-                    <a href="{% url 'follow_user' viewed_user.username %}"
-                        style="font-size: 0.9rem; background: var(--color-primary); color: white; border: 1px solid var(--color-primary); padding: 5px 15px; border-radius: 6px; text-decoration: none; transition: 0.2s;">
-                        <i class="fa-solid fa-user-plus"></i> {% trans "Follow" %}
-                    </a>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <a href="{% url 'follow_user' viewed_user.username %}"
+                            style="font-size: 0.9rem; background: var(--color-primary); color: white; border: 1px solid var(--color-primary); padding: 5px 15px; border-radius: 6px; text-decoration: none; transition: 0.2s;">
+                            <i class="fa-solid fa-user-plus"></i> {% trans "Follow" %}
+                        </a>
+                        <a href="{% url 'chat:start_chat' viewed_user.username %}"
+                           style="font-size: 0.9rem; color: #fff; background: rgba(123, 47, 247, 0.2); border: 1px solid var(--color-accent); padding: 5px 15px; border-radius: 6px; text-decoration: none; transition: 0.2s; display: inline-flex; align-items: center; gap: 5px;">
+                            <i class="fa-solid fa-envelope"></i> {% trans "Message" %}
+                        </a>
+                    </div>
                 {% endif %}
 
                 <div style="display: flex; gap: 20px; margin-top: 10px; font-size: 0.9rem; color: var(--color-muted);">
@@ -71,7 +83,7 @@
                 {% if badges %}
                 <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
                     {% for badge in badges %}
-                    <div title="{{ badge.desc }}" 
+                    <div title="{{ badge.description }}" 
                          style="background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; display: flex; align-items: center; gap: 5px; border: 1px solid {{ badge.color }}; color: {{ badge.color }}; cursor: help;">
                         <i class="fa-solid {{ badge.icon }}"></i> {{ badge.name }}
                     </div>

@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}Search: {{ query }} - MitsuList{% endblock %}
+
+{% block content %}
+<style>
+    .search-header {
+        text-align: center;
+        margin: 40px 0;
+        font-family: var(--font-header);
+    }
+    .search-input-large {
+        width: 100%;
+        max-width: 600px;
+        padding: 15px 25px;
+        font-size: 1.2rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid var(--glass-border);
+        border-radius: 30px;
+        color: white;
+        transition: border-color 0.3s;
+    }
+    .search-input-large:focus {
+        outline: none;
+        border-color: var(--color-primary);
+    }
+    .results-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+    .user-card, .review-card, .news-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        padding: 20px;
+        transition: transform 0.2s, box-shadow 0.2s;
+        text-decoration: none;
+        color: white;
+        display: block;
+    }
+    .user-card:hover, .review-card:hover, .news-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        border-color: var(--color-primary);
+    }
+    .user-card img {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 15px;
+        border: 2px solid var(--color-primary);
+    }
+    .section-title {
+        border-bottom: 2px solid var(--color-primary);
+        padding-bottom: 10px;
+        margin-top: 40px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: var(--color-muted);
+        font-style: italic;
+    }
+    .rank-badge {
+        font-size: 0.7rem;
+        background: rgba(123, 47, 247, 0.2);
+        color: var(--color-accent);
+        padding: 2px 8px;
+        border-radius: 10px;
+        margin-left: auto;
+    }
+</style>
+
+<div class="container reveal">
+    <div class="search-header">
+        <h1><i class="fa-solid fa-magnifying-glass"></i> {% trans "Global Search" %}</h1>
+        <form method="get" action="{% url 'global_search' %}">
+            <input type="text" name="q" value="{{ query }}" placeholder="{% trans 'Search anime, users, reviews...' %}" class="search-input-large" required>
+        </form>
+    </div>
+
+    {% if query %}
+        <!-- Anime Results via Jikan -->
+        <h2 class="section-title"><i class="fa-solid fa-tv"></i> {% trans "Anime" %}</h2>
+        {% if anime_results %}
+            <div class="results-grid">
+                {% for anime in anime_results %}
+                <a href="{% url 'anime-view' anime.mal_id %}" class="anime-card">
+                    <img src="{{ anime.images.jpg.image_url }}" alt="{{ anime.title }}">
+                    <div class="anime-info">
+                        <h3>{{ anime.title }}</h3>
+                        <p>★ {{ anime.score|default:"N/A" }}</p>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">{% trans "No anime found for" %} "{{ query }}"</div>
+        {% endif %}
+
+        <!-- User Results via PostgreSQL -->
+        <h2 class="section-title">
+            <i class="fa-solid fa-users"></i> {% trans "Community Users" %}
+            <span style="font-size: 0.9rem; margin-left: auto; color: var(--color-muted);">Powered by PostgreSQL FTS</span>
+        </h2>
+        {% if users %}
+            <div class="results-grid">
+                {% for u in users %}
+                <a href="{% url 'public_profile' u.username %}" class="user-card" style="text-align: center;">
+                    <img src="{{ u.profile.image.url }}" alt="{{ u.username }}">
+                    <h3 style="margin: 0; font-family: var(--font-header);">{{ u.username }}</h3>
+                    {% if u.profile.bio %}
+                        <p style="font-size: 0.85rem; color: var(--color-muted); margin-top: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                            {{ u.profile.bio }}
+                        </p>
+                    {% endif %}
+                    <div style="margin-top: 10px; font-size: 0.8rem; color: var(--color-primary);">
+                        Match Rank: {{ u.rank|floatformat:3 }}
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">{% trans "No users found" %}</div>
+        {% endif %}
+
+        <!-- Review Results via PostgreSQL -->
+        <h2 class="section-title"><i class="fa-solid fa-pen-nib"></i> {% trans "User Reviews" %}</h2>
+        {% if reviews %}
+            <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+                {% for review in reviews %}
+                <a href="{% url 'anime_reviews_list' review.anime_id %}" class="review-card" style="display: flex; gap: 15px;">
+                    <img src="{{ review.user.profile.image.url }}" alt="avatar" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
+                    <div style="flex-grow: 1;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <strong style="color: var(--color-primary);">{{ review.user.username }}</strong>
+                            <span class="rank-badge">Rank: {{ review.rank|floatformat:3 }}</span>
+                        </div>
+                        <p style="margin-top: 5px; font-size: 0.95rem; color: #e2e8f0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                            "{{ review.content }}"
+                        </p>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">{% trans "No matching reviews found" %}</div>
+        {% endif %}
+
+    {% else %}
+        <div style="text-align: center; margin-top: 50px; color: var(--color-muted);">
+            <i class="fa-brands fa-searchengin fa-4x" style="opacity: 0.5; margin-bottom: 20px;"></i>
+            <p>{% trans "Type a query above to search globally across Anime, Users, and Reviews via PostgreSQL Vector Search." %}</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

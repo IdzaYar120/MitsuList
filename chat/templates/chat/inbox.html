@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block content %}
+<style>
+    .inbox-container {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 20px;
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+    }
+    .inbox-header {
+        font-family: var(--font-header);
+        color: var(--color-text-primary);
+        margin-bottom: 20px;
+        font-size: 1.8rem;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    .thread-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .thread-card {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        text-decoration: none;
+        color: var(--color-text-primary);
+        transition: background 0.2s ease;
+    }
+    .thread-card:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+    .thread-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 15px;
+        border: 2px solid var(--color-primary);
+    }
+    .thread-info {
+        flex-grow: 1;
+    }
+    .thread-username {
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin: 0 0 5px 0;
+    }
+    .thread-last-msg {
+        font-size: 0.9rem;
+        color: var(--color-text-secondary);
+        margin: 0;
+    }
+    .thread-time {
+        font-size: 0.8rem;
+        color: var(--color-text-secondary);
+        white-space: nowrap;
+    }
+    .empty-inbox {
+        text-align: center;
+        padding: 40px 0;
+        color: var(--color-text-secondary);
+    }
+</style>
+
+<div class="inbox-container reveal-stagger">
+    <div class="inbox-header">
+        <i class="fa-solid fa-comments" style="color: var(--color-primary)"></i>
+        {% trans "My Messages" %}
+    </div>
+
+    <div class="thread-list">
+        {% for thread in threads %}
+            {# Determine the other user #}
+            {% url 'chat:room' thread.id as room_url %}
+            {% if request.user == thread.user1 %}
+                {% with other=thread.user2 %}
+                    <a href="{{ room_url }}" class="thread-card">
+                        <img src="{{ other.profile.image.url }}" class="thread-avatar" alt="{{ other.username }}">
+                        <div class="thread-info">
+                            <h3 class="thread-username">{{ other.username }}</h3>
+                            <p class="thread-last-msg">
+                                {% if thread.messages.last %}
+                                    {{ thread.messages.last.text|truncatechars:40 }}
+                                {% else %}
+                                    {% trans "No messages yet." %}
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="thread-time">
+                            {{ thread.updated_at|date:"M d, H:i" }}
+                        </div>
+                    </a>
+                {% endwith %}
+            {% else %}
+                {% with other=thread.user1 %}
+                    <a href="{{ room_url }}" class="thread-card">
+                        <img src="{{ other.profile.image.url }}" class="thread-avatar" alt="{{ other.username }}">
+                        <div class="thread-info">
+                            <h3 class="thread-username">{{ other.username }}</h3>
+                            <p class="thread-last-msg">
+                                {% if thread.messages.last %}
+                                    {{ thread.messages.last.text|truncatechars:40 }}
+                                {% else %}
+                                    {% trans "No messages yet." %}
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="thread-time">
+                            {{ thread.updated_at|date:"M d, H:i" }}
+                        </div>
+                    </a>
+                {% endwith %}
+            {% endif %}
+        {% empty %}
+            <div class="empty-inbox">
+                <i class="fa-solid fa-ghost fa-3x" style="margin-bottom: 15px; opacity: 0.5;"></i>
+                <h3>{% trans "It's quiet here..." %}</h3>
+                <p>{% trans "Visit a user's profile to start a chat." %}</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

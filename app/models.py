@@ -108,6 +108,7 @@ class Notification(models.Model):
         ('review_comment', 'Review Comment'),
         ('new_follower', 'New Follower'),
         ('system', 'System Message'),
+        ('badge_earned', 'Badge Earned'),
     ]
 
     recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')

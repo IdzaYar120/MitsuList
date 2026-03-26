@@ -10,8 +10,11 @@
     <!-- P5 Favicons -->
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'ico/apple-touch-icon.png' %}">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'ico/favicon-32x32.png' %}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'ico/favicon-16x16.png' %}">
-    <link rel="manifest" href="{% static 'ico/site.webmanifest' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/ico/favicon-16x16.png">
+    <link rel="manifest" href="/static/ico/site.webmanifest">
+
+    <!-- Security & Hotlink Bypass -->
+    <meta name="referrer" content="no-referrer">
 
     <!-- SEO & Open Graph (Default) -->
     {% block meta %}
@@ -32,9 +35,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@400;600;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-        integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 
     <!-- Theme Variables & Styles -->
     <link rel="stylesheet" href="{% static 'css/variables.css' %}">
@@ -71,16 +72,16 @@
                     <span style="color: var(--color-accent);">Mitsu</span>List
                 </span>
             </a>
-            <div id="search-container-nav" style="display: flex; align-items: center; gap: 0;">
-                <input id="input-box" placeholder="Explore Anime..."
+            <form action="{% url 'global_search' %}" method="get" id="search-container-nav" style="display: flex; align-items: center; gap: 0; margin: 0;">
+                <input id="input-box" name="q" placeholder="{% trans 'Explore Anime...' %}" required
                     style="border-radius: var(--border-radius) 0 0 var(--border-radius);">
-                <button id="search-button"
+                <button id="search-button" type="submit"
                     style="background: var(--color-primary); border: none; color: white; padding: 10px 15px; cursor: pointer;"><i
                         class="fa-solid fa-magnifying-glass"></i></button>
-                <button id="toggle-filters" title="Advanced Filters"
+                <button id="toggle-filters" type="button" title="Advanced Filters"
                     style="border-radius: 0 var(--border-radius) var(--border-radius) 0; background: var(--color-secondary); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--color-accent); padding: 10px 15px; cursor: pointer; transition: var(--transition);"><i
                         class="fa-solid fa-sliders"></i></button>
-            </div>
+            </form>
             <div style="margin-left: 20px;">
                 <a href="{% url 'calendar' %}" style="color: var(--color-text); text-decoration: none; font-weight: 600; font-family: var(--font-header); transition: var(--transition);">
                     <i class="fa-regular fa-calendar-days" style="color: var(--color-primary);"></i> {% trans "Calendar" %}
@@ -137,6 +138,9 @@
                 </form>
 
                 {% if user.is_authenticated %}
+                <a href="{% url 'chat:inbox' %}" style="color: var(--color-text-secondary); margin-right: 15px; text-decoration: none; font-size: 1.2rem; transition: var(--transition);">
+                    <i class="fa-solid fa-envelope"></i>
+                </a>
                 <a href="{% url 'profile' %}"
                     style="color: var(--color-muted); margin-right: 15px; text-decoration: none; transition: var(--transition);">{{user.username}}</a>
                 <a href="{% url 'logout' %}" style="color: var(--color-primary); text-decoration: none; border-left: 1px solid var(--color-muted); padding-left: 15px; transition: var(--transition);">{% trans "Logout" %}</a>
@@ -147,16 +151,18 @@
             </div>
         </div>
 
-        <!-- Messages Section -->
+        <!-- Toast Container Base -->
+        <div id="toast-container"></div>
+        
+        <!-- Inject Django Messages into Toast JS -->
         {% if messages %}
-        <div id="messages-container" style="margin-top: 20px; width: 80%; max-width: 600px;">
-            {% for message in messages %}
-            <div class="alert alert-{{message.tags}}"
-                style="background: var(--glass-bg); backdrop-filter: blur(10px); color: white; padding: 15px 20px; margin-bottom: 10px; font-family: var(--font-body); border-radius: 10px; border: 1px solid rgba(123, 47, 247, 0.3); text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
-                {{message}}
-            </div>
-            {% endfor %}
-        </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                {% for message in messages %}
+                showToast("{{ message.tags }}", "{{ message|escapejs }}");
+                {% endfor %}
+            });
+        </script>
         {% endif %}
 
         <!-- AJAX Search Results Container -->
@@ -290,6 +296,100 @@
         })();
     </script>
 
+    <!-- Toast Notification Engine -->
+    <script>
+        // Synthesizes a clean "pop" sound using WebAudio API (Zero network calls required)
+        function playPopSound() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                
+                osc.type = 'sine';
+                // Frequency sweep for a nice pop sound
+                osc.frequency.setValueAtTime(800, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.1);
+                
+                // Volume envelope
+                gain.gain.setValueAtTime(0.5, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+                
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + 0.1);
+            } catch (e) {
+                console.log("Audio play blocked by browser policy");
+            }
+        }
+
+        // Main toast rendering function
+        function showToast(type, text) {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            // Map django tags to toast styles and FA icons
+            let iconClass = 'fa-circle-info';
+            let styleClass = 'toast-info';
+            
+            if (type.includes('success')) {
+                iconClass = 'fa-circle-check';
+                styleClass = 'toast-success';
+            } else if (type.includes('error') || type.includes('danger')) {
+                iconClass = 'fa-circle-exclamation';
+                styleClass = 'toast-error';
+            } else if (type.includes('warning')) {
+                iconClass = 'fa-triangle-exclamation';
+                styleClass = 'toast-warning';
+            }
+
+            const toast = document.createElement('div');
+            toast.className = `toast-msg ${styleClass}`;
+            toast.innerHTML = `
+                <i class="fa-solid ${iconClass} toast-icon"></i>
+                <div style="flex-grow: 1; text-align: left;">${text}</div>
+                <div class="toast-progress"></div>
+            `;
+
+            container.appendChild(toast);
+            
+            // Play sound asynchronously
+            setTimeout(playPopSound, 50);
+
+            // Trigger slide in animation
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    toast.classList.add('show');
+                    // Start progress bar animation (shrink to 0)
+                    const progress = toast.querySelector('.toast-progress');
+                    if (progress) {
+                        progress.style.transform = 'scaleX(0)';
+                    }
+                });
+            });
+
+            // Dismiss function
+            const dismiss = () => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    if (toast.parentNode) toast.parentNode.removeChild(toast);
+                }, 400); // Wait for transition
+            };
+
+            // Auto dismiss after 3 seconds
+            const timer = setTimeout(dismiss, 3000);
+
+            // Dismiss on click
+            toast.addEventListener('click', () => {
+                clearTimeout(timer);
+                dismiss();
+            });
+        }
+    </script>
+    
     {% block scripts %}{% endblock %}
 </body>
 

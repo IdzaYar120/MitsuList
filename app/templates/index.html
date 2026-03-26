@@ -125,7 +125,7 @@
     </div>
     {% endif %}
 
-    <div class="header-and-buttons">
+    <div class="header-and-buttons reveal">
         <h1 id="currently-airing-header"><i class="fa-solid fa-bolt"
                 style="color: var(--color-accent);"></i>&nbsp;&nbsp;{% trans "THIS SEASON" %}</h1>
         <div class="scroll-btns-group" style="display: flex; gap: 10px; margin-left: auto; margin-right: 5%;">
@@ -133,7 +133,7 @@
             <button class="scroll-buttons" id="next-airing"><i class="fa-solid fa-chevron-right"></i></button>
         </div>
     </div>
-    <div id="airing-now-container">
+    <div id="airing-now-container" class="reveal-stagger">
         {% for airing_now_anime in airing_now_data.data %}
         <a href="anime/{{airing_now_anime.mal_id}}/" class="anime-card-links">
             <div class="anime-cards">
@@ -147,7 +147,7 @@
         {% endfor %}
     </div>
 
-    <div class="header-and-buttons">
+    <div class="header-and-buttons reveal">
         <h1 id="popular-anime-header"><i class="fa-solid fa-fire"
                 style="color: var(--color-accent);"></i>&nbsp;&nbsp;{% trans "POPULAR" %}</h1>
         <div class="scroll-btns-group" style="display: flex; gap: 10px; margin-left: auto; margin-right: 5%;">
@@ -155,7 +155,7 @@
             <button class="scroll-buttons" id="next-popular-anime"><i class="fa-solid fa-chevron-right"></i></button>
         </div>
     </div>
-    <div id="popular-anime-container">
+    <div id="popular-anime-container" class="reveal-stagger">
         {% for popular_anime in popular_anime_data.data %}
         <a href="anime/{{popular_anime.mal_id}}/" class="anime-card-links">
             <div class="anime-cards">
@@ -169,14 +169,14 @@
         {% endfor %}
     </div>
 
-    <div class="header-and-buttons">
+    <div class="header-and-buttons reveal">
         <h1 id="top-anime-header"><i class="fa-solid fa-crown" style="color: var(--color-accent);"></i>&nbsp;&nbsp;{% trans "TOP ANIME" %}</h1>
         <div class="scroll-btns-group" style="display: flex; gap: 10px; margin-left: auto; margin-right: 5%;">
             <button class="scroll-buttons" id="previous-top-anime"><i class="fa-solid fa-chevron-left"></i></button>
             <button class="scroll-buttons" id="next-top-anime"><i class="fa-solid fa-chevron-right"></i></button>
         </div>
     </div>
-    <div id="top-anime-container">
+    <div id="top-anime-container" class="reveal-stagger">
         {% for top_anime in top_anime_data.data %}
         <a href="anime/{{top_anime.mal_id}}/" class="anime-card-links">
             <div class="anime-cards">
@@ -193,7 +193,7 @@
 </div>
 
 {% if user.is_authenticated and recommendations_data and recommendations_data.data %}
-<div class="header-and-buttons">
+<div class="header-and-buttons reveal">
     <h1 id="recommendations-header"><i class="fa-solid fa-thumbs-up"
             style="color: var(--color-accent);"></i>&nbsp;&nbsp;BECAUSE YOU WATCHED {{ source_anime_title|upper }}</h1>
     <div class="scroll-btns-group" style="display: flex; gap: 10px; margin-left: auto; margin-right: 5%;">
@@ -201,7 +201,7 @@
         <button class="scroll-buttons" id="next-recommendations"><i class="fa-solid fa-chevron-right"></i></button>
     </div>
 </div>
-<div id="recommendations-container"
+<div id="recommendations-container" class="reveal-stagger"
     style="display: flex; overflow-x: auto; padding: 20px 5%; gap: 30px; scrollbar-width: none; -ms-overflow-style: none; scroll-behavior: smooth;">
     {% for rec in recommendations_data.data %}
     <a href="anime/{{rec.entry.mal_id}}/" class="anime-card-links">
@@ -223,7 +223,7 @@
 </style>
 {% endif %}
 
-<div class="header-and-buttons">
+<div class="header-and-buttons reveal">
     <h1 id="anime-movie-header"><i class="fa-solid fa-ticket" style="color: var(--color-accent);"></i>&nbsp;&nbsp;MOVIES
     </h1>
     <div class="scroll-btns-group" style="display: flex; gap: 10px; margin-left: auto; margin-right: 5%;">
@@ -231,7 +231,7 @@
         <button class="scroll-buttons" id="next-anime-movie"><i class="fa-solid fa-chevron-right"></i></button>
     </div>
 </div>
-<div id="anime-movie-container">
+<div id="anime-movie-container" class="reveal-stagger">
     {% for movie in anime_movie.data %}
     <a href="anime/{{movie.mal_id}}/" class="anime-card-links">
         <div class="anime-cards">

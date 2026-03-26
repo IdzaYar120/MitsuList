@@ -294,15 +294,9 @@ def public_profile(request, username):
         minutes_watched = stats['total_episodes'] * 24
         stats['days_watched'] = round(minutes_watched / 60 / 24, 1)
         
-        badges = []
-        if stats['total_entries'] >= 10:
-            badges.append({'name': 'Newbie', 'icon': 'fa-seedling', 'color': '#2ecc71', 'desc': 'Watched 10+ anime'})
-        if stats['total_entries'] >= 50:
-            badges.append({'name': 'Otaku', 'icon': 'fa-glasses', 'color': '#3498db', 'desc': 'Watched 50+ anime'})
-        if stats['total_entries'] >= 100:
-            badges.append({'name': 'Veteran', 'icon': 'fa-crown', 'color': '#f1c40f', 'desc': 'Watched 100+ anime'})
-        if stats['completed'] >= 50:
-            badges.append({'name': 'Completionist', 'icon': 'fa-check-double', 'color': '#9b59b6', 'desc': 'Completed 50+ anime'})
+        # Earned Badges are now fetched from the database
+        user_badges = viewed_user.earned_badges.select_related('badge').all()
+        badges = [ub.badge for ub in user_badges]
         
         cache.set(cache_key, (stats, badges), 300)  # 5 minutes
     

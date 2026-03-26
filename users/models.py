@@ -114,7 +114,30 @@ class UserAnimeEntry(models.Model):
         ordering = ['-updated_at']
 
     def __str__(self):
-        return f"{self.user.username} - {self.title} ({self.status})"
+        return f"{self.user.username} - {self.title} ({self.get_status_display()})"
+
+
+class Badge(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    description = models.CharField(max_length=200)
+    icon = models.CharField(max_length=50) # e.g. 'fa-seedling'
+    color = models.CharField(max_length=20, default='#2ecc71')
+    category = models.CharField(max_length=50) # 'anime_count', 'review_count', 'completed_count'
+    requirement_value = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.name
+
+class UserBadge(models.Model):
+    user = models.ForeignKey(User, related_name='earned_badges', on_delete=models.CASCADE)
+    badge = models.ForeignKey(Badge, on_delete=models.CASCADE)
+    earned_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'badge')
+
+    def __str__(self):
+        return f"{self.user.username} earned {self.badge.name}"
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
