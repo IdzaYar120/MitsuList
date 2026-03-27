@@ -111,9 +111,14 @@
             </div>
             {% endif %}
             
-            <div id="auth-links"
+                <div id="auth-links"
                 style="margin-left: 20px; font-family: var(--font-body); font-weight: 600; display: flex; align-items: center;">
                 
+                <!-- Install PWA Button (Hidden by Default) -->
+                <button id="install-app-btn" style="display: none; background: var(--color-primary); border: none; color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; cursor: pointer; margin-right: 15px; font-weight: bold; transition: var(--transition); box-shadow: 0 4px 10px rgba(0,0,0,0.3);" title="Install App">
+                    <i class="fa-solid fa-download"></i> {% trans "App" %}
+                </button>
+
                 <!-- Theme Toggle Button -->
                 <button id="theme-toggle" style="background: transparent; border: none; color: var(--color-text); font-size: 1.2rem; cursor: pointer; margin-right: 15px; transition: var(--transition);" title="Toggle Theme">
                     <i class="fa-solid fa-moon" id="theme-icon"></i>
@@ -390,6 +395,53 @@
         }
     </script>
     
+    <!-- PWA Installation Script -->
+    <script>
+        let deferredPrompt;
+        const installBtn = document.getElementById('install-app-btn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent Chrome 67 and earlier from automatically showing the prompt
+            e.preventDefault();
+            // Stash the event so it can be triggered later.
+            deferredPrompt = e;
+            // Update UI to notify the user they can add to home screen
+            if (installBtn) {
+                installBtn.style.display = 'inline-flex';
+                installBtn.style.alignItems = 'center';
+                installBtn.style.gap = '5px';
+            }
+        });
+
+        if (installBtn) {
+            installBtn.addEventListener('click', (e) => {
+                // hide our user interface that shows our A2HS button
+                installBtn.style.display = 'none';
+                // Show the prompt
+                deferredPrompt.prompt();
+                // Wait for the user to respond to the prompt
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the A2HS prompt');
+                    } else {
+                        console.log('User dismissed the A2HS prompt');
+                        installBtn.style.display = 'inline-flex';
+                    }
+                    deferredPrompt = null;
+                });
+            });
+        }
+
+        window.addEventListener('appinstalled', (evt) => {
+            // Log install to analytics
+            console.log('INSTALL: Success');
+            // Show toast using our new notification system
+            if (typeof showToast === 'function') {
+                showToast('success', '{% trans "MitsuList successfully installed to your device!" %}');
+            }
+        });
+    </script>
+
     {% block scripts %}{% endblock %}
 </body>
 
