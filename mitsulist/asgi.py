@@ -20,12 +20,13 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mitsulist.settings')
 django_asgi_app = get_asgi_application()
 
 import chat.routing
+import clubs.routing
 
 application = ProtocolTypeRouter({
     "http": django_asgi_app,
     "websocket": AuthMiddlewareStack(
         URLRouter(
-            chat.routing.websocket_urlpatterns
+            chat.routing.websocket_urlpatterns + clubs.routing.websocket_urlpatterns
         )
     ),
 })

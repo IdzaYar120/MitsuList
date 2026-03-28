@@ -11,6 +11,7 @@ urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),
     path('users/', include('users.urls')),
     path('chat/', include('chat.urls')),
+    path('clubs/', include('clubs.urls')),
     path('sw.js', TemplateView.as_view(template_name='sw.js', content_type='application/javascript'), name='sw.js'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

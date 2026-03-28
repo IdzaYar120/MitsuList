@@ -1,0 +1,436 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}{{ club.name }} - MitsuList{% endblock %}
+
+{% block content %}
+<style>
+    .club-dashboard {
+        display: grid;
+        grid-template-columns: 350px 1fr;
+        gap: 30px;
+        max-width: 1200px;
+        margin: 20px auto;
+        min-height: calc(100vh - 120px);
+    }
+    
+    @media (max-width: 900px) {
+        .club-dashboard {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .sidebar {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .sidebar-cover {
+        height: 150px;
+        background-color: #222;
+        background-size: cover;
+        background-position: center;
+        border-bottom: 2px solid var(--color-primary);
+    }
+
+    .sidebar-content {
+        padding: 20px;
+    }
+
+    .club-title {
+        font-family: var(--font-header);
+        margin: 0 0 10px 0;
+        font-size: 1.5rem;
+    }
+
+    .club-desc {
+        color: var(--color-muted);
+        font-size: 0.95rem;
+        margin-bottom: 20px;
+        line-height: 1.5;
+    }
+
+    .members-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-bottom: 20px;
+    }
+
+    .member-avatar {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        border: 1px solid var(--color-primary);
+        object-fit: cover;
+    }
+
+    .recommendations-list {
+        margin-top: 20px;
+        border-top: 1px solid rgba(255,255,255,0.1);
+        padding-top: 20px;
+    }
+
+    .rec-item {
+        display: flex;
+        gap: 15px;
+        background: rgba(0,0,0,0.2);
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+
+    .rec-item img {
+        width: 50px;
+        height: 70px;
+        border-radius: 4px;
+        object-fit: cover;
+    }
+
+    .rec-info h4 {
+        margin: 0 0 5px 0;
+        font-size: 0.95rem;
+        color: white;
+    }
+
+    .rec-info p {
+        margin: 0;
+        font-size: 0.8rem;
+        color: var(--color-muted);
+    }
+
+    /* CHAT UI */
+    .chat-layout {
+        display: flex;
+        flex-direction: column;
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .chat-header {
+        padding: 15px 20px;
+        background: rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid var(--glass-border);
+        color: white;
+    }
+
+    .chat-messages {
+        flex-grow: 1;
+        padding: 20px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        scrollbar-width: thin;
+        scrollbar-color: var(--color-primary) transparent;
+        height: 500px;
+    }
+
+    .message-container {
+        display: flex;
+        gap: 10px;
+        max-width: 85%;
+    }
+
+    .message-container.sent {
+        align-self: flex-end;
+        flex-direction: row-reverse;
+    }
+
+    .message-container.received {
+        align-self: flex-start;
+    }
+
+    .chat-avatar {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+    }
+
+    .message-bubble {
+        padding: 10px 14px;
+        border-radius: 12px;
+        position: relative;
+        line-height: 1.4;
+        word-wrap: break-word;
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+    }
+
+    .sent .message-bubble {
+        background: var(--color-primary);
+        color: white;
+    }
+
+    .message-sender {
+        font-size: 0.75rem;
+        color: var(--color-accent);
+        margin-bottom: 3px;
+        font-weight: bold;
+    }
+
+    .sent .message-sender {
+        display: none;
+    }
+
+    .message-time {
+        font-size: 0.65rem;
+        color: rgba(255, 255, 255, 0.5);
+        margin-top: 5px;
+        display: block;
+        text-align: right;
+    }
+
+    .chat-input-area {
+        padding: 15px 20px;
+        background: rgba(0, 0, 0, 0.2);
+        border-top: 1px solid var(--glass-border);
+        display: flex;
+        gap: 10px;
+    }
+
+    .chat-input {
+        flex-grow: 1;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 12px 20px;
+        color: white;
+        font-family: var(--font-main);
+        outline: none;
+    }
+
+    .chat-input:focus {
+        border-color: var(--color-primary);
+    }
+
+    .send-btn {
+        background: var(--color-primary);
+        color: white;
+        border: none;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s;
+    }
+
+    .btn-action {
+        width: 100%;
+        padding: 10px;
+        border-radius: 8px;
+        font-weight: bold;
+        text-align: center;
+        cursor: pointer;
+        display: inline-block;
+        text-decoration: none;
+        margin-bottom: 10px;
+    }
+</style>
+
+<div class="container reveal">
+    <div class="club-dashboard">
+        
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            {% if club.cover_image %}
+            <div class="sidebar-cover" style="background-image: url('{{ club.cover_image.url }}');"></div>
+            {% else %}
+            <div class="sidebar-cover"></div>
+            {% endif %}
+            
+            <div class="sidebar-content">
+                <h1 class="club-title">{{ club.name }}</h1>
+                <p class="club-desc">{{ club.description|default:"No description provided." }}</p>
+
+                <!-- Actions -->
+                {% if user.is_authenticated %}
+                    {% if is_member %}
+                        <form method="post" action="{% url 'clubs:leave_club' club.pk %}" onsubmit="return confirm('Are you sure you want to leave this club?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-action" style="background: transparent; border: 1px solid #ff4757; color: #ff4757;">
+                                <i class="fa-solid fa-person-walking-arrow-right"></i> Leave Club
+                            </button>
+                        </form>
+                    {% else %}
+                        <form method="post" action="{% url 'clubs:join_club' club.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-action" style="background: var(--color-primary); border: none; color: white;">
+                                <i class="fa-solid fa-right-to-bracket"></i> Join Club
+                            </button>
+                        </form>
+                    {% endif %}
+                {% endif %}
+
+                <!-- Members -->
+                <h3 style="font-size: 1rem; margin-top: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;"><i class="fa-solid fa-users"></i> {{ club.members.count }} Members</h3>
+                <div class="members-list">
+                    {% for member in club.members.all %}
+                        <a href="{% url 'public_profile' member.username %}" title="{{ member.username }}">
+                            <img src="{{ member.profile.image.url }}" class="member-avatar" alt="Avatar">
+                        </a>
+                    {% endfor %}
+                </div>
+
+                <!-- Recommendations -->
+                <div class="recommendations-list">
+                    <h3 style="font-size: 1rem; margin-bottom: 15px;"><i class="fa-solid fa-star" style="color: var(--color-accent);"></i> Club Recommendations</h3>
+                    
+                    {% if is_member %}
+                    <form method="post" action="{% url 'clubs:recommend_anime' club.pk %}" style="margin-bottom: 15px; display: flex; flex-direction: column; gap: 5px;">
+                        {% csrf_token %}
+                        <input type="number" name="anime_id" placeholder="Anime ID (MAL)" required style="padding: 8px; border-radius: 4px; border: none; background: rgba(0,0,0,0.3); color: white;">
+                        <input type="text" name="reason" placeholder="Why watch this? (optional)" style="padding: 8px; border-radius: 4px; border: none; background: rgba(0,0,0,0.3); color: white;">
+                        <button type="submit" style="background: var(--color-secondary); color: white; border: none; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer;">Add Recommendation</button>
+                    </form>
+                    {% endif %}
+
+                    {% for rec in recommendations %}
+                    <div class="rec-item">
+                        {% if rec.anime_image_url %}
+                        <img src="{{ rec.anime_image_url }}" alt="Cover">
+                        {% endif %}
+                        <div class="rec-info">
+                            <a href="{% url 'anime-view' rec.anime_id %}" style="text-decoration: none; color: white;">
+                                <h4>{{ rec.anime_title }}</h4>
+                            </a>
+                            <p>Recommended by <span style="color: var(--color-accent);">{{ rec.suggester.username }}</span></p>
+                            {% if rec.reason %}
+                                <p style="margin-top: 5px; font-style: italic;">"{{ rec.reason }}"</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                        <p style="color: var(--color-muted); font-size: 0.9rem;">No recommendations yet.</p>
+                    {% endfor %}
+                </div>
+
+            </div>
+        </div>
+
+        <!-- MAIN CHAT PANEL -->
+        <div class="chat-layout">
+            <div class="chat-header">
+                <i class="fa-solid fa-comments fa-xl" style="margin-right: 15px; color: var(--color-primary);"></i>
+                <h2 style="margin: 0; font-family: var(--font-header);">Group Chat Hub</h2>
+            </div>
+            
+            {% if is_member %}
+            <div class="chat-messages" id="chat-log">
+                {% for msg in club.messages.all %}
+                    <div class="message-container {% if msg.sender == request.user %}sent{% else %}received{% endif %}">
+                        {% if msg.sender != request.user %}
+                            <img src="{{ msg.sender.profile.image.url }}" class="chat-avatar" alt="Avatar">
+                        {% endif %}
+                        <div class="message-bubble">
+                            <div class="message-sender">{{ msg.sender.username }}</div>
+                            {{ msg.text }}
+                            <span class="message-time">{{ msg.timestamp|date:"H:i" }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="chat-input-area">
+                <input type="text" id="chat-message-input" class="chat-input" placeholder="Type a message to the club..." autocomplete="off">
+                <button id="chat-message-submit" class="send-btn">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+            {% else %}
+            <div style="flex-grow: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; color: var(--color-muted);">
+                <i class="fa-solid fa-lock fa-3x" style="margin-bottom: 20px; opacity: 0.5;"></i>
+                <p>Join the club to participate in the chat!</p>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+
+<!-- WebSocket Script -->
+{% if is_member %}
+{{ club.id|json_script:"club-id" }}
+{{ request.user.username|json_script:"current-username" }}
+
+<script>
+    const clubId = JSON.parse(document.getElementById('club-id').textContent);
+    const currentUsername = JSON.parse(document.getElementById('current-username').textContent);
+
+    const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+    const chatSocket = new WebSocket(
+        wsProtocol
+        + window.location.host
+        + '/ws/clubs/'
+        + clubId
+        + '/'
+    );
+
+    const chatLog = document.getElementById('chat-log');
+
+    function scrollToBottom() {
+        chatLog.scrollTop = chatLog.scrollHeight;
+    }
+    window.onload = scrollToBottom;
+
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        const isSent = data.sender === currentUsername;
+
+        let avatarHtml = '';
+        if (!isSent) {
+            avatarHtml = `<img src="${data.avatar_url}" class="chat-avatar" alt="Avatar">`;
+        }
+        
+        const msgHtml = `
+            <div class="message-container ${isSent ? 'sent' : 'received'}">
+                ${avatarHtml}
+                <div class="message-bubble">
+                    <div class="message-sender">${data.sender}</div>
+                    ${data.message.replace(/</g, "&lt;").replace(/>/g, "&gt;")}
+                    <span class="message-time">${data.timestamp}</span>
+                </div>
+            </div>
+        `;
+        
+        chatLog.insertAdjacentHTML('beforeend', msgHtml);
+        scrollToBottom();
+    };
+
+    chatSocket.onclose = function(e) {
+        console.error('Club Chat socket closed unexpectedly');
+    };
+
+    document.getElementById('chat-message-input').onkeyup = function(e) {
+        if (e.keyCode === 13) {
+            document.getElementById('chat-message-submit').click();
+        }
+    };
+
+    document.getElementById('chat-message-submit').onclick = function(e) {
+        const messageInputDom = document.getElementById('chat-message-input');
+        const message = messageInputDom.value;
+        if(message.trim() !== "") {
+            chatSocket.send(JSON.stringify({
+                'message': message
+            }));
+            messageInputDom.value = '';
+        }
+    };
+</script>
+{% endif %}
+
+{% endblock %}

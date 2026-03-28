@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}Clubs & Communities - MitsuList{% endblock %}
+
+{% block content %}
+<style>
+    .club-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+        margin-top: 30px;
+    }
+    .club-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+        text-decoration: none;
+        color: white;
+        display: flex;
+        flex-direction: column;
+    }
+    .club-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        border-color: var(--color-primary);
+    }
+    .club-cover {
+        height: 120px;
+        background-color: #222;
+        background-size: cover;
+        background-position: center;
+        border-bottom: 2px solid var(--color-primary);
+    }
+    .club-info {
+        padding: 20px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .club-title {
+        font-family: var(--font-header);
+        margin: 0 0 10px 0;
+        font-size: 1.2rem;
+    }
+    .club-desc {
+        color: var(--color-muted);
+        font-size: 0.9rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        margin-bottom: 15px;
+    }
+    .club-meta {
+        margin-top: auto;
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        color: var(--color-accent);
+    }
+    .header-flex {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="container reveal">
+    <div class="header-flex">
+        <h1 style="font-family: var(--font-header); margin: 0;">
+            <i class="fa-solid fa-users-viewfinder"></i> {% trans "Communities" %}
+        </h1>
+        {% if user.is_authenticated %}
+        <a href="{% url 'clubs:create_club' %}" style="background: var(--color-primary); color: white; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; transition: var(--transition);">
+            <i class="fa-solid fa-plus"></i> {% trans "Create Club" %}
+        </a>
+        {% endif %}
+    </div>
+
+    {% if clubs %}
+        <div class="club-grid reveal-stagger">
+            {% for club in clubs %}
+            <a href="{% url 'clubs:club_detail' club.pk %}" class="club-card item">
+                {% if club.cover_image %}
+                <div class="club-cover" style="background-image: url('{{ club.cover_image.url }}');"></div>
+                {% else %}
+                <div class="club-cover"></div>
+                {% endif %}
+                <div class="club-info">
+                    <h3 class="club-title">{{ club.name }}</h3>
+                    <div class="club-desc">{{ club.description|default:"No description provided." }}</div>
+                    <div class="club-meta">
+                        <span><i class="fa-solid fa-user-group"></i> {{ club.members.count }}</span>
+                        <span>Created: {{ club.created_at|date:"M d, Y" }}</span>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="text-align: center; margin-top: 50px; color: var(--color-muted); font-style: italic;">
+            <i class="fa-solid fa-ghost fa-3x" style="opacity: 0.5; margin-bottom: 15px;"></i>
+            <p>{% trans "No clubs exist yet. Be the first to start a community!" %}</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

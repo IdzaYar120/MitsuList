@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}Create Club - MitsuList{% endblock %}
+
+{% block content %}
+<div class="container reveal">
+    <div style="max-width: 600px; margin: 0 auto; background: var(--glass-bg); border: 1px solid var(--glass-border); padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        <h2 style="font-family: var(--font-header); text-align: center; margin-bottom: 30px;">
+            <i class="fa-solid fa-users" style="color: var(--color-primary);"></i> {% trans "Create a Club" %}
+        </h2>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: bold;">{% trans "Club Name" %}</label>
+                <input type="text" name="name" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.3); color: white;">
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: bold;">{% trans "Description" %}</label>
+                <textarea name="description" rows="5" placeholder="{% trans 'Tell everyone what your community is about...' %}" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.3); color: white;"></textarea>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: bold;">{% trans "Cover Image (Optional)" %}</label>
+                <input type="file" name="cover_image" accept="image/*" style="width: 100%; color: var(--color-muted);">
+            </div>
+
+            <button type="submit" class="btn" style="width: 100%; background: var(--color-primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 1.1rem; cursor: pointer; transition: 0.2s;">
+                {% trans "Launch Club" %} <i class="fa-solid fa-rocket"></i>
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
