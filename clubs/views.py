@@ -5,7 +5,7 @@ from .models import Club, ClubRecommendation
 from app.services import fetch_jikan_data
 
 def club_list(request):
-    clubs = Club.objects.all().order_by('-created_at')
+    clubs = Club.objects.select_related('owner', 'owner__profile').prefetch_related('members').order_by('-created_at')
     return render(request, 'clubs/club_list.html', {'clubs': clubs})
 
 @login_required
@@ -37,10 +37,10 @@ def create_club(request):
     return render(request, 'clubs/create_club.html')
 
 def club_detail(request, pk):
-    club = get_object_or_404(Club, pk=pk)
+    club = get_object_or_404(Club.objects.select_related('owner', 'owner__profile').prefetch_related('members', 'members__profile', 'messages', 'messages__sender', 'messages__sender__profile'), pk=pk)
     is_member = request.user.is_authenticated and request.user in club.members.all()
     
-    recommendations = club.recommendations.all().select_related('suggester')
+    recommendations = club.recommendations.all().select_related('suggester', 'suggester__profile')
     
     context = {
         'club': club,

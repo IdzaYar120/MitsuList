@@ -158,7 +158,7 @@ async def anime_detail(request, anime_id):
     # Review Logic
     from asgiref.sync import sync_to_async
     
-    get_reviews = sync_to_async(lambda: list(Review.objects.filter(anime_id=anime_id).order_by('-created_at').select_related('user')))
+    get_reviews = sync_to_async(lambda: list(Review.objects.filter(anime_id=anime_id).order_by('-created_at').select_related('user', 'user__profile').prefetch_related('likes', 'comments')))
     reviews = await get_reviews()
     
     user_review = None

@@ -9,7 +9,7 @@ def inbox(request):
     """List all conversations for the current user."""
     threads = ChatThread.objects.filter(
         Q(user1=request.user) | Q(user2=request.user)
-    ).order_by('-updated_at')
+    ).select_related('user1', 'user1__profile', 'user2', 'user2__profile').order_by('-updated_at')
     
     context = {
         'threads': threads
@@ -19,13 +19,13 @@ def inbox(request):
 @login_required
 def room(request, thread_id):
     """View a specific chat conversation."""
-    thread = get_object_or_404(ChatThread, id=thread_id)
+    thread = get_object_or_404(ChatThread.objects.select_related('user1', 'user1__profile', 'user2', 'user2__profile'), id=thread_id)
     
     # Ensure current user is part of the thread
     if request.user != thread.user1 and request.user != thread.user2:
         return redirect('chat:inbox')
         
-    messages = thread.messages.all()
+    messages = thread.messages.all().select_related('sender', 'sender__profile')
     
     # Determine the other user
     other_user = thread.user2 if request.user == thread.user1 else thread.user1
