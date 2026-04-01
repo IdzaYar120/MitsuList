@@ -94,6 +94,6 @@ class ClubChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def get_user_avatar(self, user):
         try:
-            return user.profile.image.url
+            return user.profile.avatar_url
         except Exception:
             return '/media/default.jpg'

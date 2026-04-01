@@ -280,7 +280,7 @@
                 <div class="members-list">
                     {% for member in club.members.all %}
                         <a href="{% url 'public_profile' member.username %}" title="{{ member.username }}">
-                            <img src="{{ member.profile.image.url }}" class="member-avatar" alt="Avatar">
+                            <img src="{{ member.profile.avatar_url }}" class="member-avatar" alt="Avatar">
                         </a>
                     {% endfor %}
                 </div>
@@ -333,7 +333,7 @@
                 {% for msg in club.messages.all %}
                     <div class="message-container {% if msg.sender == request.user %}sent{% else %}received{% endif %}">
                         {% if msg.sender != request.user %}
-                            <img src="{{ msg.sender.profile.image.url }}" class="chat-avatar" alt="Avatar">
+                            <img src="{{ msg.sender.profile.avatar_url }}" class="chat-avatar" alt="Avatar">
                         {% endif %}
                         <div class="message-bubble">
                             <div class="message-sender">{{ msg.sender.username }}</div>

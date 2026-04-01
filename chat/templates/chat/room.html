@@ -132,7 +132,7 @@
     <!-- Header -->
     <div class="chat-header">
         <a href="{% url 'in_user_profile' other_user.username %}">
-            <img src="{{ other_user.profile.image.url }}" class="header-avatar" alt="{{ other_user.username }}">
+            <img src="{{ other_user.profile.avatar_url }}" class="header-avatar" alt="{{ other_user.username }}">
         </a>
         <div class="header-info">
             <h2>{{ other_user.username }}</h2>

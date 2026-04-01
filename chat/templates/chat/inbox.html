@@ -84,7 +84,7 @@
             {% if request.user == thread.user1 %}
                 {% with other=thread.user2 %}
                     <a href="{{ room_url }}" class="thread-card">
-                        <img src="{{ other.profile.image.url }}" class="thread-avatar" alt="{{ other.username }}">
+                        <img src="{{ other.profile.avatar_url }}" class="thread-avatar" alt="{{ other.username }}">
                         <div class="thread-info">
                             <h3 class="thread-username">{{ other.username }}</h3>
                             <p class="thread-last-msg">
@@ -103,7 +103,7 @@
             {% else %}
                 {% with other=thread.user1 %}
                     <a href="{{ room_url }}" class="thread-card">
-                        <img src="{{ other.profile.image.url }}" class="thread-avatar" alt="{{ other.username }}">
+                        <img src="{{ other.profile.avatar_url }}" class="thread-avatar" alt="{{ other.username }}">
                         <div class="thread-info">
                             <h3 class="thread-username">{{ other.username }}</h3>
                             <p class="thread-last-msg">

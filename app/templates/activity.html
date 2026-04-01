@@ -45,7 +45,7 @@
             
             <!-- User Avatar -->
             <a href="{% url 'public_profile' activity.user.username %}" style="flex-shrink: 0;">
-                <img src="{{ activity.user.profile.image.url }}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--color-primary);">
+                <img src="{{ activity.user.profile.avatar_url }}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--color-primary);">
             </a>
 
             <!-- Activity Content -->

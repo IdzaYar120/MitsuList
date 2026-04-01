@@ -45,36 +45,18 @@ class Profile(models.Model):
     def __str__(self):
         return f'{self.user.username} Profile'
 
-    def save(self, *args, **kwargs):
-        # Check if this is an existing instance to determine if image changed
-        process_image = False
-        if self.pk:
-            try:
-                old_profile = Profile.objects.get(pk=self.pk)
-                if old_profile.image != self.image:
-                    process_image = True
-            except Profile.DoesNotExist:
-                process_image = True # Should be created
-        else:
-            process_image = True # New instance
+    @property
+    def avatar_url(self):
+        try:
+            url = self.image.url if self.image else ""
+        except ValueError:
+            return ""
 
-        super().save(*args, **kwargs)
-        
-        if process_image and self.image:
-            # Resize image if too large
-            try:
-                from PIL import Image
-                img = Image.open(self.image.path)
-                if img.height > 300 or img.width > 300:
-                    output_size = (300, 300)
-                    img.thumbnail(output_size)
-                    img.save(self.image.path)
-            except FileNotFoundError:
-                pass  # Image file doesn't exist yet (e.g., during initial migration)
-            except Exception as e:
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.warning(f"Could not resize profile image: {e}")
+        if "res.cloudinary.com" in url:
+            parts = url.split('/upload/')
+            if len(parts) == 2:
+                return f"{parts[0]}/upload/w_300,h_300,c_fill,q_auto,f_auto/{parts[1]}"
+        return url
 
 class SavedSearch(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='saved_searches')
