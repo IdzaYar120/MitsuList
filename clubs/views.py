@@ -3,6 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Club, ClubRecommendation
 from app.services import fetch_jikan_data
+from django.http import JsonResponse
+from django.core.paginator import Paginator
 
 def club_list(request):
     clubs = Club.objects.select_related('owner', 'owner__profile').prefetch_related('members').order_by('-created_at')
@@ -37,7 +39,10 @@ def create_club(request):
     return render(request, 'clubs/create_club.html')
 
 def club_detail(request, pk):
-    club = get_object_or_404(Club.objects.select_related('owner', 'owner__profile').prefetch_related('members', 'members__profile', 'messages', 'messages__sender', 'messages__sender__profile'), pk=pk)
+    club = get_object_or_404(Club.objects.select_related('owner', 'owner__profile').prefetch_related('members', 'members__profile'), pk=pk)
+    
+    messages_list = list(club.messages.all().select_related('sender', 'sender__profile').order_by('-timestamp')[:50])
+    messages_list.reverse()
     is_member = request.user.is_authenticated and request.user in club.members.all()
     
     recommendations = club.recommendations.all().select_related('suggester', 'suggester__profile')
@@ -46,6 +51,7 @@ def club_detail(request, pk):
         'club': club,
         'is_member': is_member,
         'recommendations': recommendations,
+        'messages': messages_list,
     }
     return render(request, 'clubs/club_detail.html', context)
 
@@ -119,3 +125,31 @@ def recommend_anime(request, pk):
             messages.error(request, "Failed to connect to Jikan API.")
 
     return redirect('clubs:club_detail', pk=pk)
+
+def get_club_messages(request, pk):
+    """API endpoint to get paginated club chat history."""
+    club = get_object_or_404(Club, pk=pk)
+    
+    page_number = request.GET.get('page', 1)
+    messages_query = club.messages.all().select_related('sender', 'sender__profile').order_by('-timestamp')
+    paginator = Paginator(messages_query, 50)
+    
+    try:
+        page_obj = paginator.page(page_number)
+    except Exception:
+        return JsonResponse({'messages': [], 'has_next': False})
+        
+    messages_data = []
+    for msg in reversed(page_obj.object_list):
+        messages_data.append({
+            'text': msg.text,
+            'timestamp': msg.timestamp.strftime("%H:%M"),
+            'sender': msg.sender.username,
+            'avatar_url': msg.sender.profile.avatar_url,
+            'is_sent': request.user.is_authenticated and msg.sender == request.user
+        })
+        
+    return JsonResponse({
+        'messages': messages_data,
+        'has_next': page_obj.has_next()
+    })

@@ -10,4 +10,5 @@ urlpatterns = [
     path('<int:pk>/join/', views.join_club, name='join_club'),
     path('<int:pk>/leave/', views.leave_club, name='leave_club'),
     path('<int:pk>/recommend/', views.recommend_anime, name='recommend_anime'),
+    path('api/<int:pk>/messages/', views.get_club_messages, name='get_club_messages'),
 ]

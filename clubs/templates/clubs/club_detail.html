@@ -330,7 +330,7 @@
             
             {% if is_member %}
             <div class="chat-messages" id="chat-log">
-                {% for msg in club.messages.all %}
+                {% for msg in messages %}
                     <div class="message-container {% if msg.sender == request.user %}sent{% else %}received{% endif %}">
                         {% if msg.sender != request.user %}
                             <img src="{{ msg.sender.profile.avatar_url }}" class="chat-avatar" alt="Avatar">
@@ -381,11 +381,58 @@
 
     const chatLog = document.getElementById('chat-log');
 
+    let currentPage = 1;
+    let hasNextPage = true;
+    let isLoading = false;
+
     function scrollToBottom() {
         chatLog.scrollTop = chatLog.scrollHeight;
     }
     window.onload = scrollToBottom;
 
+    chatLog.addEventListener('scroll', function() {
+        if (chatLog.scrollTop === 0 && hasNextPage && !isLoading) {
+            loadOlderMessages();
+        }
+    });
+
+    async function loadOlderMessages() {
+        isLoading = true;
+        const oldScrollHeight = chatLog.scrollHeight;
+        
+        try {
+            const response = await fetch(`/clubs/api/${clubId}/messages/?page=${currentPage + 1}`);
+            const data = await response.json();
+            
+            if (data.messages && data.messages.length > 0) {
+                let html = '';
+                data.messages.forEach(msg => {
+                    const isSent = msg.is_sent;
+                    html += `
+                        <div class="message-container ${isSent ? 'sent' : 'received'}">
+                            ${!isSent ? `<img src="${msg.avatar_url}" class="chat-avatar" alt="Avatar">` : ''}
+                            <div class="message-bubble">
+                                <div class="message-sender">${msg.sender}</div>
+                                ${msg.text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}
+                                <span class="message-time">${msg.timestamp}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                chatLog.insertAdjacentHTML('afterbegin', html);
+                chatLog.scrollTop = chatLog.scrollHeight - oldScrollHeight;
+                currentPage++;
+            }
+            if (data.has_next === false) {
+                hasNextPage = false;
+            }
+        } catch (e) {
+            console.error("Failed to load older messages", e);
+        } finally {
+            isLoading = false;
+        }
+    }
     chatSocket.onmessage = function(e) {
         const data = JSON.parse(e.data);
         const isSent = data.sender === currentUsername;
