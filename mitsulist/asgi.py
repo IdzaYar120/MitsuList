@@ -21,12 +21,13 @@ django_asgi_app = get_asgi_application()
 
 import chat.routing
 import clubs.routing
+import app.routing
 
 application = ProtocolTypeRouter({
     "http": django_asgi_app,
     "websocket": AuthMiddlewareStack(
         URLRouter(
-            chat.routing.websocket_urlpatterns + clubs.routing.websocket_urlpatterns
+            chat.routing.websocket_urlpatterns + clubs.routing.websocket_urlpatterns + app.routing.websocket_urlpatterns
         )
     ),
 })

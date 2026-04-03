@@ -124,3 +124,22 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"To {self.recipient.username} - {self.notification_type} - Read: {self.is_read}"
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
+@receiver(post_save, sender=Notification)
+def broadcast_notification(sender, instance, created, **kwargs):
+    if created:
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f'user_{instance.recipient.id}_notifications',
+            {
+                'type': 'send_notification',
+                'title': instance.get_notification_type_display(),
+                'message': instance.message,
+                'link': instance.link or '',
+            }
+        )
