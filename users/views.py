@@ -106,7 +106,7 @@ def get_user_anime_status(request, anime_id):
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import EmailMultiAlternatives
+from .tasks import send_async_email
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.contrib.sites.shortcuts import get_current_site
@@ -141,15 +141,13 @@ def register(request):
             text_content = render_to_string('users/activation_email.txt', context)
             html_content = render_to_string('users/activation_email.html', context)
             
-            # Send Email
-            email = EmailMultiAlternatives(
+            # Send Email Asynchronously via Celery
+            send_async_email.delay(
                 subject=mail_subject,
-                body=text_content,
-                from_email=None, # Uses DEFAULT_FROM_EMAIL from settings
-                to=[user.email]
+                recipient_email=user.email,
+                text_content=text_content,
+                html_content=html_content
             )
-            email.attach_alternative(html_content, "text/html")
-            email.send()
             
             return render(request, 'users/registration_done.html', {'email': user.email})
     else:
@@ -401,8 +399,8 @@ def import_list(request):
                 messages.error(request, 'Please enter a MAL username.')
                 return redirect('import_list')
             
-            from app.services import import_mal_username_background
-            import_mal_username_background(request.user.id, mal_username)
+            from app.tasks import import_mal_username_task
+            import_mal_username_task.delay(request.user.id, mal_username)
             messages.success(request, f'Import started for "{mal_username}" in the background! Please wait a minute or two and refresh your profile.')
             return redirect('profile')
             
