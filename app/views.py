@@ -50,7 +50,10 @@ async def index(request):
     await _prefetch_user_profile(request)
     # Fetch News (Database - synchronous for now, Django handles it)
     from asgiref.sync import sync_to_async
-    news_items = await sync_to_async(list)(News.objects.all().order_by('-created_at'))
+    news_items = cache.get('home_news')
+    if news_items is None:
+        news_items = await sync_to_async(list)(News.objects.all().order_by('-created_at')[:5])
+        cache.set('home_news', news_items, 3600)  # Кеш на 1 годину
 
     # Fetch API Data using new async helper
     airing_now_data, top_anime_data, popular_anime_data, anime_movie = await asyncio.gather(
@@ -97,9 +100,13 @@ async def index(request):
             
         # Activity Feed (Social)
         from .services import get_activity_feed
-        # Wrap sync DB call
-        get_feed_async = sync_to_async(get_activity_feed)
-        activity_feed = await get_feed_async(request.user)
+        # Wrap sync DB call and Cache
+        feed_cache_key = f'activity_feed_{request.user.id}'
+        activity_feed = cache.get(feed_cache_key)
+        if activity_feed is None:
+            get_feed_async = sync_to_async(get_activity_feed)
+            activity_feed = await get_feed_async(request.user)
+            cache.set(feed_cache_key, activity_feed, 120)  # Кеш на 2 хвилини
     else:
         activity_feed = []
         
@@ -158,8 +165,12 @@ async def anime_detail(request, anime_id):
     # Review Logic
     from asgiref.sync import sync_to_async
     
-    get_reviews = sync_to_async(lambda: list(Review.objects.filter(anime_id=anime_id).order_by('-created_at').select_related('user', 'user__profile').prefetch_related('likes', 'comments')))
-    reviews = await get_reviews()
+    review_cache_key = f'anime_reviews_{anime_id}'
+    reviews = cache.get(review_cache_key)
+    if reviews is None:
+        get_reviews = sync_to_async(lambda: list(Review.objects.filter(anime_id=anime_id).order_by('-created_at').select_related('user', 'user__profile').prefetch_related('likes', 'comments')))
+        reviews = await get_reviews()
+        cache.set(review_cache_key, reviews, 300)  # Кеш на 5 хвилин
     
     user_review = None
     review_form = None
@@ -466,8 +477,14 @@ async def global_search(request):
             
             return found_users, found_reviews, found_news
             
-        # Execute DB Search
-        users, reviews, news = await do_db_search()
+        # Execute DB Search with Caching
+        cache_key = f"global_search_db_{query}"
+        results = cache.get(cache_key)
+        if results is None:
+            users, reviews, news = await do_db_search()
+            cache.set(cache_key, (users, reviews, news), 3600)  # Кеш на 1 годину
+        else:
+            users, reviews, news = results
         
         # Execute Jikan API Search in parallel
         encoded_query = urllib.parse.quote(query)

@@ -33,10 +33,10 @@ JIKAN_API_ENDPOINTS = {
     'schedules': 'https://api.jikan.moe/v4/schedules',
 }
 
-async def fetch_jikan_data(cache_key, url, timeout=3600, retries=2):
+async def fetch_jikan_data(cache_key, url, timeout=86400, retries=2):
     """
     Asynchronously fetch data from Jikan API with caching, throttling, and retry logic.
-    Default timeout increased to 1 hour to reduce API hits.
+    Default timeout increased to 24 hours (86400s) to reduce API hits.
     """
     global last_request_time
     
