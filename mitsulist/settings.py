@@ -173,6 +173,10 @@ LOCALE_PATHS = [
     BASE_DIR / 'locale',
 ]
 
+# Sessions using Redis Cache
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'default'
+
 # Secure Cookies (Production)
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
