@@ -312,6 +312,10 @@ async def activity_feed_view(request):
         'page_obj': page_obj,
         'feed_type': 'following'
     }
+    
+    if request.headers.get('HX-Request'):
+        return render(request, 'activity_feed_items.html', context)
+        
     return render(request, 'activity.html', context)
 
 async def global_feed_view(request):
@@ -335,8 +339,10 @@ async def global_feed_view(request):
         'page_obj': page_obj,
         'feed_type': 'global'
     }
-    return render(request, 'activity.html', context)
-
+    
+    if request.headers.get('HX-Request'):
+        return render(request, 'activity_feed_items.html', context)
+        
     return render(request, 'activity.html', context)
 
 async def notifications_view(request):
