@@ -2,6 +2,29 @@
 {% load static %}
 
 {% block content %}
+<link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+<script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+<style>
+    /* Dark mode for EasyMDE */
+    .editor-toolbar, .editor-toolbar i.separator, .editor-toolbar button { 
+        color: var(--color-text); 
+        border-color: rgba(255,255,255,0.1); 
+    }
+    .editor-toolbar button:hover, .editor-toolbar button.active { 
+        background: var(--color-primary); 
+    }
+    .CodeMirror {
+        background: rgba(255,255,255,0.05) !important;
+        color: var(--color-text) !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        border-radius: 0 0 8px 8px !important;
+    }
+    .editor-toolbar {
+        border-radius: 8px 8px 0 0 !important;
+        background: rgba(0,0,0,0.2) !important;
+    }
+</style>
+
 <div class="content-section" style="max-width: 800px; margin: 40px auto; padding: 20px;">
     <h2 class="mitsulist-header-tag">WRITE A REVIEW</h2>
 
@@ -46,4 +69,15 @@
         </form>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var easyMDE = new EasyMDE({
+            element: document.querySelector('textarea[name="content"]'),
+            spellChecker: false,
+            placeholder: "Share your thoughts... You can use Markdown! Wrap spoilers in ||like this||",
+            toolbar: ["bold", "italic", "heading", "|", "quote", "unordered-list", "ordered-list", "|", "link", "preview", "guide"]
+        });
+    });
+</script>
 {% endblock %}

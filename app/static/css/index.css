@@ -635,4 +635,41 @@ input[type="number"] {
 .reveal-stagger.visible > *:nth-child(3) { transition-delay: 0.15s; }
 .reveal-stagger.visible > *:nth-child(4) { transition-delay: 0.20s; }
 .reveal-stagger.visible > *:nth-child(5) { transition-delay: 0.25s; }
-.reveal-stagger.visible > *:nth-child(6) { transition-delay: 0.30s; }
+.reveal-stagger.visible > *:nth-child(6) { transition-delay: 0.30s; }
+
+/* Markdown & Spoilers */
+.mitsulist-spoiler {
+    background-color: var(--color-muted);
+    color: transparent;
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 0 4px;
+    transition: color 0.3s, background-color 0.3s;
+}
+
+.mitsulist-spoiler:hover, .mitsulist-spoiler.revealed {
+    color: inherit;
+    background-color: rgba(255,255,255,0.05);
+}
+
+.review-markdown-content p {
+    margin-bottom: 15px;
+    line-height: 1.6;
+}
+
+.review-markdown-content a {
+    color: var(--color-accent);
+    text-decoration: underline;
+}
+
+.review-markdown-content blockquote {
+    border-left: 4px solid var(--color-primary);
+    padding-left: 15px;
+    color: var(--color-muted);
+    font-style: italic;
+    background: rgba(0,0,0,0.2);
+    margin-left: 0;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-radius: 0 8px 8px 0;
+}

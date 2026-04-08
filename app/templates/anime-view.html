@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static i18n %}
+{% load static i18n markdown_extras %}
 
 {% block title %}{{anime_data.title}} - MitsuList{% endblock %}
 
@@ -311,7 +311,7 @@
                     <h4 style="margin: 0; color: var(--color-primary);">{% trans "My Review" %}</h4>
                     <div style="font-size: 0.8rem; color: var(--color-muted);">{{ user_review.created_at|date:"M d, Y" }}</div>
                 </div>
-                <p style="margin: 0; color: #e2e8f0; line-height: 1.6;">{{ user_review.content }}</p>
+                <div class="review-markdown-content" style="color: #e2e8f0;">{{ user_review.content|markdown_format }}</div>
                 <div style="margin-top: 15px; display: flex; gap: 10px;">
                     <a href="{% url 'delete_review' user_review.id %}" onclick="return confirm('{% trans "Delete your review?" %}')"
                        style="font-size: 0.8rem; color: #f87171; text-decoration: none;">
@@ -332,7 +332,7 @@
                         <span style="font-size: 0.8rem; color: var(--color-muted);">{{ review.created_at|date:"M d, Y" }}</span>
                     </div>
                     <p style="color: #cbd5e1; font-size: 0.95rem; line-height: 1.5; margin: 0;">
-                        {{ review.content|truncatechars:200 }}
+                        {{ review.content|striptags|truncatechars:200 }}
                     </p>
                     <div style="margin-top: 10px; font-size: 0.8rem; color: var(--color-muted);">
                          <i class="fa-regular fa-heart"></i> {{ review.likes.count }} &bull; <i class="fa-regular fa-comment"></i> {{ review.comments.count }}
