@@ -179,6 +179,12 @@
         <!-- AJAX Search Results Container -->
         <div id="container"></div>
 
+        {% if jikan_api_unhealthy %}
+        <div style="background-color: #ff4757; color: white; padding: 10px; margin: 20px auto; width: 90%; max-width: 1200px; border-radius: var(--border-radius); text-align: center; font-weight: 600; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <i class="fa-solid fa-triangle-exclamation"></i> {% trans "MyAnimeList API is currently experiencing issues. Some data may be missing or outdated." %}
+        </div>
+        {% endif %}
+
         <main>
             {% block content %}{% endblock %}
         </main>

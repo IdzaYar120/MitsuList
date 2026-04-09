@@ -61,6 +61,7 @@ async def fetch_jikan_data(cache_key, url, timeout=86400, retries=2):
                     if response.status_code == 200:
                         data = response.json()
                         cache.set(cache_key, data, timeout)
+                        cache.delete('jikan_api_unhealthy')  # Clear flag on success
                         return data
                     
                     elif response.status_code == 429:
@@ -83,6 +84,8 @@ async def fetch_jikan_data(cache_key, url, timeout=86400, retries=2):
                     logger.error(f"Connection error: {exc}")
                     break
     
+    # If we get here, the API request failed completely
+    cache.set('jikan_api_unhealthy', True, 300)  # Unhealthy for 5 mins
     return {'data': []}
 
 async def fetch_anime_recommendations(cache_key, anime_id, timeout=86400):
