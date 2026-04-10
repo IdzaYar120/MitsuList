@@ -412,7 +412,9 @@ def anime_reviews_list(request, anime_id):
     # Actually, we should probably fetch basic info or at least have a robust template.
     # For now, let's just fetch reviews.
     
-    reviews = Review.objects.filter(anime_id=anime_id).select_related('user', 'user__profile').annotate(
+    reviews = Review.objects.filter(anime_id=anime_id).select_related('user', 'user__profile').prefetch_related(
+        'comments', 'comments__user', 'comments__user__profile'
+    ).annotate(
         likes_count=Count('likes'),
         is_liked=Exists(ReviewLike.objects.filter(review=OuterRef('pk'), user=request.user)) if request.user.is_authenticated else Value(False)
     ).order_by('-created_at')

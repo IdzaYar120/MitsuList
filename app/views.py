@@ -168,7 +168,7 @@ async def anime_detail(request, anime_id):
     review_cache_key = f'anime_reviews_{anime_id}'
     reviews = cache.get(review_cache_key)
     if reviews is None:
-        get_reviews = sync_to_async(lambda: list(Review.objects.filter(anime_id=anime_id).order_by('-created_at').select_related('user', 'user__profile').prefetch_related('likes', 'comments')))
+        get_reviews = sync_to_async(lambda: list(Review.objects.filter(anime_id=anime_id).order_by('-created_at').select_related('user', 'user__profile').prefetch_related('likes', 'comments', 'comments__user', 'comments__user__profile')))
         reviews = await get_reviews()
         cache.set(review_cache_key, reviews, 300)  # Кеш на 5 хвилин
     
