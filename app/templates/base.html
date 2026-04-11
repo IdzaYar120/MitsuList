@@ -82,34 +82,34 @@
                     style="border-radius: 0 var(--border-radius) var(--border-radius) 0; background: var(--color-secondary); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--color-accent); padding: 10px 15px; cursor: pointer; transition: var(--transition);"><i
                         class="fa-solid fa-sliders"></i></button>
             </form>
-            <div style="margin-left: 20px;">
+            <div style="margin-left: 20px;" class="nav-desktop-only">
                 <a href="{% url 'calendar' %}" style="color: var(--color-text); text-decoration: none; font-weight: 600; font-family: var(--font-header); transition: var(--transition);">
                     <i class="fa-regular fa-calendar-days" style="color: var(--color-primary);"></i> {% trans "Calendar" %}
                 </a>
             </div>
             
             {% if user.is_authenticated %}
-            <div style="margin-left: 20px;">
+            <div style="margin-left: 20px;" class="nav-desktop-only">
                 <a href="{% url 'discover' %}" style="color: var(--color-text); text-decoration: none; font-weight: 600; font-family: var(--font-header); transition: var(--transition);">
                     <i class="fa-solid fa-compass" style="color: #38bdf8;"></i> {% trans "Discover" %}
                 </a>
             </div>
             {% endif %}
             
-            <div style="margin-left: 20px;">
+            <div style="margin-left: 20px;" class="nav-desktop-only">
                 <a href="{% url 'activity-feed' %}" style="color: var(--color-text); text-decoration: none; font-weight: 600; font-family: var(--font-header); transition: var(--transition);">
                     <i class="fa-solid fa-rss" style="color: #ff9ff3;"></i> {% trans "Feed" %}
                 </a>
             </div>
             
-            <div style="margin-left: 20px;">
+            <div style="margin-left: 20px;" class="nav-desktop-only">
                 <a href="{% url 'clubs:club_list' %}" style="color: var(--color-text); text-decoration: none; font-weight: 600; font-family: var(--font-header); transition: var(--transition);">
                     <i class="fa-solid fa-users-viewfinder" style="color: #4ade80;"></i> {% trans "Clubs" %}
                 </a>
             </div>
             
             {% if user.is_authenticated %}
-            <div style="margin-left: 20px; position: relative;" id="nav-notification-container">
+            <div style="margin-left: 20px; position: relative;" id="nav-notification-container" class="nav-desktop-only">
                 <a href="{% url 'notifications' %}" style="color: var(--color-text); text-decoration: none; font-size: 1.2rem; transition: var(--transition);">
                     <i class="fa-solid fa-bell"></i>
                     <span id="unread-badge" style="display: none; position: absolute; top: -5px; right: -10px; background: #ff4757; color: white; font-size: 0.7rem; font-weight: bold; border-radius: 10px; padding: 2px 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">0</span>
@@ -153,11 +153,11 @@
                     <i class="fa-solid fa-envelope"></i>
                 </a>
                 <a href="{% url 'profile' %}"
-                    style="color: var(--color-muted); margin-right: 15px; text-decoration: none; transition: var(--transition);">{{user.username}}</a>
-                <a href="{% url 'logout' %}" style="color: var(--color-primary); text-decoration: none; border-left: 1px solid var(--color-muted); padding-left: 15px; transition: var(--transition);">{% trans "Logout" %}</a>
+                    style="color: var(--color-muted); margin-right: 15px; text-decoration: none; transition: var(--transition);"><span class="mobile-hide-text">{{user.username}}</span></a>
+                <a href="{% url 'logout' %}" style="color: var(--color-primary); text-decoration: none; border-left: 1px solid var(--color-muted); padding-left: 15px; transition: var(--transition);"><span class="mobile-hide-text">{% trans "Logout" %}</span></a>
                 {% else %}
-                <a href="{% url 'login' %}" style="color: var(--color-text); text-decoration: none; margin-right: 20px; transition: var(--transition);">{% trans "Login" %}</a>
-                <a href="{% url 'register' %}" style="color: white; text-decoration: none; background: var(--color-primary); padding: 8px 20px; border-radius: var(--border-radius); transition: var(--transition); border: 1px solid var(--color-primary);">{% trans "Join" %}</a>
+                <a href="{% url 'login' %}" style="color: var(--color-text); text-decoration: none; margin-right: 20px; transition: var(--transition);"><span class="mobile-hide-text">{% trans "Login" %}</span></a>
+                <a href="{% url 'register' %}" style="color: white; text-decoration: none; background: var(--color-primary); padding: 8px 20px; border-radius: var(--border-radius); transition: var(--transition); border: 1px solid var(--color-primary);"><span class="mobile-hide-text">{% trans "Join" %}</span></a>
                 {% endif %}
             </div>
         </div>
@@ -185,6 +185,38 @@
         </div>
         {% endif %}
 
+        <!-- Mobile Bottom Navigation Bar -->
+        <nav id="bottom-nav-bar">
+            <a href="{% url 'home' %}" class="bottom-nav-item">
+                <i class="fa-solid fa-house"></i>
+                <span>{% trans "Home" %}</span>
+            </a>
+            <a href="{% url 'global_search' %}" class="bottom-nav-item">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <span>{% trans "Search" %}</span>
+            </a>
+            {% if user.is_authenticated %}
+            <a href="{% url 'activity-feed' %}" class="bottom-nav-item">
+                <i class="fa-solid fa-rss"></i>
+                <span>{% trans "Feed" %}</span>
+            </a>
+            <a href="{% url 'notifications' %}" class="bottom-nav-item" style="position: relative;">
+                <i class="fa-solid fa-bell"></i>
+                <span>{% trans "Alerts" %}</span>
+                <span id="bottom-unread-badge" style="display: none; position: absolute; top: 0px; right: 15px; background: #ff4757; color: white; font-size: 0.6rem; font-weight: bold; border-radius: 10px; padding: 2px 5px;">0</span>
+            </a>
+            <a href="{% url 'profile' %}" class="bottom-nav-item">
+                <i class="fa-solid fa-user"></i>
+                <span>{% trans "Profile" %}</span>
+            </a>
+            {% else %}
+            <a href="{% url 'login' %}" class="bottom-nav-item">
+                <i class="fa-solid fa-right-to-bracket"></i>
+                <span>{% trans "Login" %}</span>
+            </a>
+            {% endif %}
+        </nav>
+
         <main>
             {% block content %}{% endblock %}
         </main>
@@ -204,17 +236,26 @@
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const badge = document.getElementById("unread-badge");
+            const bottomBadge = document.getElementById("bottom-unread-badge");
             
+            function updateBadges(count) {
+                let text = count > 9 ? '9+' : count;
+                let display = count > 0 ? "inline-block" : "none";
+                if (badge) {
+                    badge.textContent = text;
+                    badge.style.display = display;
+                }
+                if (bottomBadge) {
+                    bottomBadge.textContent = text;
+                    bottomBadge.style.display = display;
+                }
+            }
+
             function checkUnread() {
                 fetch("/api/notifications/unread/")
                     .then(res => res.json())
                     .then(data => {
-                        if (data.unread > 0) {
-                            badge.textContent = data.unread > 9 ? '9+' : data.unread;
-                            badge.style.display = "inline-block";
-                        } else {
-                            badge.style.display = "none";
-                        }
+                        updateBadges(data.unread);
                     })
                     .catch(err => console.error("Error fetching notifications:", err));
             }
@@ -232,10 +273,10 @@
                 const data = JSON.parse(e.data);
                 if (data.type === 'notification') {
                     // Update badge
-                    let currentCount = parseInt(badge.textContent) || 0;
+                    let badgeNode = badge || bottomBadge;
+                    let currentCount = parseInt(badgeNode ? badgeNode.textContent : 0) || 0;
                     currentCount += 1;
-                    badge.textContent = currentCount > 9 ? '9+' : currentCount;
-                    badge.style.display = "inline-block";
+                    updateBadges(currentCount);
                     
                     // Show toast
                     let toastMsg = data.message;
