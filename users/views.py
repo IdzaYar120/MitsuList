@@ -292,9 +292,14 @@ def public_profile(request, username):
         minutes_watched = stats['total_episodes'] * 24
         stats['days_watched'] = round(minutes_watched / 60 / 24, 1)
         
-        # Earned Badges are now fetched from the database
-        user_badges = viewed_user.earned_badges.select_related('badge').all()
-        badges = [ub.badge for ub in user_badges]
+        # Earned Badges
+        user_badges = viewed_user.earned_badges.select_related('badge').order_by('-is_pinned', '-earned_at')
+        badges = []
+        for ub in user_badges:
+            badge_obj = ub.badge
+            badge_obj.is_pinned = ub.is_pinned
+            badge_obj.user_badge_id = ub.id
+            badges.append(badge_obj)
         
         cache.set(cache_key, (stats, badges), 300)  # 5 minutes
     
@@ -621,3 +626,55 @@ def toggle_theme(request):
         return JsonResponse({'status': 'error', 'message': 'Invalid theme'}, status=400)
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+@login_required
+@require_POST
+def toggle_pin_badge(request, badge_id):
+    from .models import UserBadge
+    try:
+        # Here badge_id is the actual Badge model ID, we find UserBadge
+        user_badge = UserBadge.objects.get(badge_id=badge_id, user=request.user)
+        
+        if not user_badge.is_pinned:
+            current_pinned_count = UserBadge.objects.filter(user=request.user, is_pinned=True).count()
+            if current_pinned_count >= 3:
+                return JsonResponse({'status': 'error', 'message': 'You can only pin up to 3 badges.'}, status=400)
+            user_badge.is_pinned = True
+        else:
+            user_badge.is_pinned = False
+            
+        user_badge.save()
+        
+        # Invalidate Profile Cache
+        from django.core.cache import cache
+        cache.delete(f'profile_stats_{request.user.pk}')
+        
+        return JsonResponse({'status': 'success', 'is_pinned': user_badge.is_pinned})
+    except UserBadge.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Badge not found.'}, status=404)
+
+def leaderboard(request):
+    from django.db.models import Sum, Count
+    
+    # Top Watchers (All Time Episodes)
+    top_watchers = User.objects.annotate(
+        total_episodes=Sum('anime_entries__episodes_watched')
+    ).exclude(total_episodes__isnull=True).order_by('-total_episodes')[:10]
+
+    # Top Reviewers (All Time Reviews)
+    top_reviewers = User.objects.annotate(
+        total_reviews=Count('review')
+    ).exclude(total_reviews=0).order_by('-total_reviews')[:10]
+    
+    # Top Badges Earner
+    from .models import UserBadge
+    top_badges = User.objects.annotate(
+        total_badges=Count('earned_badges')
+    ).exclude(total_badges=0).order_by('-total_badges')[:10]
+    
+    context = {
+        'top_watchers': top_watchers,
+        'top_reviewers': top_reviewers,
+        'top_badges': top_badges,
+    }
+    return render(request, 'users/leaderboard.html', context)

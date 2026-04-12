@@ -103,6 +103,12 @@
             </div>
             
             <div style="margin-left: 20px;" class="nav-desktop-only">
+                <a href="{% url 'leaderboard' %}" style="color: var(--color-text); text-decoration: none; font-weight: 600; font-family: var(--font-header); transition: var(--transition);">
+                    <i class="fa-solid fa-trophy" style="color: gold;"></i> {% trans "Leaderboard" %}
+                </a>
+            </div>
+
+            <div style="margin-left: 20px;" class="nav-desktop-only">
                 <a href="{% url 'clubs:club_list' %}" style="color: var(--color-text); text-decoration: none; font-weight: 600; font-family: var(--font-header); transition: var(--transition);">
                     <i class="fa-solid fa-users-viewfinder" style="color: #4ade80;"></i> {% trans "Clubs" %}
                 </a>

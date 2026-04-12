@@ -37,6 +37,7 @@ urlpatterns = [
     path('discord/callback/', views.discord_callback, name='discord_callback'),
     path('discord/disconnect/', views.discord_disconnect, name='discord_disconnect'),
     path('api/discord/presence/<str:discord_id>/', views.discord_presence_api, name='discord_presence_api'),
-    path('api/toggle-theme/', views.toggle_theme, name='toggle_theme'),
+    path('preferences/theme/', views.toggle_theme, name='toggle_theme'),
+    path('leaderboard/', views.leaderboard, name='leaderboard'),
+    path('api/badges/pin/<int:badge_id>/', views.toggle_pin_badge, name='toggle_pin_badge'),
 ]
-

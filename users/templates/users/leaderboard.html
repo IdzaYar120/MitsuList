@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans "Global Leaderboard" %} - MitsuList{% endblock %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 40px auto; padding: 20px;">
+    
+    <div style="text-align: center; margin-bottom: 50px;">
+        <h1 style="font-family: var(--font-header); font-size: 3rem; color: white; margin: 0; text-transform: uppercase; letter-spacing: 2px;">
+            <i class="fa-solid fa-trophy" style="color: gold; text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);"></i> {% trans "Global Leaderboard" %}
+        </h1>
+        <p style="color: var(--color-muted); font-size: 1.2rem; margin-top: 10px;">
+            {% trans "The most active and dedicated legends of MitsuList." %}
+        </p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px;">
+        
+        <!-- Top Watchers -->
+        <div style="background: var(--glass-bg); padding: 30px; border-radius: 16px; border: 1px solid rgba(123, 47, 247, 0.3); border-top: 5px solid var(--color-primary); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            <h2 style="font-family: var(--font-header); margin-top: 0; color: white; display: flex; align-items: center; gap: 10px;">
+                <i class="fa-solid fa-eye" style="color: var(--color-primary);"></i> {% trans "Top Watchers" %}
+            </h2>
+            <p style="color: var(--color-muted); font-size: 0.85rem; margin-bottom: 20px;">{% trans "Most overall episodes watched." %}</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                {% for u in top_watchers %}
+                <a href="{% url 'public_profile' u.username %}" style="display: flex; align-items: center; gap: 15px; text-decoration: none; background: rgba(255,255,255,0.03); padding: 10px; border-radius: 10px; transition: 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'">
+                    <strong style="color: {% if forloop.counter == 1 %}gold{% elif forloop.counter == 2 %}silver{% elif forloop.counter == 3 %}#cd7f32{% else %}var(--color-muted){% endif %}; width: 20px; text-align: center;">#{{ forloop.counter }}</strong>
+                    <div style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; border: 2px solid {% if forloop.counter <= 3 %}var(--color-primary){% else %}transparent{% endif %};">
+                        <img src="{{ u.profile.avatar_url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div style="flex-grow: 1;">
+                        <div style="color: white; font-weight: bold; font-size: 1rem;">{{ u.username }}</div>
+                    </div>
+                    <div style="color: var(--color-accent); font-weight: bold;">
+                        {{ u.total_episodes }} <span style="font-size:0.7rem;">eps</span>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Top Critics -->
+        <div style="background: var(--glass-bg); padding: 30px; border-radius: 16px; border: 1px solid rgba(255, 107, 107, 0.3); border-top: 5px solid #ff6b6b; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            <h2 style="font-family: var(--font-header); margin-top: 0; color: white; display: flex; align-items: center; gap: 10px;">
+                <i class="fa-solid fa-pen-nib" style="color: #ff6b6b;"></i> {% trans "Top Critics" %}
+            </h2>
+            <p style="color: var(--color-muted); font-size: 0.85rem; margin-bottom: 20px;">{% trans "Most reviews written." %}</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                {% for u in top_reviewers %}
+                <a href="{% url 'public_profile' u.username %}" style="display: flex; align-items: center; gap: 15px; text-decoration: none; background: rgba(255,255,255,0.03); padding: 10px; border-radius: 10px; transition: 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'">
+                    <strong style="color: {% if forloop.counter == 1 %}gold{% elif forloop.counter == 2 %}silver{% elif forloop.counter == 3 %}#cd7f32{% else %}var(--color-muted){% endif %}; width: 20px; text-align: center;">#{{ forloop.counter }}</strong>
+                    <div style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; border: 2px solid {% if forloop.counter <= 3 %}#ff6b6b{% else %}transparent{% endif %};">
+                        <img src="{{ u.profile.avatar_url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div style="flex-grow: 1;">
+                        <div style="color: white; font-weight: bold; font-size: 1rem;">{{ u.username }}</div>
+                    </div>
+                    <div style="color: #ff6b6b; font-weight: bold;">
+                        {{ u.total_reviews }} <span style="font-size:0.7rem;">revs</span>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Achievement Hunters -->
+        <div style="background: var(--glass-bg); padding: 30px; border-radius: 16px; border: 1px solid rgba(74, 222, 128, 0.3); border-top: 5px solid #4ade80; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            <h2 style="font-family: var(--font-header); margin-top: 0; color: white; display: flex; align-items: center; gap: 10px;">
+                <i class="fa-solid fa-medal" style="color: #4ade80;"></i> {% trans "Top Hunters" %}
+            </h2>
+            <p style="color: var(--color-muted); font-size: 0.85rem; margin-bottom: 20px;">{% trans "Most badges unlocked." %}</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                {% for u in top_badges %}
+                <a href="{% url 'public_profile' u.username %}" style="display: flex; align-items: center; gap: 15px; text-decoration: none; background: rgba(255,255,255,0.03); padding: 10px; border-radius: 10px; transition: 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'">
+                    <strong style="color: {% if forloop.counter == 1 %}gold{% elif forloop.counter == 2 %}silver{% elif forloop.counter == 3 %}#cd7f32{% else %}var(--color-muted){% endif %}; width: 20px; text-align: center;">#{{ forloop.counter }}</strong>
+                    <div style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; border: 2px solid {% if forloop.counter <= 3 %}#4ade80{% else %}transparent{% endif %};">
+                        <img src="{{ u.profile.avatar_url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div style="flex-grow: 1;">
+                        <div style="color: white; font-weight: bold; font-size: 1rem;">{{ u.username }}</div>
+                    </div>
+                    <div style="color: #4ade80; font-weight: bold;">
+                        {{ u.total_badges }} <span style="font-size:0.7rem;">badges</span>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

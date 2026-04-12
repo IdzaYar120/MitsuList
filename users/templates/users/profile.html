@@ -79,12 +79,27 @@
                     <span>{% trans "Member since" %} {{viewed_user.date_joined|date:"F Y"}}</span>
                 </div>
                 
-                <!-- Badges -->
-                {% if badges %}
+                <!-- Pinned Badges -->
                 <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
                     {% for badge in badges %}
-                    <div title="{{ badge.description }}" 
-                         style="background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; display: flex; align-items: center; gap: 5px; border: 1px solid {{ badge.color }}; color: {{ badge.color }}; cursor: help;">
+                        {% if badge.is_pinned %}
+                        <div title="Pinned: {{ badge.description }}" 
+                             style="background: rgba(255,255,255,0.05); padding: 5px 15px; border-radius: 20px; font-size: 0.9rem; font-weight: bold; display: flex; align-items: center; gap: 8px; border: 2px solid {{ badge.color }}; color: {{ badge.color }}; cursor: help; box-shadow: 0 0 10px {{ badge.color }}40;">
+                            <i class="fa-solid fa-thumbtack" style="font-size: 0.7rem;"></i> <i class="fa-solid {{ badge.icon }}"></i> {{ badge.name }}
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <!-- Badges -->
+                {% if badges %}
+                <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; align-items: center;">
+                    <span style="color: var(--color-muted); font-size: 0.8rem; text-transform: uppercase;">{% trans "Badges" %}:</span>
+                    {% for badge in badges %}
+                    <div title="{% if is_own_profile %}{% trans 'Click to pin/unpin' %}{% else %}{{ badge.description }}{% endif %}" 
+                         {% if is_own_profile %}onclick="togglePinBadge({{ badge.id }})"{% endif %}
+                         style="background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; display: flex; align-items: center; gap: 5px; border: 1px solid {% if badge.is_pinned %}{{ badge.color }}{% else %}rgba(255,255,255,0.2){% endif %}; color: {{ badge.color }}; cursor: {% if is_own_profile %}pointer{% else %}help{% endif %}; opacity: {% if badge.is_pinned %}0.3{% else %}1{% endif %}; transition: 0.2s;"
+                         {% if is_own_profile %}onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='{% if badge.is_pinned %}0.3{% else %}1{% endif %}'"{% endif %}>
                         <i class="fa-solid {{ badge.icon }}"></i> {{ badge.name }}
                     </div>
                     {% endfor %}
@@ -289,6 +304,38 @@
 </div>
 
 <script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function togglePinBadge(badgeId) {
+        fetch(`/api/badges/pin/${badgeId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json'
+            }
+        }).then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                window.location.reload();
+            } else {
+                alert(data.message || "{% trans 'Error toggling badge' %}");
+            }
+        }).catch(err => console.error(err));
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
         const tabs = document.querySelectorAll(".list-tab");
         const items = document.querySelectorAll(".entry-item");

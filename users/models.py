@@ -114,6 +114,7 @@ class UserBadge(models.Model):
     user = models.ForeignKey(User, related_name='earned_badges', on_delete=models.CASCADE)
     badge = models.ForeignKey(Badge, on_delete=models.CASCADE)
     earned_at = models.DateTimeField(auto_now_add=True)
+    is_pinned = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ('user', 'badge')
