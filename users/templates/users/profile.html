@@ -231,10 +231,23 @@
             <button class="list-tab" data-tab="plan_to_watch"
                 style="padding: 15px 30px; background: transparent; border: none; color: var(--color-muted); font-family: var(--font-header); cursor: pointer; border-bottom: 3px solid transparent;">
                 {% trans "PLAN TO WATCH" %}</button>
+            <button class="list-tab" data-tab="stats"
+                style="padding: 15px 30px; background: transparent; border: none; color: var(--color-muted); font-family: var(--font-header); cursor: pointer; border-bottom: 3px solid transparent;">
+                <i class="fa-solid fa-chart-simple"></i> {% trans "STATS" %}</button>
         </div>
 
         <!-- List Content -->
         <div style="padding: 20px;">
+            <div id="stats-section" style="display: none;">
+                <h3 style="color: white; margin-bottom: 20px; font-family: var(--font-header); text-align: center;">
+                    {% trans "Score Distribution" %}
+                </h3>
+                <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; height: 350px; max-width: 800px; margin: 0 auto;">
+                    <canvas id="scoreChart"></canvas>
+                </div>
+            </div>
+
+            <div id="entries-section">
             {% if anime_entries %}
             <div class="list-grid"
                 style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;">
@@ -299,10 +312,13 @@
                 {% endif %}
             </div>
             {% endif %}
+            {% endif %}
+            </div>
         </div>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     function getCookie(name) {
         let cookieValue = null;
@@ -354,16 +370,75 @@
 
                 // Filter items
                 const status = tab.dataset.tab;
-                items.forEach(item => {
-                    if (status === "all" || item.dataset.status === status) {
-                        item.style.display = "block";
-                    } else {
-                        item.style.display = "none";
-                    }
-                });
+                
+                if (status === "stats") {
+                    document.getElementById("entries-section").style.display = "none";
+                    document.getElementById("stats-section").style.display = "block";
+                    renderStatsChart();
+                } else {
+                    document.getElementById("stats-section").style.display = "none";
+                    document.getElementById("entries-section").style.display = "block";
+                    items.forEach(item => {
+                        if (status === "all" || item.dataset.status === status) {
+                            item.style.display = "block";
+                        } else {
+                            item.style.display = "none";
+                        }
+                    });
+                }
             });
         });
     });
+
+    let chartRendered = false;
+    function renderStatsChart() {
+        if (chartRendered) return;
+        chartRendered = true;
+        
+        let rawData = '{{ stats.score_distribution_json|safe }}';
+        if (!rawData) return;
+        
+        const counts = JSON.parse(rawData);
+        const labels = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
+        
+        const ctx = document.getElementById('scoreChart').getContext('2d');
+        let gradient = ctx.createLinearGradient(0, 0, 0, 350);
+        gradient.addColorStop(0, 'rgba(123, 47, 247, 0.8)');
+        gradient.addColorStop(1, 'rgba(123, 47, 247, 0.0)');
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '{% trans "Anime Count" %}',
+                    data: counts,
+                    backgroundColor: gradient,
+                    borderColor: '#7b2ff7',
+                    borderWidth: 2,
+                    borderRadius: 4,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: '#94a3b8', precision: 0 },
+                        grid: { color: 'rgba(255,255,255,0.05)' }
+                    },
+                    x: {
+                        ticks: { color: '#94a3b8' },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    }
 </script>
 
 <style>

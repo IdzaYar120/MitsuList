@@ -292,6 +292,15 @@ def public_profile(request, username):
         minutes_watched = stats['total_episodes'] * 24
         stats['days_watched'] = round(minutes_watched / 60 / 24, 1)
         
+        # Calculate Score Distribution (1 to 10)
+        from django.db.models import Count
+        import json
+        score_counts = anime_entries_list.exclude(score=0).values('score').annotate(count=Count('score')).order_by('score')
+        dist = {str(i): 0 for i in range(1, 11)}
+        for sc in score_counts:
+            dist[str(sc['score'])] = sc['count']
+        stats['score_distribution_json'] = json.dumps(list(dist.values()))
+        
         # Earned Badges
         user_badges = viewed_user.earned_badges.select_related('badge').order_by('-is_pinned', '-earned_at')
         badges = []
