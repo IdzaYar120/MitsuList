@@ -33,6 +33,46 @@ JIKAN_API_ENDPOINTS = {
     'schedules': 'https://api.jikan.moe/v4/schedules',
 }
 
+async def cache_anime_metadata(data):
+    from asgiref.sync import sync_to_async
+    from .models import AnimeMetadata
+    import logging
+
+    def _save_single(item):
+        if not item or 'mal_id' not in item:
+            return
+        
+        studios = [s.get('name') for s in item.get('studios', [])]
+        genres = [g.get('name') for g in item.get('genres', [])]
+        
+        AnimeMetadata.objects.update_or_create(
+            mal_id=item['mal_id'],
+            defaults={
+                'title': item.get('title', ''),
+                'image_url': item.get('images', {}).get('jpg', {}).get('large_image_url') if item.get('images') else None,
+                'synopsis': item.get('synopsis', ''),
+                'episodes': item.get('episodes'),
+                'score': item.get('score'),
+                'media_type': item.get('type'),
+                'status': item.get('status'),
+                'studios': studios,
+                'genres': genres,
+            }
+        )
+
+    def _process_data():
+        try:
+            if 'data' in data:
+                if isinstance(data['data'], list):
+                    for item in data['data']:
+                        _save_single(item)
+                elif isinstance(data['data'], dict):
+                    _save_single(data['data'])
+        except Exception as e:
+            logging.error(f"Error caching anime metadata: {e}")
+
+    await sync_to_async(_process_data)()
+
 async def fetch_jikan_data(cache_key, url, timeout=86400, retries=2):
     """
     Asynchronously fetch data from Jikan API with caching, throttling, and retry logic.
@@ -62,6 +102,10 @@ async def fetch_jikan_data(cache_key, url, timeout=86400, retries=2):
                         data = response.json()
                         cache.set(cache_key, data, timeout)
                         cache.delete('jikan_api_unhealthy')  # Clear flag on success
+                        
+                        # Save Anime metadata directly to DB asynchronously
+                        asyncio.create_task(cache_anime_metadata(data))
+                        
                         return data
                     
                     elif response.status_code == 429:

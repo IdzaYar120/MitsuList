@@ -143,3 +143,19 @@ def broadcast_notification(sender, instance, created, **kwargs):
                 'link': instance.link or '',
             }
         )
+
+class AnimeMetadata(models.Model):
+    mal_id = models.IntegerField(primary_key=True)
+    title = models.CharField(max_length=255)
+    image_url = models.URLField(max_length=500, blank=True, null=True)
+    synopsis = models.TextField(blank=True, null=True)
+    episodes = models.IntegerField(blank=True, null=True)
+    score = models.FloatField(blank=True, null=True)
+    media_type = models.CharField(max_length=50, blank=True, null=True)
+    status = models.CharField(max_length=50, blank=True, null=True)
+    studios = models.JSONField(default=list, blank=True)
+    genres = models.JSONField(default=list, blank=True)
+    last_updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.mal_id} - {self.title}"

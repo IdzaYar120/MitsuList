@@ -301,6 +301,25 @@ def public_profile(request, username):
             dist[str(sc['score'])] = sc['count']
         stats['score_distribution_json'] = json.dumps(list(dist.values()))
         
+        # Calculate Top Studios and Genres from local cache
+        from app.models import AnimeMetadata
+        watched_ids = anime_entries_list.exclude(status='plan_to_watch').values_list('anime_id', flat=True)
+        local_animes = AnimeMetadata.objects.filter(mal_id__in=watched_ids)
+        
+        studio_freq = {}
+        genre_freq = {}
+        for anime in local_animes:
+            for s in anime.studios:
+                studio_freq[s] = studio_freq.get(s, 0) + 1
+            for g in anime.genres:
+                genre_freq[g] = genre_freq.get(g, 0) + 1
+                
+        top_studios = sorted(studio_freq.items(), key=lambda x: x[1], reverse=True)[:5]
+        top_genres = sorted(genre_freq.items(), key=lambda x: x[1], reverse=True)[:5]
+        
+        stats['top_studios_json'] = json.dumps(top_studios)
+        stats['top_genres_json'] = json.dumps(top_genres)
+        
         # Earned Badges
         user_badges = viewed_user.earned_badges.select_related('badge').order_by('-is_pinned', '-earned_at')
         badges = []

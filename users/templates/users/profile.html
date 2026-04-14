@@ -242,8 +242,23 @@
                 <h3 style="color: white; margin-bottom: 20px; font-family: var(--font-header); text-align: center;">
                     {% trans "Score Distribution" %}
                 </h3>
-                <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; height: 350px; max-width: 800px; margin: 0 auto;">
+                <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; height: 350px; max-width: 800px; margin: 0 auto; margin-bottom: 30px;">
                     <canvas id="scoreChart"></canvas>
+                </div>
+
+                <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 300px; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px;">
+                        <h3 style="color: white; margin-top: 0; text-align: center; font-family: var(--font-header);">{% trans "Top Studios" %}</h3>
+                        <div style="height: 250px;">
+                            <canvas id="studiosChart"></canvas>
+                        </div>
+                    </div>
+                    <div style="flex: 1; min-width: 300px; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px;">
+                        <h3 style="color: white; margin-top: 0; text-align: center; font-family: var(--font-header);">{% trans "Top Genres" %}</h3>
+                        <div style="height: 250px;">
+                            <canvas id="genresChart"></canvas>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -396,48 +411,92 @@
         chartRendered = true;
         
         let rawData = '{{ stats.score_distribution_json|safe }}';
-        if (!rawData) return;
-        
-        const counts = JSON.parse(rawData);
-        const labels = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
-        
-        const ctx = document.getElementById('scoreChart').getContext('2d');
-        let gradient = ctx.createLinearGradient(0, 0, 0, 350);
-        gradient.addColorStop(0, 'rgba(123, 47, 247, 0.8)');
-        gradient.addColorStop(1, 'rgba(123, 47, 247, 0.0)');
-        
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: '{% trans "Anime Count" %}',
-                    data: counts,
-                    backgroundColor: gradient,
-                    borderColor: '#7b2ff7',
-                    borderWidth: 2,
-                    borderRadius: 4,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
+        if (rawData) {
+            const counts = JSON.parse(rawData);
+            const labels = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
+            
+            const ctx = document.getElementById('scoreChart').getContext('2d');
+            let gradient = ctx.createLinearGradient(0, 0, 0, 350);
+            gradient.addColorStop(0, 'rgba(123, 47, 247, 0.8)');
+            gradient.addColorStop(1, 'rgba(123, 47, 247, 0.0)');
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '{% trans "Anime Count" %}',
+                        data: counts,
+                        backgroundColor: gradient,
+                        borderColor: '#7b2ff7',
+                        borderWidth: 2,
+                        borderRadius: 4,
+                    }]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: { color: '#94a3b8', precision: 0 },
-                        grid: { color: 'rgba(255,255,255,0.05)' }
-                    },
-                    x: {
-                        ticks: { color: '#94a3b8' },
-                        grid: { display: false }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#94a3b8', precision: 0 },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        },
+                        x: {
+                            ticks: { color: '#94a3b8' },
+                            grid: { display: false }
+                        }
                     }
                 }
+            });
+        }
+
+        const topStudiosRaw = '{{ stats.top_studios_json|safe }}';
+        if (topStudiosRaw) {
+            const studiosData = JSON.parse(topStudiosRaw);
+            if (studiosData.length > 0) {
+                const stdCtx = document.getElementById('studiosChart').getContext('2d');
+                new Chart(stdCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: studiosData.map(d => d[0]),
+                        datasets: [{
+                            data: studiosData.map(d => d[1]),
+                            backgroundColor: ['#7b2ff7', '#ff0055', '#38bdf8', '#4ade80', '#f1c40f'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { position: 'right', labels: {color: '#94a3b8'} } }
+                    }
+                });
             }
-        });
+        }
+
+        const topGenresRaw = '{{ stats.top_genres_json|safe }}';
+        if (topGenresRaw) {
+            const genresData = JSON.parse(topGenresRaw);
+            if (genresData.length > 0) {
+                const genCtx = document.getElementById('genresChart').getContext('2d');
+                new Chart(genCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: genresData.map(d => d[0]),
+                        datasets: [{
+                            data: genresData.map(d => d[1]),
+                            backgroundColor: ['#38bdf8', '#ff0055', '#7b2ff7', '#f1c40f', '#4ade80'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { position: 'right', labels: {color: '#94a3b8'} } }
+                    }
+                });
+            }
+        }
     }
 </script>
 
