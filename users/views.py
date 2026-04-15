@@ -706,3 +706,18 @@ def leaderboard(request):
         'top_badges': top_badges,
     }
     return render(request, 'users/leaderboard.html', context)
+
+from django.http import HttpResponse
+from django.views.decorators.http import require_POST
+
+@login_required
+@require_POST
+def quick_update_anime_episode(request, anime_id):
+    from .models import UserAnimeEntry
+    try:
+        entry = UserAnimeEntry.objects.get(user=request.user, anime_id=anime_id)
+        entry.episodes_watched += 1
+        entry.save()
+        return HttpResponse(f"{entry.episodes_watched} eps")
+    except UserAnimeEntry.DoesNotExist:
+        return HttpResponse("Error", status=400)
