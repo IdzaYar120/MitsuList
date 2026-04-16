@@ -721,3 +721,33 @@ def quick_update_anime_episode(request, anime_id):
         return HttpResponse(f"{entry.episodes_watched} eps")
     except UserAnimeEntry.DoesNotExist:
         return HttpResponse("Error", status=400)
+
+@login_required
+@require_POST
+def htmx_add_to_plan(request, anime_id):
+    from app.models import AnimeMetadata
+    from .models import UserAnimeEntry
+    from django.http import HttpResponse
+
+    try:
+        meta = AnimeMetadata.objects.get(mal_id=anime_id)
+        entry, created = UserAnimeEntry.objects.get_or_create(
+            user=request.user,
+            anime_id=anime_id,
+            defaults={
+                'title': meta.title,
+                'image_url': meta.image_url,
+                'status': 'plan_to_watch'
+            }
+        )
+        return HttpResponse('<div class="following-badge" title="In your list"><i class="fa-solid fa-star"></i></div>')
+    except AnimeMetadata.DoesNotExist:
+        UserAnimeEntry.objects.get_or_create(
+            user=request.user,
+            anime_id=anime_id,
+            defaults={
+                'title': f"Anime #{anime_id}",
+                'status': 'plan_to_watch'
+            }
+        )
+        return HttpResponse('<div class="following-badge" title="In your list"><i class="fa-solid fa-star"></i></div>')

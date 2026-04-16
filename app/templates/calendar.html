@@ -158,11 +158,26 @@
                 {% for anime in anime_list %}
                 <a href="{% url 'anime-view' anime.mal_id %}" class="calendar-card {% if anime.is_following %}following{% endif %}">
                     <img src="{{ anime.images.jpg.image_url }}" alt="{{ anime.title }}" class="calendar-card-img" loading="lazy">
-                    <div class="calendar-card-info">
-                        <div class="calendar-card-title">{{ anime.title }}</div>
+                    <div class="calendar-card-info" style="position: relative; flex-grow: 1;">
+                        <div class="calendar-card-title" title="{{ anime.title }}">{{ anime.title }}</div>
                         <span class="calendar-card-time">{{ anime.broadcast.time|default:"??" }}</span>
                         {% if anime.is_following %}
-                            <div class="following-badge"><i class="fa-solid fa-star"></i></div>
+                            <div class="following-badge" title="{% trans 'In your list' %}"><i class="fa-solid fa-star"></i></div>
+                        {% else %}
+                            {% if user.is_authenticated %}
+                            <button class="add-plan-btn"
+                                    hx-post="/api/anime/{{anime.mal_id}}/add_to_plan/"
+                                    hx-target="this"
+                                    hx-swap="outerHTML"
+                                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                                    onclick="event.preventDefault(); event.stopPropagation();"
+                                    title="{% trans 'Add to Plan to Watch' %}"
+                                    style="position: absolute; bottom: -2px; right: 0px; background: var(--color-primary); color: white; border: none; border-radius: 4px; padding: 2px 6px; font-size: 0.7rem; cursor: pointer; transition: 0.2s; z-index: 10;"
+                                    onmouseover="this.style.background='#9a55f8'"
+                                    onmouseout="this.style.background='var(--color-primary)'">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                            {% endif %}
                         {% endif %}
                     </div>
                 </a>

@@ -102,6 +102,12 @@
                     <i class="fa-solid fa-rss" style="color: #ff9ff3;"></i> {% trans "Feed" %}
                 </a>
             </div>
+
+            <div style="margin-left: 20px;" class="nav-desktop-only">
+                <a href="{% url 'calendar' %}" style="color: var(--color-text); text-decoration: none; font-weight: 600; font-family: var(--font-header); transition: var(--transition);">
+                    <i class="fa-regular fa-calendar-days" style="color: var(--color-accent);"></i> {% trans "Schedule" %}
+                </a>
+            </div>
             
             <div style="margin-left: 20px;" class="nav-desktop-only">
                 <a href="{% url 'leaderboard' %}" style="color: var(--color-text); text-decoration: none; font-weight: 600; font-family: var(--font-header); transition: var(--transition);">

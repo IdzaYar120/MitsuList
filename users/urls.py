@@ -41,4 +41,5 @@ urlpatterns = [
     path('leaderboard/', views.leaderboard, name='leaderboard'),
     path('api/badges/pin/<int:badge_id>/', views.toggle_pin_badge, name='toggle_pin_badge'),
     path('api/anime/<int:anime_id>/quick_update/', views.quick_update_anime_episode, name='quick_update_anime_episode'),
+    path('api/anime/<int:anime_id>/add_to_plan/', views.htmx_add_to_plan, name='htmx_add_to_plan'),
 ]
