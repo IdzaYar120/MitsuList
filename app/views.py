@@ -397,11 +397,15 @@ async def discovery_view(request):
         from django.shortcuts import redirect
         return redirect('login')
         
-    from .services import get_smart_recommendations
+    from .services import get_yui_ai_recommendations
     
-    _, recommendations = await get_smart_recommendations(request.user, limit=20)
+    ai_message, fallback_data, recommendations = await get_yui_ai_recommendations(request.user, limit=20)
     
+    if fallback_data and not recommendations:
+        recommendations = [{'anime': item, 'context': 'Популярне зараз'} for item in fallback_data.get('data', [])]
+        
     context = {
+        'ai_message': ai_message,
         'recommendations': recommendations
     }
     return render(request, 'discover.html', context)

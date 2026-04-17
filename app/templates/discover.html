@@ -15,6 +15,28 @@
         </p>
     </div>
 
+    {% if ai_message %}
+    <div class="yui-ai-bubble" style="background: rgba(123, 47, 247, 0.1); border: 1px solid var(--color-primary); border-radius: 16px; padding: 25px; margin-bottom: 30px; display: flex; gap: 20px; align-items: flex-start; box-shadow: 0 4px 20px rgba(123, 47, 247, 0.15); animation: float-bubble 4s ease-in-out infinite;">
+        <div style="background: var(--color-primary); color: white; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; box-shadow: 0 0 15px var(--color-primary);">
+            <i class="fa-solid fa-robot"></i>
+        </div>
+        <div>
+            <h3 style="margin: 0 0 8px 0; color: var(--color-text); font-family: var(--font-header);">Yui AI ✨</h3>
+            <p style="margin: 0; color: var(--color-muted); line-height: 1.6; font-size: 1.05rem;">
+                {{ ai_message|safe|linebreaksbr }}
+            </p>
+        </div>
+    </div>
+    
+    <style>
+        @keyframes float-bubble {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0px); }
+        }
+    </style>
+    {% endif %}
+
     <!-- Recommendations Grid -->
     <div style="margin-top: 40px;">
         {% if recommendations %}
