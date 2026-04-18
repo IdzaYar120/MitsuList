@@ -42,4 +42,7 @@ urlpatterns = [
     path('api/badges/pin/<int:badge_id>/', views.toggle_pin_badge, name='toggle_pin_badge'),
     path('api/anime/<int:anime_id>/quick_update/', views.quick_update_anime_episode, name='quick_update_anime_episode'),
     path('api/anime/<int:anime_id>/add_to_plan/', views.htmx_add_to_plan, name='htmx_add_to_plan'),
+    path('profile/lists/new/', views.create_custom_list, name='create_custom_list'),
+    path('profile/<str:username>/list/<int:list_id>/', views.custom_list_detail, name='custom_list_detail'),
+    path('api/lists/<int:list_id>/toggle/<int:anime_id>/', views.toggle_custom_list_entry, name='toggle_custom_list_entry'),
 ]

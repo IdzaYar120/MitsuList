@@ -331,6 +331,8 @@ def public_profile(request, username):
         
         cache.set(cache_key, (stats, badges), 300)  # 5 minutes
     
+    custom_lists = viewed_user.custom_lists.all()
+
     if request.user.is_authenticated:
         if request.user != viewed_user:
             is_following = Follow.objects.filter(user=request.user, following=viewed_user).exists()
@@ -352,6 +354,7 @@ def public_profile(request, username):
         'following_count': following_count,
         'is_following': is_following,
         'is_own_profile': request.user == viewed_user,
+        'custom_lists': custom_lists,
         'shared_anime': shared_anime,
         'stats': stats,
         'badges': badges,
@@ -751,3 +754,60 @@ def htmx_add_to_plan(request, anime_id):
             }
         )
         return HttpResponse('<div class="following-badge" title="In your list"><i class="fa-solid fa-star"></i></div>')
+
+
+@login_required
+@require_POST
+def create_custom_list(request):
+    from .models import CustomList
+    name = request.POST.get('name')
+    description = request.POST.get('description', '')
+    is_public = request.POST.get('is_public') == 'on'
+    
+    if name:
+        CustomList.objects.get_or_create(
+            user=request.user,
+            name=name,
+            defaults={
+                'description': description,
+                'is_public': is_public
+            }
+        )
+    return redirect('profile')
+
+@login_required
+@require_POST
+def toggle_custom_list_entry(request, list_id, anime_id):
+    from .models import CustomList, UserAnimeEntry
+    from django.http import HttpResponse
+    from django.shortcuts import get_object_or_404
+    
+    custom_list = get_object_or_404(CustomList, id=list_id, user=request.user)
+    entry = get_object_or_404(UserAnimeEntry, user=request.user, anime_id=anime_id)
+    
+    if entry in custom_list.entries.all():
+        custom_list.entries.remove(entry)
+        return HttpResponse('<i class="fa-regular fa-folder"></i>')
+    else:
+        custom_list.entries.add(entry)
+        return HttpResponse('<i class="fa-solid fa-folder-open" style="color:var(--color-primary);"></i>')
+
+def custom_list_detail(request, username, list_id):
+    from .models import CustomList
+    from django.contrib.auth.models import User
+    from django.shortcuts import get_object_or_404, render
+    
+    list_user = get_object_or_404(User, username=username)
+    custom_list = get_object_or_404(CustomList, id=list_id, user=list_user)
+    
+    if not custom_list.is_public and request.user != list_user:
+        return render(request, '403.html', status=403)
+        
+    entries = custom_list.entries.all()
+    
+    context = {
+        'custom_list': custom_list,
+        'list_user': list_user,
+        'anime_entries': entries
+    }
+    return render(request, 'users/custom_list.html', context)

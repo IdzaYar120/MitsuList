@@ -84,6 +84,34 @@
             <button id="update-tracker-btn"
                 style="width: 100%; margin-top: 15px; background: var(--color-primary); color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600; text-transform: uppercase;">{% trans "Update Status" %}</button>
             <div id="tracker-msg" style="margin-top: 10px; font-size: 0.9rem; text-align: center; height: 1.2em;"></div>
+            
+            {% if user_custom_lists %}
+            <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+                <h4 style="margin: 0 0 10px 0; color: var(--color-muted); font-size: 0.9rem;"><i class="fa-solid fa-folder-plus"></i> {% trans "Save to Collection" %}</h4>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    {% for clist in user_custom_lists %}
+                    <button hx-post="/users/api/lists/{{clist.id}}/toggle/{{anime_data.mal_id}}/"
+                            hx-swap="innerHTML"
+                            hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                            style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 8px 12px; border-radius: 6px; cursor: pointer; text-align: left; display: flex; justify-content: space-between; align-items: center; transition: 0.2s;"
+                            onmouseover="this.style.borderColor='var(--color-primary)'"
+                            onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">
+                        <span>{{ clist.name }}</span>
+                        <span style="font-size: 1.1rem; border-radius: 4px; padding: 2px;">
+                        {% if clist.current_anime %}
+                        <i class="fa-solid fa-folder-open" style="color:var(--color-primary);"></i>
+                        {% else %}
+                        <i class="fa-regular fa-folder"></i>
+                        {% endif %}
+                        </span>
+                    </button>
+                    {% endfor %}
+                </div>
+                <p style="font-size: 0.75rem; color: var(--color-muted); text-align: center; margin-top: 10px;">
+                    <i class="fa-solid fa-circle-info"></i> {% trans "Anime must be added to your tracker above before saving to a custom collection." %}
+                </p>
+            </div>
+            {% endif %}
 
             <script>
                 document.addEventListener("DOMContentLoaded", () => {

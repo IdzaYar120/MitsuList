@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}{{ custom_list.name }} - MitsuList{% endblock %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 40px auto; padding: 0 20px;">
+    
+    <!-- Header -->
+    <div style="margin-bottom: 40px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+        <div style="display: flex; gap: 20px; align-items: flex-start; justify-content: space-between;">
+            <div>
+                <h1 style="font-family: var(--font-header); font-size: 2.5rem; margin: 0 0 10px 0; color: var(--color-text);">
+                    <i class="fa-solid fa-folder-open" style="color: var(--color-primary);"></i> {{ custom_list.name }}
+                    {% if not custom_list.is_public %}
+                        <i class="fa-solid fa-lock" style="font-size: 1.2rem; color: var(--color-muted); margin-left: 10px;" title="Private Collection"></i>
+                    {% endif %}
+                </h1>
+                
+                <p style="color: var(--color-muted); font-size: 1.1rem; margin: 0 0 15px 0;">
+                    {% trans "Curated by" %} 
+                    <a href="{% url 'public_profile' list_user.username %}" style="color: var(--color-accent); text-decoration: none; font-weight: bold;">
+                        @{{ list_user.username }}
+                    </a> &bull; {{ anime_entries.count }} {% trans "Anime" %}
+                </p>
+
+                {% if custom_list.description %}
+                <div style="background: rgba(0,0,0,0.2); padding: 15px 20px; border-radius: 8px; border-left: 3px solid var(--color-primary); color: #cbd5e1; max-width: 800px;">
+                    {{ custom_list.description|linebreaksbr }}
+                </div>
+                {% endif %}
+            </div>
+            
+            {% if request.user == list_user %}
+            <div style="text-align: right;">
+                <button class="mitsulist-btn-primary" onclick="navigator.clipboard.writeText(window.location.href); alert('{% trans "Link copied to clipboard!" %}');" style="margin-bottom: 10px; display: inline-block;">
+                    <i class="fa-solid fa-share-nodes"></i> {% trans "Share Collection" %}
+                </button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Anime Grid -->
+    {% if anime_entries %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 25px;">
+            {% for entry in anime_entries %}
+                <div class="anime-card" style="background: rgba(0,0,0,0.2); border-radius: 12px; overflow: hidden; transition: 0.2s;">
+                    <a href="/anime/{{entry.anime_id}}/" style="text-decoration: none; color: white; display: block;">
+                        <div style="height: 280px; overflow: hidden;">
+                            <img src="{{entry.image_url}}" style="width: 100%; height: 100%; object-fit: cover; transition: 0.3s;" class="card-img" loading="lazy">
+                        </div>
+                        <div style="padding: 15px;">
+                            <h4 style="margin: 0 0 5px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{entry.title}}</h4>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--color-muted); align-items: center;">
+                                <span><i class="fa-solid fa-star" style="color: gold;"></i> {{entry.score}}</span>
+                                <span>{{entry.episodes_watched}} eps</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 60px 20px; color: var(--color-muted); border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px;">
+            <i class="fa-regular fa-folder-open" style="font-size: 4rem; margin-bottom: 20px; opacity: 0.5;"></i>
+            <h2 style="font-family: var(--font-header);">{% trans "This collection is empty" %}</h2>
+            {% if request.user == list_user %}
+                <p style="max-width: 500px; margin: 0 auto;">{% trans "Go to any anime page and click 'Save to Collection' to start populating this folder." %}</p>
+                <a href="{% url 'home' %}" class="mitsulist-btn-primary" style="display: inline-block; margin-top: 20px; text-decoration: none;">{% trans "Find Anime" %}</a>
+            {% else %}
+                <p>{% trans "The creator hasn't added any anime to this collection yet." %}</p>
+            {% endif %}
+        </div>
+    {% endif %}
+
+</div>
+
+<style>
+    .anime-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+    .card-img:hover { transform: scale(1.05); }
+</style>
+{% endblock %}
