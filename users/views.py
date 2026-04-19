@@ -112,8 +112,12 @@ from django.urls import reverse
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth.models import User
 
-@ratelimit(key='ip', rate='5/h', block=True, method='POST')
+@ratelimit(key='ip', rate='5/m', block=False)
 def register(request):
+    if getattr(request, 'limited', False):
+        messages.error(request, 'Занадто багато спроб реєстрації. Будь ласка, зачекайте хвилину (Rate Limit).')
+        return render(request, 'users/register.html', {'form': UserRegisterForm()})
+
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
         if form.is_valid():
@@ -170,8 +174,12 @@ def activate(request, uidb64, token):
     else:
         return render(request, 'users/activation_invalid.html')
 
-@ratelimit(key='ip', rate='10/m', block=True, method='POST')
+@ratelimit(key='ip', rate='5/m', block=False, method='POST')
 def login_view(request):
+    if getattr(request, 'limited', False):
+        messages.error(request, 'Занадто багато спроб входу. Будь ласка, зачекайте хвилину (Rate Limit).')
+        return render(request, 'users/login.html', {'form': AuthenticationForm()})
+        
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():

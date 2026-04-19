@@ -158,11 +158,21 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # SECURITY SETTINGS
 # =============================================================================
 
-# HTTPS and SSL Settings (Production)
-SECURE_SSL_REDIRECT = not DEBUG  # Redirect HTTP to HTTPS in production
-SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0  # 1 year HSTS
-SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
-SECURE_HSTS_PRELOAD = not DEBUG
+import os
+IS_PRODUCTION = os.getenv('DJANGO_ENV') == 'production'
+
+# Secure by default regardless of environment
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+if IS_PRODUCTION:
+    # Strict HTTPS and Protocol protections ONLY in Production
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000 # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
 
 # Internationalization
 LANGUAGES = [
