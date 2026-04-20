@@ -338,8 +338,7 @@ def public_profile(request, username):
             badges.append(badge_obj)
         
         cache.set(cache_key, (stats, badges), 300)  # 5 minutes
-    
-    custom_lists = viewed_user.custom_lists.all()
+    custom_lists = viewed_user.custom_lists.annotate(entries_count=Count('entries'))
 
     if request.user.is_authenticated:
         if request.user != viewed_user:
