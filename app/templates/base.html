@@ -95,6 +95,14 @@
                     <i class="fa-solid fa-compass" style="color: #38bdf8;"></i> {% trans "Discover" %}
                 </a>
             </div>
+            
+            <div style="margin-left: 20px;" class="nav-desktop-only">
+                <a href="{% url 'wrapped_current' %}" style="color: #fff; background: linear-gradient(135deg, #ff0055, #7b2ff7); padding: 6px 14px; border-radius: 20px; text-decoration: none; font-weight: bold; font-family: var(--font-header); transition: var(--transition); box-shadow: 0 4px 15px rgba(255, 0, 85, 0.4);"
+                   onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(123, 47, 247, 0.6)'"
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(255, 0, 85, 0.4)'">
+                    <i class="fa-solid fa-gift"></i> {% trans "Wrapped" %}
+                </a>
+            </div>
             {% endif %}
             
             <div style="margin-left: 20px;" class="nav-desktop-only">
