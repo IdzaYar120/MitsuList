@@ -251,9 +251,8 @@ async def get_yui_ai_recommendations(user, limit=20):
     seed_animes = []
     
     if top_studio and best_anime:
-        ai_message = f"Привіт! Я Yui AI 🌸.
-
-Я проаналізувала твій профіль і помітила, що ти обожнюєш студію **{top_studio}** (твоєму улюбленому **{best_anime['title']}** ти поставив {best_anime.get('score', 0)}/10). Тому я підібрала для тебе ці персональні рекомендації!"
+        ai_message = (f"Привіт! Я Yui AI 🌸.\n\n"
+                      f"Я проаналізувала твій профіль і помітила, що ти обожнюєш студію **{top_studio}** (твоєму улюбленому **{best_anime['title']}** ти поставив {best_anime.get('score', 0)}/10). Тому я підібрала для тебе ці персональні рекомендації!")
         seed_animes = [best_anime]
     else:
         sorted_seeds = sorted(

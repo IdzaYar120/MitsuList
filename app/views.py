@@ -175,6 +175,7 @@ async def anime_detail(request, anime_id):
     user_review = None
     review_form = None
 
+    user_custom_lists = []
     if request.user.is_authenticated:
         # Check if user already reviewed
         get_existing_review = sync_to_async(lambda: Review.objects.filter(user=request.user, anime_id=anime_id).first())
@@ -182,6 +183,18 @@ async def anime_detail(request, anime_id):
         
         if existing_review:
             user_review = existing_review
+            
+        # Get custom lists for dropdown
+        from django.db.models import Prefetch
+        from users.models import CustomList, UserAnimeEntry
+        
+        @sync_to_async
+        def get_user_lists():
+            return list(CustomList.objects.filter(user=request.user).prefetch_related(
+                Prefetch('entries', queryset=UserAnimeEntry.objects.filter(anime_id=anime_id), to_attr='current_anime')
+            ))
+            
+        user_custom_lists = await get_user_lists()
 
     context = {
         'anime_data': anime_data,
@@ -196,6 +209,7 @@ async def anime_detail(request, anime_id):
         'reviews': reviews,
         'review_form': review_form,
         'user_review': user_review,
+        'user_custom_lists': user_custom_lists,
     }
     return render(request, 'anime-view.html', context)
 
