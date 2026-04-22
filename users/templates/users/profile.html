@@ -55,6 +55,22 @@
                         style="margin: 0; font-family: var(--font-header); font-size: 2.5rem; text-transform: uppercase;">
                         {{viewed_user.username}}
                     </h1>
+                    <div style="background: rgba(255, 215, 0, 0.1); border: 1px solid gold; color: gold; padding: 4px 10px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; display: flex; align-items: center; gap: 5px;">
+                        <i class="fa-solid fa-star"></i> Lv. {{ viewed_user.profile.level }}
+                    </div>
+                </div>
+                
+                <div style="margin-top: 15px; margin-bottom: 20px; max-width: 400px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--color-muted); margin-bottom: 5px;">
+                        <span><b>XP:</b> {{ viewed_user.profile.xp }}</span>
+                        <span>{{ viewed_user.profile.xp_to_next_level }} {% trans "to level up" %}</span>
+                    </div>
+                    <div style="height: 8px; background: rgba(0,0,0,0.4); border-radius: 10px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);">
+                        <div style="height: 100%; width: {{ viewed_user.profile.xp_progress|floatformat:0 }}%; background: linear-gradient(90deg, var(--color-primary), gold); border-radius: 10px; box-shadow: 0 0 10px rgba(255,215,0,0.5);"></div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
                                     {% if is_own_profile %}
                     <div class="profile-actions" style="display: flex; gap: 10px;">
                         <a href="{% url 'edit_profile' %}" 

@@ -23,6 +23,7 @@
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px;">
                 <div>
                     <a href="{% url 'public_profile' activity.user.username %}" style="color: white; font-weight: bold; text-decoration: none; font-family: var(--font-header);">{{ activity.user.username }}</a>
+                    <span style="font-size: 0.7rem; background: rgba(255, 215, 0, 0.2); border: 1px solid gold; color: gold; padding: 2px 6px; border-radius: 10px; font-weight: bold; margin-left: 5px; vertical-align: middle;">Lv.{{ activity.user.profile.level }}</span>
                     
                     <span style="color: var(--color-muted);">
                         {% if activity.activity_type == 'status_update' %}

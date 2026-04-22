@@ -74,6 +74,11 @@ def update_anime_status(request):
             if not anime_id or not status:
                 return JsonResponse({'status': 'error', 'message': 'Missing fields'}, status=400)
 
+            old_episodes = 0
+            existing_entry = UserAnimeEntry.objects.filter(user=request.user, anime_id=anime_id).first()
+            if existing_entry:
+                old_episodes = existing_entry.episodes_watched
+
             entry, created = UserAnimeEntry.objects.update_or_create(
                 user=request.user,
                 anime_id=anime_id,
@@ -85,6 +90,21 @@ def update_anime_status(request):
                     'image_url': image_url
                 }
             )
+            
+            # RPG Gamification: Add XP
+            try:
+                ep_watched = int(episodes_watched)
+                episodes_diff = max(0, ep_watched - old_episodes)
+                if episodes_diff > 0:
+                    profile = request.user.profile
+                    profile.xp += episodes_diff * 10
+                    new_level = (profile.xp // 200) + 1
+                    if new_level > profile.level:
+                        profile.level = new_level
+                    profile.save()
+            except (ValueError, TypeError):
+                pass
+                
             return JsonResponse({'status': 'success', 'entry_id': entry.id})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)

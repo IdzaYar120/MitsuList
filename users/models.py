@@ -7,6 +7,10 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     favorites = models.JSONField(default=list, blank=True)
     
+    # RPG Gamification
+    xp = models.IntegerField(default=0)
+    level = models.IntegerField(default=1)
+    
     # New Fields
     image = models.ImageField(default='default.jpg', upload_to='profile_pics')
     bio = models.TextField(blank=True, max_length=500)
@@ -44,6 +48,14 @@ class Profile(models.Model):
 
     def __str__(self):
         return f'{self.user.username} Profile'
+        
+    @property
+    def xp_progress(self):
+        return (self.xp % 200) / 200 * 100
+        
+    @property
+    def xp_to_next_level(self):
+        return 200 - (self.xp % 200)
 
     @property
     def avatar_url(self):
