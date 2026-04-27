@@ -525,3 +525,30 @@ async def global_search(request):
         'anime_results': anime_results
     }
     return render(request, 'global_search.html', context)
+
+import uuid
+from django.shortcuts import redirect, get_object_or_404
+from .models import WatchParty
+
+@login_required
+def create_party(request):
+    if request.method == 'POST':
+        video_url = request.POST.get('video_url', '')
+        anime_id = request.POST.get('anime_id', None)
+        
+        # Generate random 6-character room code
+        room_code = str(uuid.uuid4())[:6].upper()
+        
+        party = WatchParty.objects.create(
+            host=request.user,
+            room_code=room_code,
+            video_url=video_url,
+            anime_id=anime_id
+        )
+        return redirect('party_room', room_code=party.room_code)
+    return redirect('home')
+
+@login_required
+def party_room(request, room_code):
+    party = get_object_or_404(WatchParty, room_code=room_code)
+    return render(request, 'party_room.html', {'party': party})

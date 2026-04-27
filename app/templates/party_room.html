@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}Watch Party: {{ party.room_code }} - MitsuList{% endblock %}
+
+{% block content %}
+<div style="display: flex; height: calc(100vh - 100px); max-width: 1400px; margin: 0 auto; gap: 20px; padding: 20px;">
+    
+    <!-- Left: Video Player (70%) -->
+    <div style="flex: 7; background: var(--glass-bg); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column;">
+        
+        <!-- Video Header -->
+        <div style="padding: 15px 20px; background: rgba(0,0,0,0.4); border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="margin: 0; font-family: var(--font-header); font-size: 1.5rem;">
+                <i class="fa-solid fa-popcorn" style="color: var(--color-primary);"></i> {% trans "Watch Party" %} <span style="color: var(--color-muted); font-size: 1rem;">#{{ party.room_code }}</span>
+            </h2>
+            
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <span style="font-size: 0.9rem; color: var(--color-muted);">
+                    <i class="fa-solid fa-crown" style="color: gold;"></i> {% trans "Host" %}: {{ party.host.username }}
+                </span>
+                <button onclick="copyRoomLink()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 5px 10px; border-radius: 6px; cursor: pointer; transition: 0.2s;">
+                    <i class="fa-solid fa-link"></i> {% trans "Invite" %}
+                </button>
+            </div>
+        </div>
+        
+        <!-- The Player -->
+        <div style="flex-grow: 1; background: black; position: relative; display: flex; align-items: center; justify-content: center;">
+            <video id="party-video" src="{{ party.video_url }}" {% if request.user == party.host %}controls{% endif %} style="width: 100%; max-height: 100%; outline: none;" playsinline></video>
+            
+            {% if request.user != party.host %}
+            <!-- Overlay for guests to block them from clicking on the video directly if it accidentally shows controls -->
+            <div id="guest-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; cursor: default; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                <button id="join-audio-btn" style="padding: 15px 30px; font-size: 1.2rem; background: var(--color-primary); color: white; border: none; border-radius: 30px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(123, 47, 247, 0.4);">
+                    <i class="fa-solid fa-play"></i> {% trans "Click to Sync & Enable Audio" %}
+                </button>
+                <p style="margin-top: 15px; color: var(--color-muted); font-size: 0.9rem;">{% trans "Browsers block auto-playing video with sound. Click to join the party." %}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Right: Chat & Users (30%) -->
+    <div style="flex: 3; background: var(--glass-bg); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; display: flex; flex-direction: column; overflow: hidden;">
+        <!-- Chat Header -->
+        <div style="padding: 15px; background: rgba(0,0,0,0.4); border-bottom: 1px solid rgba(255,255,255,0.1);">
+            <h3 style="margin: 0; font-size: 1.1rem;"><i class="fa-solid fa-comments"></i> {% trans "Live Chat" %}</h3>
+        </div>
+        
+        <!-- Chat Messages -->
+        <div id="chat-messages" style="flex-grow: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;">
+            <div style="text-align: center; color: var(--color-muted); font-size: 0.8rem; margin-bottom: 10px;">
+                {% trans "Welcome to the Watch Party! The host controls the playback." %}
+            </div>
+        </div>
+        
+        <!-- Chat Input -->
+        <div style="padding: 15px; border-top: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2);">
+            <form id="chat-form" style="display: flex; gap: 10px;">
+                <input type="text" id="chat-input" placeholder="{% trans 'Type a message...' %}" style="flex-grow: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 10px 15px; border-radius: 20px; outline: none;" autocomplete="off">
+                <button type="submit" style="background: var(--color-primary); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+    
+</div>
+
+<script>
+    const roomCode = "{{ party.room_code }}";
+    const isHost = "{{ request.user.username }}" === "{{ party.host.username }}";
+    const video = document.getElementById('party-video');
+    const chatMessages = document.getElementById('chat-messages');
+    const chatInput = document.getElementById('chat-input');
+    const chatForm = document.getElementById('chat-form');
+    
+    // WebSocket Setup
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+    const partySocket = new WebSocket(wsProtocol + window.location.host + '/ws/party/' + roomCode + '/');
+    
+    let isSeeking = false;
+    let ignoreNextEvent = false;
+
+    partySocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        const action = data.action;
+        
+        if (action === 'chat') {
+            appendMessage(data.sender, data.data.message);
+        } else if (!isHost) {
+            // Handle Video Sync commands for guests
+            if (action === 'play') {
+                ignoreNextEvent = true;
+                video.currentTime = data.data.time;
+                video.play().catch(e => console.log("Play prevented:", e));
+            } else if (action === 'pause') {
+                ignoreNextEvent = true;
+                video.currentTime = data.data.time;
+                video.pause();
+            } else if (action === 'seek') {
+                ignoreNextEvent = true;
+                video.currentTime = data.data.time;
+            }
+        }
+    };
+
+    partySocket.onclose = function(e) {
+        console.error('Party socket closed unexpectedly');
+        appendMessage('System', 'Connection lost to the server.', 'var(--color-accent)');
+    };
+
+    // Chat Logic
+    chatForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const msg = chatInput.value.trim();
+        if (msg) {
+            partySocket.send(JSON.stringify({
+                'action': 'chat',
+                'message': msg
+            }));
+            chatInput.value = '';
+        }
+    });
+
+    function appendMessage(sender, text, color="white") {
+        const div = document.createElement('div');
+        div.style.background = 'rgba(255,255,255,0.05)';
+        div.style.padding = '8px 12px';
+        div.style.borderRadius = '8px';
+        div.style.fontSize = '0.9rem';
+        
+        const usernameSpan = document.createElement('span');
+        usernameSpan.style.fontWeight = 'bold';
+        usernameSpan.style.color = color;
+        usernameSpan.style.marginRight = '8px';
+        usernameSpan.innerText = sender + ':';
+        
+        const textSpan = document.createElement('span');
+        textSpan.style.color = 'var(--color-text)';
+        textSpan.innerText = text;
+        
+        div.appendChild(usernameSpan);
+        div.appendChild(textSpan);
+        
+        chatMessages.appendChild(div);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Host Video Controls Logic
+    if (isHost) {
+        video.addEventListener('play', () => {
+            if (ignoreNextEvent) { ignoreNextEvent = false; return; }
+            partySocket.send(JSON.stringify({'action': 'play', 'time': video.currentTime}));
+        });
+        
+        video.addEventListener('pause', () => {
+            if (ignoreNextEvent) { ignoreNextEvent = false; return; }
+            partySocket.send(JSON.stringify({'action': 'pause', 'time': video.currentTime}));
+        });
+        
+        video.addEventListener('seeked', () => {
+            if (ignoreNextEvent) { ignoreNextEvent = false; return; }
+            partySocket.send(JSON.stringify({'action': 'seek', 'time': video.currentTime}));
+        });
+    } else {
+        // Guest Logic
+        const joinBtn = document.getElementById('join-audio-btn');
+        if (joinBtn) {
+            joinBtn.addEventListener('click', () => {
+                video.muted = false;
+                document.getElementById('guest-overlay').style.display = 'none';
+                video.play().catch(e => console.log(e)); // Attempt to play, will sync on next host command
+                appendMessage('System', 'You joined the stream. Waiting for host sync...', 'var(--color-primary)');
+            });
+        }
+    }
+
+    function copyRoomLink() {
+        navigator.clipboard.writeText(window.location.href);
+        alert('Room link copied to clipboard!');
+    }
+</script>
+{% endblock %}

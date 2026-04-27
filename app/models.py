@@ -159,3 +159,16 @@ class AnimeMetadata(models.Model):
 
     def __str__(self):
         return f"{self.mal_id} - {self.title}"
+
+class WatchParty(models.Model):
+    host = models.ForeignKey(User, on_delete=models.CASCADE, related_name='hosted_parties')
+    room_code = models.CharField(max_length=10, unique=True, db_index=True)
+    anime_id = models.IntegerField(blank=True, null=True)
+    video_url = models.URLField(max_length=1000)
+    status = models.CharField(max_length=20, default='paused')
+    current_time = models.FloatField(default=0.0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"Party {self.room_code} by {self.host.username}"

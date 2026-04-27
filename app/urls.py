@@ -15,4 +15,6 @@ urlpatterns = [
     path("discover/", views.discovery_view, name="discover"),
     path("wrapped/", views.wrapped_view, name="wrapped_current"),
     path("wrapped/<int:year>/", views.wrapped_view, name="wrapped"),
+    path("party/create/", views.create_party, name="create_party"),
+    path("party/<str:room_code>/", views.party_room, name="party_room"),
 ]

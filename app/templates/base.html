@@ -128,6 +128,31 @@
                     <i class="fa-solid fa-users-viewfinder" style="color: #4ade80;"></i> {% trans "Clubs" %}
                 </a>
             </div>
+
+            {% if user.is_authenticated %}
+            <div style="margin-left: 20px;" class="nav-desktop-only">
+                <button onclick="document.getElementById('party-modal').style.display='flex'" style="background: none; border: 1px solid rgba(255,255,255,0.2); color: var(--color-text); text-decoration: none; font-weight: 600; font-family: var(--font-header); transition: var(--transition); cursor: pointer; padding: 5px 12px; border-radius: 20px;">
+                    <i class="fa-solid fa-popcorn" style="color: #f1c40f;"></i> {% trans "Party" %}
+                </button>
+            </div>
+            
+            <!-- Watch Party Modal -->
+            <div id="party-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(5px);">
+                <div style="background: var(--glass-bg); padding: 30px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                    <h2 style="margin-top: 0; font-family: var(--font-header);"><i class="fa-solid fa-popcorn" style="color: gold;"></i> {% trans "Create Watch Party" %}</h2>
+                    <p style="color: var(--color-muted); font-size: 0.9rem; margin-bottom: 20px;">{% trans "Paste a direct video link (.mp4) to watch synchronously with your friends." %}</p>
+                    <form action="{% url 'create_party' %}" method="POST" style="display: flex; flex-direction: column; gap: 15px;">
+                        {% csrf_token %}
+                        <input type="url" name="video_url" required placeholder="https://example.com/video.mp4" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 12px; border-radius: 8px; outline: none; width: 100%;">
+                        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px;">
+                            <button type="button" onclick="document.getElementById('party-modal').style.display='none'" style="background: transparent; border: 1px solid rgba(255,255,255,0.2); color: white; padding: 8px 15px; border-radius: 8px; cursor: pointer;">Cancel</button>
+                            <button type="submit" style="background: var(--color-primary); border: none; color: white; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold;">Create Room</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+
             
             {% if user.is_authenticated %}
             <div style="margin-left: 20px; position: relative;" id="nav-notification-container" class="nav-desktop-only">
