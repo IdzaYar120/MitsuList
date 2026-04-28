@@ -1,5 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
+from PIL import Image
+from io import BytesIO
+from django.core.files.base import ContentFile
+import os
 
 class Club(models.Model):
     name = models.CharField(max_length=150, unique=True)
@@ -11,6 +15,27 @@ class Club(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        if self.cover_image and hasattr(self.cover_image, 'file'):
+            try:
+                img = Image.open(self.cover_image)
+                # Check if it's already a WebP or default image to skip processing
+                if img.format != 'WEBP' and not self.cover_image.name.endswith('default_club.jpg'):
+                    output = BytesIO()
+                    # Convert RGBA/P to RGB to avoid errors when saving to WEBP
+                    if img.mode in ("RGBA", "P"):
+                        img = img.convert("RGB")
+                    img.save(output, format='WEBP', quality=80)
+                    output.seek(0)
+                    
+                    # Generate new filename
+                    filename = os.path.splitext(os.path.basename(self.cover_image.name))[0] + '.webp'
+                    self.cover_image.save(filename, ContentFile(output.read()), save=False)
+            except Exception as e:
+                print(f"Error compressing club cover image: {e}")
+                
+        super().save(*args, **kwargs)
 
 class ClubMessage(models.Model):
     club = models.ForeignKey(Club, on_delete=models.CASCADE, related_name='messages')

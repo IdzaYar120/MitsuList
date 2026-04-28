@@ -2,6 +2,10 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from PIL import Image
+from io import BytesIO
+from django.core.files.base import ContentFile
+import os
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -48,6 +52,27 @@ class Profile(models.Model):
 
     def __str__(self):
         return f'{self.user.username} Profile'
+
+    def save(self, *args, **kwargs):
+        if self.image and hasattr(self.image, 'file'):
+            try:
+                img = Image.open(self.image)
+                # Check if it's already a WebP or default image to skip processing
+                if img.format != 'WEBP' and not self.image.name.endswith('default.jpg'):
+                    output = BytesIO()
+                    # Convert RGBA/P to RGB to avoid errors when saving to WEBP
+                    if img.mode in ("RGBA", "P"):
+                        img = img.convert("RGB")
+                    img.save(output, format='WEBP', quality=80)
+                    output.seek(0)
+                    
+                    # Generate new filename
+                    filename = os.path.splitext(os.path.basename(self.image.name))[0] + '.webp'
+                    self.image.save(filename, ContentFile(output.read()), save=False)
+            except Exception as e:
+                print(f"Error compressing profile image: {e}")
+                
+        super().save(*args, **kwargs)
         
     @property
     def xp_progress(self):

@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static i18n %}
+{% load static i18n cache %}
 
 {% block title %}MitsuList{% endblock %}
 
@@ -7,6 +7,7 @@
 <div id="homepage-div">
     
     {% if user.is_authenticated and activity_feed %}
+    {% cache 60 friend_activity request.user.id %}
     <div style="margin-bottom: 40px; width: 90%; max-width: 1200px; margin-left: auto; margin-right: auto; padding-top: 20px;">
         <h1 style="font-family: var(--font-header); font-size: 1.5rem; color: white; display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
             <i class="fa-solid fa-user-group" style="color: var(--color-accent);"></i> {% trans "FRIEND ACTIVITY" %}
@@ -46,6 +47,7 @@
             {% endfor %}
         </div>
     </div>
+    {% endcache %}
     {% endif %}
     <!-- Advanced Filters Panel -->
     <div id="advanced-filters-panel" class="glass-panel"
@@ -125,6 +127,7 @@
     </div>
     {% endif %}
 
+    {% cache 300 global_anime_blocks %}
     <div class="header-and-buttons reveal">
         <h1 id="currently-airing-header"><i class="fa-solid fa-bolt"
                 style="color: var(--color-accent);"></i>&nbsp;&nbsp;{% trans "THIS SEASON" %}</h1>
@@ -241,9 +244,10 @@
                 <i class="fa-solid fa-star" style="color: gold"></i>&nbsp;{{movie.score}}
             </div>
         </div>
-    </a>
+        </a>
     {% endfor %}
 </div>
+{% endcache %}
 </div>
 {% endblock %}
 
